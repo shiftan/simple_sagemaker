@@ -7,7 +7,7 @@ from time import gmtime, strftime
 from .compare_outputs import isAsExpected
 
 filePath = os.path.split(__file__)[0]
-examplesPath = os.path.abspath(os.path.join(filePath, "..", "examples"))
+examplesPath = os.path.abspath(os.path.join(filePath, "..", "..", "examples"))
 sys.path.append(examplesPath)
 
 
