@@ -1,0 +1,1 @@
+{"arg2":"\"hello\"","sagemaker_container_log_level":"20","sagemaker_program":"\"algo.py\"","arg1":"5","sagemaker_region":"\"us-east-1\"","sagemaker_job_name":"\"Task1-2020-09-03-14-50-34\"","sagemaker_submit_directory":"\"s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example/Task1/Task1-2020-09-03-14-50-34/source/sourcedir.tar.gz\""}

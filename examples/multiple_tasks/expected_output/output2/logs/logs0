@@ -1,0 +1,650 @@
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control in this shell
+2020-09-03 18:04:48,198 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-09-03 18:04:48,205 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-03 18:04:48,227 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-09-03 18:04:51,297 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-09-03 18:04:51,586 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-03 18:04:51,599 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-03 18:04:51,610 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-03 18:04:51,620 sagemaker-training-toolkit INFO     Invoking user script
+
+Training Env:
+
+{
+    "additional_framework_parameters": {},
+    "channel_input_dirs": {
+        "task1_state2": "/opt/ml/input/data/task1_state2",
+        "task1_state3": "/opt/ml/input/data/task1_state3",
+        "data": "/opt/ml/input/data/data",
+        "task1_state1": "/opt/ml/input/data/task1_state1",
+        "model": "/opt/ml/input/data/model"
+    },
+    "current_host": "algo-1",
+    "framework_module": "sagemaker_pytorch_container.training:main",
+    "hosts": [
+        "algo-1",
+        "algo-2"
+    ],
+    "hyperparameters": {
+        "stage": 2
+    },
+    "input_config_dir": "/opt/ml/input/config",
+    "input_data_config": {
+        "task1_state2": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "ShardedByS3Key",
+            "RecordWrapperType": "None"
+        },
+        "task1_state3": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "ShardedByS3Key",
+            "RecordWrapperType": "None"
+        },
+        "data": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "ShardedByS3Key",
+            "RecordWrapperType": "None"
+        },
+        "task1_state1": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "FullyReplicated",
+            "RecordWrapperType": "None"
+        },
+        "model": {
+            "ContentType": "application/x-sagemaker-model",
+            "TrainingInputMode": "File",
+            "S3DistributionType": "FullyReplicated",
+            "RecordWrapperType": "None"
+        }
+    },
+    "input_dir": "/opt/ml/input",
+    "is_master": true,
+    "job_name": "Task2-2020-09-03-18-00-40",
+    "log_level": 20,
+    "master_hostname": "algo-1",
+    "model_dir": "/opt/ml/model",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-multi/Task2/Task2-2020-09-03-18-00-40/source/sourcedir.tar.gz",
+    "module_name": "algo_multi",
+    "network_interface_name": "eth0",
+    "num_cpus": 2,
+    "num_gpus": 0,
+    "output_data_dir": "/opt/ml/output/data",
+    "output_dir": "/opt/ml/output",
+    "output_intermediate_dir": "/opt/ml/output/intermediate",
+    "resource_config": {
+        "current_host": "algo-1",
+        "hosts": [
+            "algo-1",
+            "algo-2"
+        ],
+        "network_interface_name": "eth0"
+    },
+    "user_entry_point": "algo_multi.py"
+}
+
+Environment variables:
+
+SM_HOSTS=["algo-1","algo-2"]
+SM_NETWORK_INTERFACE_NAME=eth0
+SM_HPS={"stage":2}
+SM_USER_ENTRY_POINT=algo_multi.py
+SM_FRAMEWORK_PARAMS={}
+SM_RESOURCE_CONFIG={"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}
+SM_INPUT_DATA_CONFIG={"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"model":{"ContentType":"application/x-sagemaker-model","RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state1":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state2":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"task1_state3":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}
+SM_OUTPUT_DATA_DIR=/opt/ml/output/data
+SM_CHANNELS=["data","model","task1_state1","task1_state2","task1_state3"]
+SM_CURRENT_HOST=algo-1
+SM_MODULE_NAME=algo_multi
+SM_LOG_LEVEL=20
+SM_FRAMEWORK_MODULE=sagemaker_pytorch_container.training:main
+SM_INPUT_DIR=/opt/ml/input
+SM_INPUT_CONFIG_DIR=/opt/ml/input/config
+SM_OUTPUT_DIR=/opt/ml/output
+SM_NUM_CPUS=2
+SM_NUM_GPUS=0
+SM_MODEL_DIR=/opt/ml/model
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-multi/Task2/Task2-2020-09-03-18-00-40/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data","model":"/opt/ml/input/data/model","task1_state1":"/opt/ml/input/data/task1_state1","task1_state2":"/opt/ml/input/data/task1_state2","task1_state3":"/opt/ml/input/data/task1_state3"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"stage":2},"input_config_dir":"/opt/ml/input/config","input_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"model":{"ContentType":"application/x-sagemaker-model","RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state1":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state2":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"task1_state3":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"Task2-2020-09-03-18-00-40","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-multi/Task2/Task2-2020-09-03-18-00-40/source/sourcedir.tar.gz","module_name":"algo_multi","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"algo_multi.py"}
+SM_USER_ARGS=["--stage","2"]
+SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
+SM_CHANNEL_TASK1_STATE2=/opt/ml/input/data/task1_state2
+SM_CHANNEL_TASK1_STATE3=/opt/ml/input/data/task1_state3
+SM_CHANNEL_DATA=/opt/ml/input/data/data
+SM_CHANNEL_TASK1_STATE1=/opt/ml/input/data/task1_state1
+SM_CHANNEL_MODEL=/opt/ml/input/data/model
+SM_HP_STAGE=2
+PYTHONPATH=/opt/ml/code:/opt/conda/bin:/opt/conda/lib/python36.zip:/opt/conda/lib/python3.6:/opt/conda/lib/python3.6/lib-dynload:/opt/conda/lib/python3.6/site-packages
+
+Invoking script with the following command:
+
+/opt/conda/bin/python algo_multi.py --stage 2
+
+
+INFO:__main__:Starting algo...
+INFO:task_toolkit.algo_lib:Args: Namespace(batch_size=64, channel_names=['data', 'model', 'task1_state1', 'task1_state2', 'task1_state3'], current_host='algo-1', epochs=50, hosts=['algo-1', 'algo-2'], hps={'stage': 2}, input_config_dir='/opt/ml/input/config', input_data='/opt/ml/input/data/data', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"model":{"ContentType":"application/x-sagemaker-model","RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state1":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state2":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"task1_state3":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='/opt/ml/input/data/model', input_task1_state1='/opt/ml/input/data/task1_state1', input_task1_state2='/opt/ml/input/data/task1_state2', input_task1_state3='/opt/ml/input/data/task1_state3', job_name='Task2-2020-09-03-18-00-40', learning_rate=0.05, model_dir='/opt/ml/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
+INFO:task_toolkit.algo_lib:Unmatched: ['--stage', '2']
+INFO:__main__:Argv: ['algo_multi.py', '--stage', '2']
+INFO:__main__:Env: environ({'LD_PRELOAD': '/libchangehostname.so', 'HOSTNAME': 'ip-10-0-71-11.ec2.internal', 'TRAINING_JOB_NAME': 'Task2-2020-09-03-18-00-40', 'TRAINING_JOB_ARN': 'arn:aws:sagemaker:us-east-1:667232328135:training-job/task2-2020-09-03-18-00-40', 'SAGEMAKER_TRAINING_MODULE': 'sagemaker_pytorch_container.training:main', 'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI': '/v2/credentials/00e459fd-973f-427d-9a58-7a471f14804d', 'PYTHONUNBUFFERED': '1', 'LC_ALL': 'C.UTF-8', 'PYTHONIOENCODING': 'UTF-8', 'LD_LIBRARY_PATH': ':/usr/local/lib:/opt/conda/lib:/home/.openmpi/lib/', 'NVIDIA_VISIBLE_DEVICES': 'void', 'AWS_EXECUTION_ENV': 'AWS_ECS_EC2', 'PATH': '/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/.openmpi/bin', 'PWD': '/', 'LANG': 'C.UTF-8', 'AWS_REGION': 'us-east-1', 'PYTHONDONTWRITEBYTECODE': '1', 'SHLVL': '1', 'HOME': '/root', 'DGLBACKEND': 'pytorch', 'ECS_CONTAINER_METADATA_URI': 'http://169.254.170.2/v3/0f3f1f2e-597d-4e31-9783-e3ba97aa14a0', 'DMLC_INTERFACE': 'eth0', 'ECS_CONTAINER_METADATA_URI_V4': 'http://169.254.170.2/v4/0f3f1f2e-597d-4e31-9783-e3ba97aa14a0', '_': '/opt/conda/bin/train', 'SAGEMAKER_JOB_NAME': 'Task2-2020-09-03-18-00-40', 'CURRENT_HOST': 'algo-1', 'SAGEMAKER_REGION': 'us-east-1', 'NCCL_SOCKET_IFNAME': 'eth0', 'NCCL_IB_DISABLE': '1', 'NCCL_DEBUG': 'WARN', 'MASTER_ADDR': 'algo-1', 'MASTER_PORT': '7777', 'SM_HOSTS': '["algo-1","algo-2"]', 'SM_NETWORK_INTERFACE_NAME': 'eth0', 'SM_HPS': '{"stage":2}', 'SM_USER_ENTRY_POINT': 'algo_multi.py', 'SM_FRAMEWORK_PARAMS': '{}', 'SM_RESOURCE_CONFIG': '{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', 'SM_INPUT_DATA_CONFIG': '{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"model":{"ContentType":"application/x-sagemaker-model","RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state1":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state2":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"task1_state3":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', 'SM_OUTPUT_DATA_DIR': '/opt/ml/output/data', 'SM_CHANNELS': '["data","model","task1_state1","task1_state2","task1_state3"]', 'SM_CURRENT_HOST': 'algo-1', 'SM_MODULE_NAME': 'algo_multi', 'SM_LOG_LEVEL': '20', 'SM_FRAMEWORK_MODULE': 'sagemaker_pytorch_container.training:main', 'SM_INPUT_DIR': '/opt/ml/input', 'SM_INPUT_CONFIG_DIR': '/opt/ml/input/config', 'SM_OUTPUT_DIR': '/opt/ml/output', 'SM_NUM_CPUS': '2', 'SM_NUM_GPUS': '0', 'SM_MODEL_DIR': '/opt/ml/model', 'SM_MODULE_DIR': 's3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-multi/Task2/Task2-2020-09-03-18-00-40/source/sourcedir.tar.gz', 'SM_TRAINING_ENV': '{"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data","model":"/opt/ml/input/data/model","task1_state1":"/opt/ml/input/data/task1_state1","task1_state2":"/opt/ml/input/data/task1_state2","task1_state3":"/opt/ml/input/data/task1_state3"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"stage":2},"input_config_dir":"/opt/ml/input/config","input_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"model":{"ContentType":"application/x-sagemaker-model","RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state1":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task1_state2":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"},"task1_state3":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"Task2-2020-09-03-18-00-40","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-multi/Task2/Task2-2020-09-03-18-00-40/source/sourcedir.tar.gz","module_name":"algo_multi","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"algo_multi.py"}', 'SM_USER_ARGS': '["--stage","2"]', 'SM_OUTPUT_INTERMEDIATE_DIR': '/opt/ml/output/intermediate', 'SM_CHANNEL_TASK1_STATE2': '/opt/ml/input/data/task1_state2', 'SM_CHANNEL_TASK1_STATE3': '/opt/ml/input/data/task1_state3', 'SM_CHANNEL_DATA': '/opt/ml/input/data/data', 'SM_CHANNEL_TASK1_STATE1': '/opt/ml/input/data/task1_state1', 'SM_CHANNEL_MODEL': '/opt/ml/input/data/model', 'SM_HP_STAGE': '2', 'PYTHONPATH': '/opt/ml/code:/opt/conda/bin:/opt/conda/lib/python36.zip:/opt/conda/lib/python3.6:/opt/conda/lib/python3.6/lib-dynload:/opt/conda/lib/python3.6/site-packages'})
+INFO:__main__:*** Listing files in /opt/ml
+INFO:__main__:/opt/ml:
+total 24
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 code
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 input
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 model
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 output
+
+/opt/ml/code:
+total 16
+drwxr-xr-x 3 root root  4096 Sep  3 18:04 .
+drwxr-xr-x 6 root root  4096 Sep  3 18:04 ..
+-rw-r--r-- 1 1000 users 2077 Sep  1 09:52 algo_multi.py
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 task_toolkit
+
+/opt/ml/code/task_toolkit:
+total 20
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 .
+drwxr-xr-x 3 root root  4096 Sep  3 18:04 ..
+-rw-r--r-- 1 1000 users    0 Sep  3 17:50 __init__.py
+drwxr-xr-x 2 1000 users 4096 Sep  3 17:50 __pycache__
+-rw-r--r-- 1 1000 users 4730 Sep  3 17:50 algo_lib.py
+
+/opt/ml/code/task_toolkit/__pycache__:
+total 16
+drwxr-xr-x 2 1000 users 4096 Sep  3 17:50 .
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 ..
+-rw-r--r-- 1 1000 users  190 Sep  3 17:50 __init__.cpython-37.pyc
+-rw-r--r-- 1 1000 users 3905 Sep  3 17:50 algo_lib.cpython-37.pyc
+
+/opt/ml/input:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 config
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 data
+
+/opt/ml/input/config:
+total 44
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 ..
+-rw-r--r-- 1 root root   22 Sep  3 18:02 checkpointconfig.json
+-rw-r--r-- 1 root root  223 Sep  3 18:02 debughookconfig.json
+-rw-r--r-- 1 root root  338 Sep  3 18:02 hyperparameters.json
+-rw-r--r-- 1 root root 2389 Sep  3 18:02 init-config.json
+-rw-r--r-- 1 root root  579 Sep  3 18:02 inputdataconfig.json
+-rw-r--r-- 1 root root    2 Sep  3 18:02 metric-definition-regex.json
+-rw-r--r-- 1 root root   91 Sep  3 18:02 resourceconfig.json
+-rw-r--r-- 1 root root 2972 Sep  3 18:02 trainingjobconfig.json
+-rw-r--r-- 1 root root    2 Sep  3 18:02 upstreamoutputdataconfig.json
+
+/opt/ml/input/data:
+total 52
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 ..
+-rw-r--r-- 1 root root   43 Sep  3 18:03 checkpoints-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 data
+-rw-r--r-- 1 root root  216 Sep  3 18:03 data-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 model
+-rw-r--r-- 1 root root  204 Sep  3 18:03 model-manifest
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state1
+-rw-r--r-- 1 root root 2309 Sep  3 18:03 task1_state1-manifest
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state2
+-rw-r--r-- 1 root root 2309 Sep  3 18:03 task1_state2-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 task1_state3
+-rw-r--r-- 1 root root  206 Sep  3 18:03 task1_state3-manifest
+
+/opt/ml/input/data/data:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   12 Sep  3 18:03 test
+
+/opt/ml/input/data/model:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root  187 Sep  3 18:03 model.tar.gz
+
+/opt/ml/input/data/task1_state1:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/input/data/task1_state1/algo-1:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/input/data/task1_state1/algo-2:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_9
+
+/opt/ml/input/data/task1_state2:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/input/data/task1_state2/algo-1:
+total 32
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/input/data/task1_state2/algo-2:
+total 28
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+
+/opt/ml/input/data/task1_state3:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root  388 Sep  3 18:03 output.tar.gz
+
+/opt/ml/model:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+
+/opt/ml/output:
+total 24
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 data
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 metrics
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 profiler
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 tensors
+
+/opt/ml/output/data:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+
+/opt/ml/output/metrics:
+total 12
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 sagemaker
+
+/opt/ml/output/metrics/sagemaker:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 ..
+
+/opt/ml/output/profiler:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+
+/opt/ml/output/tensors:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+
+INFO:__main__:*** Listing files in /state
+INFO:__main__:/state:
+total 8
+drwxr-xr-x  2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 23 root root 4096 Sep  3 18:04 ..
+
+INFO:task_toolkit.algo_lib:Deleting other instances' state
+INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:__main__:Doing nothing...
+INFO:task_toolkit.algo_lib:Marking instance algo-1 comletion
+INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:__main__:finished!
+INFO:__main__:*** Listing files in /opt/ml
+INFO:__main__:/opt/ml:
+total 24
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 code
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 input
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 model
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 output
+
+/opt/ml/code:
+total 16
+drwxr-xr-x 3 root root  4096 Sep  3 18:04 .
+drwxr-xr-x 6 root root  4096 Sep  3 18:04 ..
+-rw-r--r-- 1 1000 users 2077 Sep  1 09:52 algo_multi.py
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 task_toolkit
+
+/opt/ml/code/task_toolkit:
+total 20
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 .
+drwxr-xr-x 3 root root  4096 Sep  3 18:04 ..
+-rw-r--r-- 1 1000 users    0 Sep  3 17:50 __init__.py
+drwxr-xr-x 2 1000 users 4096 Sep  3 17:50 __pycache__
+-rw-r--r-- 1 1000 users 4730 Sep  3 17:50 algo_lib.py
+
+/opt/ml/code/task_toolkit/__pycache__:
+total 16
+drwxr-xr-x 2 1000 users 4096 Sep  3 17:50 .
+drwxr-xr-x 3 1000 users 4096 Sep  3 17:50 ..
+-rw-r--r-- 1 1000 users  190 Sep  3 17:50 __init__.cpython-37.pyc
+-rw-r--r-- 1 1000 users 3905 Sep  3 17:50 algo_lib.cpython-37.pyc
+
+/opt/ml/input:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 config
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 data
+
+/opt/ml/input/config:
+total 44
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 ..
+-rw-r--r-- 1 root root   22 Sep  3 18:02 checkpointconfig.json
+-rw-r--r-- 1 root root  223 Sep  3 18:02 debughookconfig.json
+-rw-r--r-- 1 root root  338 Sep  3 18:02 hyperparameters.json
+-rw-r--r-- 1 root root 2389 Sep  3 18:02 init-config.json
+-rw-r--r-- 1 root root  579 Sep  3 18:02 inputdataconfig.json
+-rw-r--r-- 1 root root    2 Sep  3 18:02 metric-definition-regex.json
+-rw-r--r-- 1 root root   91 Sep  3 18:02 resourceconfig.json
+-rw-r--r-- 1 root root 2972 Sep  3 18:02 trainingjobconfig.json
+-rw-r--r-- 1 root root    2 Sep  3 18:02 upstreamoutputdataconfig.json
+
+/opt/ml/input/data:
+total 52
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:02 ..
+-rw-r--r-- 1 root root   43 Sep  3 18:03 checkpoints-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 data
+-rw-r--r-- 1 root root  216 Sep  3 18:03 data-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 model
+-rw-r--r-- 1 root root  204 Sep  3 18:03 model-manifest
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state1
+-rw-r--r-- 1 root root 2309 Sep  3 18:03 task1_state1-manifest
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state2
+-rw-r--r-- 1 root root 2309 Sep  3 18:03 task1_state2-manifest
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 task1_state3
+-rw-r--r-- 1 root root  206 Sep  3 18:03 task1_state3-manifest
+
+/opt/ml/input/data/data:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   12 Sep  3 18:03 test
+
+/opt/ml/input/data/model:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root  187 Sep  3 18:03 model.tar.gz
+
+/opt/ml/input/data/task1_state1:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/input/data/task1_state1/algo-1:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/input/data/task1_state1/algo-2:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_9
+
+/opt/ml/input/data/task1_state2:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/input/data/task1_state2/algo-1:
+total 32
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/input/data/task1_state2/algo-2:
+total 28
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+
+/opt/ml/input/data/task1_state3:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 7 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root  388 Sep  3 18:03 output.tar.gz
+
+/opt/ml/model:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+
+/opt/ml/output:
+total 24
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 data
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 metrics
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 profiler
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 tensors
+
+/opt/ml/output/data:
+total 12
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 algo-1
+
+/opt/ml/output/data/algo-1:
+total 32
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 data_copy
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 model_copy
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 state_copy
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state1_copy
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 task1_state2_copy
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 task1_state3_copy
+
+/opt/ml/output/data/algo-1/data_copy:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+-rw-r--r-- 1 root root   12 Sep  3 18:03 test
+
+/opt/ml/output/data/algo-1/model_copy:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+-rw-r--r-- 1 root root  187 Sep  3 18:03 model.tar.gz
+
+/opt/ml/output/data/algo-1/state_copy:
+total 12
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:04 algo-1
+
+/opt/ml/output/data/algo-1/state_copy/algo-1:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 ..
+
+/opt/ml/output/data/algo-1/task1_state1_copy:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/output/data/algo-1/task1_state1_copy/algo-1:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/output/data/algo-1/task1_state1_copy/algo-2:
+total 52
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_9
+
+/opt/ml/output/data/algo-1/task1_state2_copy:
+total 16
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-1
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 algo-2
+
+/opt/ml/output/data/algo-1/task1_state2_copy/algo-1:
+total 32
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:03 __COMPLETED__
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_10
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_3
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_5
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_7
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-1_9
+
+/opt/ml/output/data/algo-1/task1_state2_copy/algo-2:
+total 28
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 4 root root 4096 Sep  3 18:03 ..
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_1
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_2
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_4
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_6
+-rw-r--r-- 1 root root    5 Sep  3 18:03 state_algo-2_8
+
+/opt/ml/output/data/algo-1/task1_state3_copy:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 8 root root 4096 Sep  3 18:04 ..
+-rw-r--r-- 1 root root  388 Sep  3 18:03 output.tar.gz
+
+/opt/ml/output/metrics:
+total 12
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 sagemaker
+
+/opt/ml/output/metrics/sagemaker:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 3 root root 4096 Sep  3 18:03 ..
+
+/opt/ml/output/profiler:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:02 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+
+/opt/ml/output/tensors:
+total 8
+drwxr-xr-x 2 root root 4096 Sep  3 18:03 .
+drwxr-xr-x 6 root root 4096 Sep  3 18:03 ..
+
+INFO:__main__:*** Listing files in /state
+INFO:__main__:/state:
+total 12
+drwxr-xr-x  3 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 23 root root 4096 Sep  3 18:04 ..
+drwxr-xr-x  2 root root 4096 Sep  3 18:04 algo-1
+
+/state/algo-1:
+total 12
+drwxr-xr-x 2 root root 4096 Sep  3 18:04 .
+drwxr-xr-x 3 root root 4096 Sep  3 18:04 ..
+-rw-r--r-- 1 root root   25 Sep  3 18:04 __COMPLETED__
+
+2020-09-03 18:04:51,718 sagemaker-training-toolkit INFO     Reporting training SUCCESS

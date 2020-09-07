@@ -1,0 +1,3 @@
+simple-sagemaker-example/Task1/input
+s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example/Task1/input/test
+s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example/Task1/input/test2

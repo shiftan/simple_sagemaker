@@ -1,0 +1,102 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: [3.7, 3.6, 3.8]
+        exclude:
+          - os: windows-latest
+            python-version: 3.6
+          - os: windows-latest
+            python-version: 3.8
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+      # Cache pip packages
+    - name: Get pip cache dir
+      id: pip-cache
+      run: |
+        echo "::set-output name=dir::$(pip cache dir)"
+    - name: pip cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ matrix.os }}-pip-${{ hashFiles('**/setup.cfg') }}
+        restore-keys: |
+          ${{ matrix.os }}-pip-
+
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Lint
+      run: |
+        tox -e lint
+    - name: Configure AWS Credentials
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Test & check coverage
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      # Run tox using the version of Python in `PATH`
+      run: |
+        tox -e py -- --capture=no --log-cli-level=INFO
+        tox -e report
+    - name: Upload coverage report
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: htmlcov
+    - name: Upload examples output
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      uses: actions/upload-artifact@v2
+      with:
+        name: examples_output
+        path: |
+          .tox/py/tmp/*/*/output/
+          !.tox/py/tmp/*/*current/output/
+    - name: Build the package
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      run: |
+        pip install setuptools wheel twine
+        python setup.py sdist bdist_wheel
+    - name: Upload dist files
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist
+
+  publish:
+
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/master')
+
+    steps:
+    - name: Download dist package
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: dist
+    - name: Publish
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
