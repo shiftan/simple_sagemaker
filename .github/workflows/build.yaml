@@ -49,12 +49,12 @@ jobs:
     - name: Smoke tests
       # Run tox using the version of Python in `PATH`
       run: |
-        tox -e py -- --capture=no --log-cli-level=INFO -- tests/smoke/
+        tox -e py -- --capture=no --log-cli-level=INFO tests/smoke/
     - name: System tests & check coverage
       if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
       # Run tox using the version of Python in `PATH`
       run: |
-        tox -e py -- --capture=no --log-cli-level=INFO -- tests/system/
+        tox -e py -- --capture=no --log-cli-level=INFO tests/system/
         tox -e report
     - name: Upload coverage report
       if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
