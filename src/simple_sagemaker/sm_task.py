@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 
 class SageMakerTask:
     """
-    An easy to use wrapper around SageMaker jobs into Tasks, a collection of jobs sharing the same input data and state (between runs).
+    An easy to use wrapper around SageMaker jobs into Tasks, a collection of jobs sharing
+        the same input data and state (between runs).
     """
 
     def __init__(
