@@ -17,9 +17,11 @@ def parseArgs():
         config_file_parser_class=configargparse.DefaultConfigFileParser
     )
 
+    # general
     parser.add("--config-file", "-c", is_config_file=True, help="config file path")
     parser.add_argument("--project_name", "-p", required=True)
     parser.add_argument("--task_name", "-t", required=True)
+    parser.add_argument("--bucket_name", "-b")
     # coding params
     parser.add_argument("--source_dir", "-s", type=lambda x: fileValidation(parser, x))
     parser.add_argument(
@@ -31,6 +33,10 @@ def parseArgs():
     # instance params
     parser.add_argument("--instance_type", "--it", default="ml.m5.large")
     parser.add_argument("--instance_count", "--ic", type=int, default=1)
+    parser.add_argument("--volume_size", "-v", type=int)
+    parser.add_argument("--use_spot", default=True, type=bool)
+    parser.add_argument("--max_wait", type=int)
+    parser.add_argument("--max_run", type=int)
     # image params
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
@@ -38,9 +44,7 @@ def parseArgs():
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument("--input_path", "-i", type=lambda x: fileValidation(parser, x))
-    parser.add_argument(
-        "--clean_state", "--cs", default=False, action="store_const", const=True
-    )
+    parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
     parser.add_argument("--output_path", "-o", default=None)
 
     args = parser.parse_args()
@@ -70,8 +74,15 @@ def main():
     sys.path.append(examplesPath)
     from simple_sagemaker.sm_project import SageMakerProject
 
-    smProject = SageMakerProject(args.project_name)
-
+    smProject = SageMakerProject(
+        **getAllParams(
+            args,
+            {
+                "task_name": "projectName",
+                "bucket_name": "bucketName",
+            },
+        )
+    )
     smProject.setDefaultCodeParams(
         **getAllParams(
             args,
@@ -88,6 +99,10 @@ def main():
             {
                 "instance_count": "instanceCount",
                 "instance_type": "instanceType",
+                "volume_size": "volumeSize",
+                "use_spot": "useSpotInstances",
+                "max_run": "maxRun",
+                "max_wait": "maxWait",
             },
         )
     )
