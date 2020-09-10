@@ -1,3 +1,3 @@
 #! /bin/bash
 BASEDIR=$(dirname "$0")
-ssm -p simple-sagemaker-example-cli -t task1 -e $BASEDIR/worker.py --cs -o $1
+ssm -p ${1}simple-sagemaker-example-cli${2} -t task1 -e $BASEDIR/worker.py --cs -o $1
