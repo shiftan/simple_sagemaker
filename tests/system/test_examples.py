@@ -61,5 +61,8 @@ def _internalTestExample(caplog, tmp_path, runner):
 def test_cli(caplog, tmp_path):
     caplog.set_level(logging.INFO)
     runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
-    print(runShell)
-    subprocess.run([runShell], check=True, shell=True)
+    outputPath = os.path.join(tmp_path, "output")
+    subprocess.run([runShell, outputPath], check=True)
+
+    expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
+    assert isAsExpected(outputPath, expectedPath)
