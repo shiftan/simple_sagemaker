@@ -38,7 +38,9 @@ def parseArgs():
     # run params
     parser.add_argument("--input_path", "-i", type=lambda x: fileValidation(parser, x))
     parser.add_argument("--clean_sate", "-cs", type=bool, default=False)
-    parser.add_argument("--output_path", "-o", type=lambda x: fileValidation(parser, x), default=None)
+    parser.add_argument(
+        "--output_path", "-o", type=lambda x: fileValidation(parser, x), default=None
+    )
 
     args = parser.parse_args()
     return args
