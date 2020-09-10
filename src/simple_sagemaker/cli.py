@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import sys
 
 import configargparse
@@ -38,7 +38,9 @@ def parseArgs():
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument("--input_path", "-i", type=lambda x: fileValidation(parser, x))
-    parser.add_argument("--clean_state", "--cs", default=False, action='store_const', const=True)
+    parser.add_argument(
+        "--clean_state", "--cs", default=False, action="store_const", const=True
+    )
     parser.add_argument("--output_path", "-o", default=None)
 
     args = parser.parse_args()
