@@ -60,9 +60,27 @@ def _internalTestExample(caplog, tmp_path, runner):
 
 def test_cli(caplog, tmp_path):
     caplog.set_level(logging.INFO)
-    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    print("Temp path:", tmp_path)
+    print("Running cli:")
+
     outputPath = os.path.join(tmp_path, "output")
-    subprocess.run([runShell, outputPath], check=True)
+    # remove current local output
+    shutil.rmtree(outputPath, ignore_errors=True)
+    # prefix/suffix for project name
+    pyVersionString = f"py{sys.version_info.major}{sys.version_info.minor}"
+    timeString = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+    postfix = f"_{timeString}_{pyVersionString}"
+    prefix = "tests/"
+
+    #runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    #subprocess.run([runShell, outputPath], check=True)
+    cmd = ["ssm", 
+        "-p", prefix+"simple-sagemaker-example-cli"+postfix,
+        "-t", "task1"
+        "-e", os.path.join(examplesPath, "cli_simple", "worker.py"),
+        "--cs"
+        "-o",  outputPath]
+    subprocess.run(cmd, check=True)
 
     expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
     assert isAsExpected(outputPath, expectedPath)
