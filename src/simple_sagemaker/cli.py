@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 
 import configargparse
@@ -28,19 +29,17 @@ def parseArgs():
         "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
     )
     # instance params
-    parser.add_argument("--instance_type", "-it", default="ml.m5.large")
-    parser.add_argument("--instance_count", "-ic", type=int, default=1)
+    parser.add_argument("--instance_type", "--it", default="ml.m5.large")
+    parser.add_argument("--instance_count", "--ic", type=int, default=1)
     # image params
-    parser.add_argument("--aws_repo", "-ar")
-    parser.add_argument("--repo_name", "-rn")
-    parser.add_argument("--image_tag", "-tag")
-    parser.add_argument("--docker_file", "-df")
+    parser.add_argument("--aws_repo", "--ar")
+    parser.add_argument("--repo_name", "--rn")
+    parser.add_argument("--image_tag", "--tag")
+    parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument("--input_path", "-i", type=lambda x: fileValidation(parser, x))
-    parser.add_argument("--clean_sate", "-cs", type=bool, default=False)
-    parser.add_argument(
-        "--output_path", "-o", type=lambda x: fileValidation(parser, x), default=None
-    )
+    parser.add_argument("--clean_state", "--cs", default=False, action='store_const', const=True)
+    parser.add_argument("--output_path", "-o", default=None)
 
     args = parser.parse_args()
     return args
@@ -61,6 +60,7 @@ def getAllParams(args, mapping):
 
 
 def main():
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     args = parseArgs()
 
     filePath = os.path.split(__file__)[0]
@@ -105,7 +105,6 @@ def main():
     imageUri = smProject.buildOrGetImage(
         instanceType=smProject.defaultInstanceParams.instanceType
     )
-    print(imageUri)
 
     runningParams = getAllParams(
         args,
@@ -123,7 +122,7 @@ def main():
     )
 
     if args.output_path:
-        smProject.downloadResults(args.task_name, args.output_path)
+        smProject.downloadResults(args.task_name, args.output_path, source=False)
 
 
 if __name__ == "__main__":

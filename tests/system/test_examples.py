@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 from time import gmtime, strftime
+import subprocess
 
 from .compare_outputs import isAsExpected
 
@@ -55,3 +56,9 @@ def _internalTestExample(caplog, tmp_path, runner):
         expectedPath = os.path.join(os.path.dirname(examplePath), "expected_output")
 
     assert isAsExpected(outputPath, expectedPath)
+
+def test_cli(caplog, tmp_path):
+    caplog.set_level(logging.INFO)
+    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    print(runShell)
+    subprocess.run([runShell], check=True, shell=True)
