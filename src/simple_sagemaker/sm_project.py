@@ -57,13 +57,15 @@ class SageMakerProject:
         # self.createBucket()
 
     def setDefaultImageParams(
-        self, awsRepoName, repoName, imgTag, dockerFilePathOrContent
+        self, awsRepoName=None, repoName=None, imgTag=None, dockerFilePathOrContent=None
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
             awsRepoName, repoName, imgTag, dockerFilePathOrContent
         )
 
-    def setDefaultCodeParams(self, sourceDir, entryPoint, dependencies):
+    def setDefaultCodeParams(
+        self, sourceDir=None, entryPoint=None, dependencies=list()
+    ):
         self.defaultCodeParams = SageMakerProject.CodeParams(
             sourceDir, entryPoint, dependencies
         )

@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import subprocess
 import sys
 from time import gmtime, strftime
 
@@ -54,4 +55,14 @@ def _internalTestExample(caplog, tmp_path, runner):
     if not os.path.isdir(expectedPath):
         expectedPath = os.path.join(os.path.dirname(examplePath), "expected_output")
 
+    assert isAsExpected(outputPath, expectedPath)
+
+
+def test_cli(caplog, tmp_path):
+    caplog.set_level(logging.INFO)
+    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    outputPath = os.path.join(tmp_path, "output")
+    subprocess.run([runShell, outputPath], check=True)
+
+    expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
     assert isAsExpected(outputPath, expectedPath)
