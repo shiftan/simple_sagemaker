@@ -1,3 +1,6 @@
 #! /bin/bash
+
+# Params: [output] [prefix] [suffix] [additional params...]
 BASEDIR=$(dirname "$0")
-ssm -p ${1}simple-sagemaker-example-cli${2} -t task1 -e $BASEDIR/worker.py --cs -o $1
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker.py -o $1/output1 --task_type 1 -i $BASEDIR/../single_file/data ${@:4}
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task2 -e $BASEDIR/worker.py -o $1/output2 --task_type 2 --iit task2_data task1 model ${@:4}
