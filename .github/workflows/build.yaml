@@ -30,6 +30,9 @@ jobs:
     - name: Get pip cache dir
       id: pip-cache
       run: |
+        echo ${{ github }}
+        echo ${{ github.base_ref }}
+        echo ${{ github.ref }}
         echo "::set-output name=dir::$(pip cache dir)"
     - name: pip cache
       uses: actions/cache@v2
