@@ -59,19 +59,19 @@ jobs:
       run: |
         tox -e py -- --capture=no --log-cli-level=INFO tests/smoke/
     - name: System tests & check coverage
-      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'refs/heads/master')
       # Run tox using the version of Python in `PATH`
       run: |
         tox -e py -- --capture=no --log-cli-level=INFO tests/system/
         tox -e report
     - name: Upload coverage report
-      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'refs/heads/master')
       uses: actions/upload-artifact@v2
       with:
         name: coverage
         path: htmlcov
     - name: Upload examples output
-      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'refs/heads/master')
       uses: actions/upload-artifact@v2
       with:
         name: examples_output
@@ -79,12 +79,12 @@ jobs:
           .tox/py/tmp/*/*/output/
           !.tox/py/tmp/*/*current/output/
     - name: Build the package
-      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'refs/heads/master')
       run: |
         pip install setuptools wheel twine
         python setup.py sdist bdist_wheel
     - name: Upload dist files
-      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.ref == 'refs/heads/master')
+      if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'refs/heads/master')
       uses: actions/upload-artifact@v2
       with:
         name: dist
