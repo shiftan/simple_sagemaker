@@ -72,8 +72,8 @@ def test_cli(caplog, tmp_path):
     postfix = f"_{timeString}_{pyVersionString}"
     prefix = "tests/"
 
-    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    runShell = os.path.join(examplesPath, "cli_multi", "run.sh")
     subprocess.run([runShell, outputPath, prefix, postfix, "--cs"], check=True)
 
-    expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
+    expectedPath = os.path.join(examplesPath, "cli_multi", "expected_output")
     assert isAsExpected(outputPath, expectedPath)
