@@ -192,7 +192,20 @@ class SageMakerProject:
         output=False,
         state=False,
     ):
-        smTask = self.tasks[taskName]
+        if taskName in self.tasks:
+            smTask = self.tasks[taskName]
+        else:
+            smTask = SageMakerTask(
+                self.boto3Session,
+                taskName,
+                None,
+                self.projectName,
+                self.bucketName,
+                smSession=self.smSession,
+            )
+            jobName = self.getCompletionJobName(taskName)
+            smTask.bindToJob(jobName)
+
         return smTask.getInputConfig(distribution, model, output, state)
 
     def downloadResults(

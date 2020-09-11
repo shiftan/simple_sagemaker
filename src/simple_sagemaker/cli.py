@@ -1,15 +1,54 @@
+import argparse
+import collections
 import logging
 import os
 import sys
 
 import configargparse
+from sagemaker.inputs import TrainingInput
 
 
 def fileValidation(parser, arg):
     if not os.path.exists(arg):
         parser.error("The file %s does not exist!" % arg)
-    else:
-        return arg
+    return arg
+
+
+def fileOrS3Validation(parser, arg):
+    if not arg.startswith("s3://") and not os.path.exists(arg):
+        parser.error("%s has to be either a file or a s3 path!" % arg)
+    return arg
+
+
+S3InputTuple = collections.namedtuple("S3Input", ("input_name", "s3_uri"))
+TaskInputTuple = collections.namedtuple("S3Input", ("input_name", "task_name", "type"))
+
+
+class S3InputAction(argparse.Action):
+    def __call__(self, parser, args, values, option_string=None):
+        # print (f'{args} {values} {option_string}')
+        # print ("****", values)
+        if not values[1].startswith("s3://"):
+            raise ValueError(f"{values[1]} has to be a s3 path!")
+
+        if not args.__getattribute__(self.dest):
+            setattr(args, self.dest, [S3InputTuple(*values)])
+        else:
+            args.__getattribute__(self.dest).append(S3InputTuple(*values))
+
+
+class TaskInputAction(argparse.Action):
+    def __call__(self, parser, args, values, option_string=None):
+        # print (f'{args} {values} {option_string}')
+        # print("****", values, hasattr(args, self.dest))
+        taskInputTypes = ["state", "model", "source", "output"]
+        if values[2] not in taskInputTypes:
+            raise ValueError(f"{values[2]} has to be one of {taskInputTypes}!")
+
+        if not args.__getattribute__(self.dest):
+            setattr(args, self.dest, [TaskInputTuple(*values)])
+        else:
+            args.__getattribute__(self.dest).append(TaskInputTuple(*values))
 
 
 def parseArgs():
@@ -43,12 +82,28 @@ def parseArgs():
     parser.add_argument("--image_tag", "--tag")
     parser.add_argument("--docker_file", "--df")
     # run params
-    parser.add_argument("--input_path", "-i", type=lambda x: fileValidation(parser, x))
+    parser.add_argument(
+        "--input_path", "-i", type=lambda x: fileOrS3Validation(parser, x)
+    )
+    parser.add_argument(
+        "--input_s3",
+        "--iis",
+        action=S3InputAction,
+        nargs=2,
+        metavar=S3InputTuple._fields,
+    )
+    parser.add_argument(
+        "--input_task",
+        "--iit",
+        action=TaskInputAction,
+        nargs=3,
+        metavar=TaskInputTuple._fields,
+    )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
     parser.add_argument("--output_path", "-o", default=None)
 
-    args = parser.parse_args()
-    return args
+    args, rest = parser.parse_known_args()
+    return args, rest
 
 
 def addParam(args, argName, paramName, params):
@@ -65,9 +120,34 @@ def getAllParams(args, mapping):
     return params
 
 
+def parseInputs(args, smProject):
+    if not args.input_task and not args.input_s3:
+        return None
+
+    inputs = dict()
+    distribution = "FullyReplicated"
+    if args.input_task:
+        for (input_name, task_name, ttype) in args.input_task:
+            inputs[input_name] = smProject.getInputConfig(task_name, **{ttype: True})
+    if args.input_s3:
+        for (input_name, s3_uri) in args.input_s3:
+            inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
+
+        # smProject.getInputConfig(taskName, distribution="ShardedByS3Key", state=True)
+        # smProject.getInputConfig(taskName, distribution="ShardedByS3Key", output=True)
+    return inputs
+
+
+def parseHyperparams(rest):
+    res = dict()
+    for i in range(0, len(rest), 2):
+        res[rest[i].strip("-")] = rest[i + 1]
+    return res
+
+
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    args = parseArgs()
+    args, rest = parseArgs()
 
     filePath = os.path.split(__file__)[0]
     examplesPath = os.path.abspath(os.path.join(filePath, ".."))
@@ -78,7 +158,7 @@ def main():
         **getAllParams(
             args,
             {
-                "task_name": "projectName",
+                "project_name": "projectName",
                 "bucket_name": "bucketName",
             },
         )
@@ -130,12 +210,17 @@ def main():
             "clean_state": "cleanState",
         },
     )
+
+    inputs = parseInputs(args, smProject)
+    hyperparameters = parseHyperparams(rest)
+
     smProject.runTask(
         args.task_name,
         imageUri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
-        hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
-        **runningParams
+        hyperparameters=hyperparameters,
+        additionalInputs=inputs,
+        **runningParams,
     )
 
     if args.output_path:

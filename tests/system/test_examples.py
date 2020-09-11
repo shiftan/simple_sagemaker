@@ -72,19 +72,8 @@ def test_cli(caplog, tmp_path):
     postfix = f"_{timeString}_{pyVersionString}"
     prefix = "tests/"
 
-    # runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
-    # subprocess.run([runShell, outputPath], check=True)
-    cmd = [
-        "ssm",
-        "-p",
-        prefix + "simple-sagemaker-example-cli" + postfix,
-        "-t",
-        "task1" "-e",
-        os.path.join(examplesPath, "cli_simple", "worker.py"),
-        "--cs" "-o",
-        outputPath,
-    ]
-    subprocess.run(cmd, check=True)
+    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
+    subprocess.run([runShell, outputPath, prefix, postfix, "--cs"], check=True)
 
     expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
     assert isAsExpected(outputPath, expectedPath)
