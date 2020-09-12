@@ -5,9 +5,9 @@ import logging
 import boto3
 import sagemaker
 
+from .constants import *
 from .ecr_sync import ECRSync
 from .sm_task import SageMakerTask
-from .constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,11 @@ class SageMakerProject:
         # self.createBucket()
 
     def setDefaultImageParams(
-        self, awsRepoName=None, repoName=None, imgTag=DEFAULT_REPO_TAG, dockerFilePathOrContent=None
+        self,
+        awsRepoName=None,
+        repoName=None,
+        imgTag=DEFAULT_REPO_TAG,
+        dockerFilePathOrContent=None,
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
             awsRepoName, repoName, imgTag, dockerFilePathOrContent

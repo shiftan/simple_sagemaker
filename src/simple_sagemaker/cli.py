@@ -6,6 +6,7 @@ import sys
 
 import configargparse
 from sagemaker.inputs import TrainingInput
+
 from .constants import *
 
 
@@ -72,10 +73,12 @@ def parseArgs():
     )
     # instance params
     parser.add_argument("--instance_type", "--it", default=DEFAULT_INSTANCE_TYPE)
-    parser.add_argument("--instance_count", "--ic", type=int, default=DEFAULT_INSTANCE_COUNT)
+    parser.add_argument(
+        "--instance_count", "--ic", type=int, default=DEFAULT_INSTANCE_COUNT
+    )
     parser.add_argument("--volume_size", "-v", type=int, default=DEFAULT_VOLUME_SIZE)
-    parser.add_argument("--no_spot", dest="use_spot", action='store_false')
-    parser.add_argument("--use_spot", dest="use_spot", action='store_true')
+    parser.add_argument("--no_spot", dest="use_spot", action="store_false")
+    parser.add_argument("--use_spot", dest="use_spot", action="store_true")
     parser.set_defaults(use_spot=DEFAULT_USE_SPOT)
     parser.add_argument("--max_wait", type=int, default=DEFAULT_MAX_WAIT)
     parser.add_argument("--max_run", type=int, default=DEFAULT_MAX_RUN)
