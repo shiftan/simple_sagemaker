@@ -1,5 +1,63 @@
 # Simple Sagemaker 
-a *simple* python wrapper around AWS SageMaker, to easily empower your data science projects
+A **very simple** way to run your python code on the cloud (AWS).
+
+Lets start with a very basic example. 
+Assuming one would like to run the following `worker.py` on the cloud:
+
+```python
+import torch
+num_devices = torch.cuda.device_count()
+print(f"Number of Cuda devices: {num_devices}")
+for i in range(num_devices):
+    print(f"Device: {i} {torch.cuda.get_device_properties(0)}")
+```
+It's as easy as running the following command to get it running on a *ml.p3.2xlarge* spot instance:
+```bash
+ssm -p simple-sagemaker-example-cli --instance_type "ml.p3.2xlarge" -t task1 -e worker.py -o ./output
+```
+The output, including logs will be save to the `output`:
+
+- [Passing command line arguments](#Passing-command-line-arguments)
+- [Task output](#Task-output)
+- [Poviding input data](#Poviding-input-data)
+- [Chaining tasks](#Chaining-tasks)
+- [Maintaining task state](#Maintaining-task-state)
+- [Configuring the docker image](#Configuring-the-docker-image)
+
+## Passing command line arguments
+Any extra argument passed to the command line 
+TBD
+
+## Task output
+TBD
+
+## Poviding input data
+TBD
+
+## Chaining tasks
+TBD
+
+## Maintaining task state
+TBD
+
+## Configuring the docker image
+TBD
+
+```mermaid
+sequence diagram test
+Alice ->> Bob: Hello Bob, how are you?
+Bob-->>John: How about you John?
+Bob--x Alice: I am good thanks!
+Bob-x John: I am good thanks!
+Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
+
+Bob-->Alice: Checking with John...
+Alice->John: Yes... John, how are you?
+```
+
+---
+
+Simple Sagemaker is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
 
 **Note: the (initial) work is still in progress...**
 
@@ -16,72 +74,72 @@ dockerFileContent = """
 FROM __BASE_IMAGE__
 RUN pip3 install pandas==1.1 scikit-learn==0.21.3
 """
-filePath = Path(__file__).parent
+file_path = Path(__file__).parent
 
 
-def runner(projectName="simple-sagemaker-sf", prefix="", postfix="", outputPath=None):
+def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_path=None):
     from simple_sagemaker.sm_project import SageMakerProject
 
-    smProject = SageMakerProject(projectName=projectName)
+    sm_project = SageMakerProject(project_name=project_name)
     # define the code parameters
-    smProject.setDefaultCodeParams(sourceDir=None, entryPoint=__file__, dependencies=[])
+    sm_project.setDefaultCodeParams(source_dir=None, entryPoint=__file__, dependencies=[])
     # define the instance parameters
-    smProject.setDefaultInstanceParams(instanceCount=2)
+    sm_project.setDefaultInstanceParams(instance_count=2)
     # docker image
-    smProject.setDefaultImageParams(
-        awsRepoName="task_repo",
-        repoName="task_repo",
-        imgTag="latest",
-        dockerFilePathOrContent=dockerFileContent,
+    sm_project.setDefaultImageParams(
+        aws_repo_name="task_repo",
+        repo_name="task_repo",
+        img_tag="latest",
+        docker_file_path_or_content=dockerFileContent,
     )
-    imageUri = smProject.buildOrGetImage(
-        instanceType=smProject.defaultInstanceParams.instanceType
+    image_uri = sm_project.buildOrGetImage(
+        instance_type=sm_project.defaultInstanceParams.instance_type
     )
     # ceate the IAM role
-    smProject.createIAMRole()
+    sm_project.createIAMRole()
 
     # *** Task 1 - process input data
-    task1Name = "task1"
+    task1_name = "task1"
     # set the input data
-    inputDataPath = filePath.parent / "data"
+    input_data_path = file_path.parent / "data"
     # run the task
-    smProject.runTask(
-        task1Name,
-        imageUri,
+    sm_project.runTask(
+        task1_name,
+        image_uri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
-        inputDataPath=str(inputDataPath) if inputDataPath.is_dir() else None,
-        cleanState=True,  # clean the current state, also forces re-running
+        input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
+        clean_state=True,  # clean the current state, also forces re-running
     )
     # download the results
-    if not outputPath:
-        outputPath = filePath.parent / "output"
-    shutil.rmtree(outputPath, ignore_errors=True)
-    smProject.downloadResults(task1Name, Path(outputPath) / "output1")
+    if not output_path:
+        output_path = file_path.parent / "output"
+    shutil.rmtree(output_path, ignore_errors=True)
+    sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 ```
 An additional *task* that depends on the previous one can now be scheduled as well:
 ```python
     # *** Task 2 - process the results of Task 1
-    task2Name = "task2"
+    task2_name = "task2"
     # set the input
-    additionalInputs = {
-        "task2_data": smProject.getInputConfig(task1Name, model=True),
-        "task2_data_dist": smProject.getInputConfig(
-            task1Name, model=True, distribution="ShardedByS3Key"
+    additional_inputs = {
+        "task2_data": sm_project.getInputConfig(task1_name, model=True),
+        "task2_data_dist": sm_project.getInputConfig(
+            task1_name, model=True, distribution="ShardedByS3Key"
         ),
     }
     # run the task
-    smProject.runTask(
-        task2Name,
-        imageUri,
+    sm_project.runTask(
+        task2_name,
+        image_uri,
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 2},
-        cleanState=True,  # clean the current state, also forces re-running
-        additionalInputs=additionalInputs,
+        clean_state=True,  # clean the current state, also forces re-running
+        additional_inputs=additional_inputs,
     )
     # download the results
-    smProject.downloadResults(task1Name, Path(outputPath) / "output2")
+    sm_project.downloadResults(task1_name, Path(output_path) / "output2")
 
-    return smProject
+    return sm_project
 ```
 
 Then, the worker code (note: the same function is used for the two different tasks, depending on the `task` hyperparameter):
@@ -95,7 +153,7 @@ def worker():
     # parse the arguments
     args = algo_lib.parseArgs()
 
-    stateDir = algo_lib.initMultiWorkersState(args)
+    state_dir = algo_lib.initMultiWorkersState(args)
 
     logger.info(f"Hyperparams: {args.hps}")
     logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
@@ -103,7 +161,7 @@ def worker():
 
     if int(args.hps["task"]) == 1:
         # update the state per running instance
-        open(f"{stateDir}/state_{args.current_host}", "wt").write("state")
+        open(f"{state_dir}/state_{args.current_host}", "wt").write("state")
         # write to the model output directory
         for file in Path(args.input_data).rglob("*"):
             relp = file.relative_to(args.input_data)
