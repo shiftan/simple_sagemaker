@@ -19,7 +19,9 @@ def setDefaultParams(sm_project):
     repo_name = "task_repo"  # local repository name
     img_tag = "latest"  # tag for local & remote images
     docker_file_path = os.path.join(file_path, "docker")  # path of the local Dockerfile
-    sm_project.setDefaultImageParams(aws_repo_name, repo_name, img_tag, docker_file_path)
+    sm_project.setDefaultImageParams(
+        aws_repo_name, repo_name, img_tag, docker_file_path
+    )
 
     # job code path, entrypoint and params
     source_dir = os.path.join(file_path, "code")
@@ -90,7 +92,9 @@ def runner(
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
     # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
-    model_uri = None  # Can be used to supply model data as an additional input, local/s3
+    model_uri = (
+        None  # Can be used to supply model data as an additional input, local/s3
+    )
     hyperparameters = {"arg1": 5, "arg2": "hello"}
 
     sm_project.runTask(

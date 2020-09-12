@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class SageMakerProject:
     ImageParams = collections.namedtuple(
-        "ImageParams", ["aws_repo_name", "repo_name", "img_tag", "docker_file_path_or_content"]
+        "ImageParams",
+        ["aws_repo_name", "repo_name", "img_tag", "docker_file_path_or_content"],
     )
     CodeParams = collections.namedtuple(
         "CodeParams", ["source_dir", "entryPoint", "dependencies"]
@@ -85,7 +86,12 @@ class SageMakerProject:
         maxWait=constants.DEFAULT_MAX_WAIT,
     ):
         self.defaultInstanceParams = SageMakerProject.InstanceParams(
-            instance_type, instance_count, volume_size, use_spot_instances, max_run, maxWait
+            instance_type,
+            instance_count,
+            volume_size,
+            use_spot_instances,
+            max_run,
+            maxWait,
         )
 
     def createBucket(self):

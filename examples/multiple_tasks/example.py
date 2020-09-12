@@ -20,7 +20,9 @@ def setDefaultParams(sm_project):
     docker_file_path = os.path.join(
         file_path, "..", "single_task", "docker"
     )  # path of the local Dockerfile
-    sm_project.setDefaultImageParams(aws_repo_name, repo_name, img_tag, docker_file_path)
+    sm_project.setDefaultImageParams(
+        aws_repo_name, repo_name, img_tag, docker_file_path
+    )
 
     # job code path, entrypoint and params
     source_dir = os.path.join(file_path, "code")
@@ -69,7 +71,10 @@ def buildImage(sm_project, fallback_uri=None):
 
 
 def runner(
-    project_name="simple-sagemaker-example-multi", prefix="", postfix="", output_path=None
+    project_name="simple-sagemaker-example-multi",
+    prefix="",
+    postfix="",
+    output_path=None,
 ):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -90,7 +95,9 @@ def runner(
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
     # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
-    model_uri = None  # Can be used to supply model data as an additional input, local/s3
+    model_uri = (
+        None  # Can be used to supply model data as an additional input, local/s3
+    )
     hyperparameters = {"stage": 1}
     sm_project.runTask(
         task_name,

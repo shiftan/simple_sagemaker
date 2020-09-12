@@ -18,7 +18,9 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 
     sm_project = SageMakerProject(prefix + project_name + postfix)
     # define the code parameters
-    sm_project.setDefaultCodeParams(source_dir=None, entryPoint=__file__, dependencies=[])
+    sm_project.setDefaultCodeParams(
+        source_dir=None, entryPoint=__file__, dependencies=[]
+    )
     # define the instance parameters
     sm_project.setDefaultInstanceParams(instance_count=2)
     # docker image

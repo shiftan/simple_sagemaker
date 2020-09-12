@@ -23,7 +23,13 @@ class SageMakerTask:
     """
 
     def __init__(
-        self, boto3_session, task_name, image_uri, prefix, bucket_name=None, smSession=None
+        self,
+        boto3_session,
+        task_name,
+        image_uri,
+        prefix,
+        bucket_name=None,
+        smSession=None,
     ):
         """
         Initializes a task
@@ -77,7 +83,9 @@ class SageMakerTask:
         job_name = f"{self.task_name}-{timestamp_prefix}-{randString}"
         return job_name
 
-    def __runProcessingJob(self, code, instance_type, instance_count, sagemaker_session):
+    def __runProcessingJob(
+        self, code, instance_type, instance_count, sagemaker_session
+    ):
         # TODO: fix refactoring
         assert False, "Should be fixed"
         script_processor = ScriptProcessor(
@@ -337,7 +345,14 @@ class SageMakerTask:
             description, "TrainingJobStatus", wait
         )
         sagemaker.session._flush_log_streams(
-            stream_names, instance_count, client, log_group, job_name, positions, dot, lw
+            stream_names,
+            instance_count,
+            client,
+            log_group,
+            job_name,
+            positions,
+            dot,
+            lw,
         )
         return lw.logsChannels
 
