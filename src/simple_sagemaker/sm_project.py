@@ -123,7 +123,7 @@ class SageMakerProject:
         }
         client = self.boto3_session.client("iam")
         try:
-            client.get_role(role_name=self.role_name)
+            client.get_role(RoleName=self.role_name)
         except:  # noqa: E722
             client.create_role(
                 role_name=self.role_name,
