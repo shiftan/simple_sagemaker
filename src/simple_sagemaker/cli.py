@@ -89,7 +89,7 @@ def parseArgs():
     # image params
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag", constants.DEFAULT_REPO_TAG)
+    parser.add_argument("--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG)
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument(
