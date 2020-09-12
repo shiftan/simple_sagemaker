@@ -7,7 +7,7 @@ import sys
 import configargparse
 from sagemaker.inputs import TrainingInput
 
-from .constants import *
+from . import constants
 
 
 def fileValidation(parser, arg):
@@ -72,20 +72,24 @@ def parseArgs():
         "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
     )
     # instance params
-    parser.add_argument("--instance_type", "--it", default=DEFAULT_INSTANCE_TYPE)
     parser.add_argument(
-        "--instance_count", "--ic", type=int, default=DEFAULT_INSTANCE_COUNT
+        "--instance_type", "--it", default=constants.DEFAULT_INSTANCE_TYPE
     )
-    parser.add_argument("--volume_size", "-v", type=int, default=DEFAULT_VOLUME_SIZE)
+    parser.add_argument(
+        "--instance_count", "--ic", type=int, default=constants.DEFAULT_INSTANCE_COUNT
+    )
+    parser.add_argument(
+        "--volume_size", "-v", type=int, default=constants.DEFAULT_VOLUME_SIZE
+    )
     parser.add_argument("--no_spot", dest="use_spot", action="store_false")
     parser.add_argument("--use_spot", dest="use_spot", action="store_true")
-    parser.set_defaults(use_spot=DEFAULT_USE_SPOT)
-    parser.add_argument("--max_wait", type=int, default=DEFAULT_MAX_WAIT)
-    parser.add_argument("--max_run", type=int, default=DEFAULT_MAX_RUN)
+    parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
+    parser.add_argument("--max_wait", type=int, default=constants.DEFAULT_MAX_WAIT)
+    parser.add_argument("--max_run", type=int, default=constants.DEFAULT_MAX_RUN)
     # image params
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag", DEFAULT_REPO_TAG)
+    parser.add_argument("--image_tag", "--tag", constants.DEFAULT_REPO_TAG)
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument(
@@ -115,7 +119,7 @@ def parseArgs():
 def addParam(args, argName, paramName, params):
     if hasattr(args, argName):
         arg = args.__getattribute__(argName)
-        if None != arg:
+        if arg is not None:
             params[paramName] = arg
 
 
