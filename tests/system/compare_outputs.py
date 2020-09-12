@@ -19,51 +19,51 @@ def getSortedFileList(path, filters):
     return set(filter(partial(applyFilter, filters=filters), files))
 
 
-def compareFileContent(expectedFilePath, outputFilePath, fileName):
+def compareFileContent(expectedfile_path, outputfile_path, file_name):
     differences = []
-    if expectedFilePath.is_dir():
+    if expectedfile_path.is_dir():
         pass
-    if "logs/" in fileName:
+    if "logs/" in file_name:
         pass
-    elif fileName.endswith(".tar.gz"):
+    elif file_name.endswith(".tar.gz"):
         pass
-    elif fileName.endswith("-manifest") or fileName.endswith("init-config.json"):
+    elif file_name.endswith("-manifest") or file_name.endswith("init-config.json"):
         pass
-    elif "/config/" in fileName and (
-        "debughookconfig.json" in fileName
-        or "hyperparameters.json" in fileName
-        or "trainingjobconfig.json" in fileName
+    elif "/config/" in file_name and (
+        "debughookconfig.json" in file_name
+        or "hyperparameters.json" in file_name
+        or "trainingjobconfig.json" in file_name
     ):
         pass
-    elif "__COMPLETED__" in fileName:
+    elif "__COMPLETED__" in file_name:
         if (
-            expectedFilePath.read_text().split("-")[0]
-            != outputFilePath.read_text().split("-")[0]
+            expectedfile_path.read_text().split("-")[0]
+            != outputfile_path.read_text().split("-")[0]
         ):
-            differences.append(f"{fileName} doesn't match")
+            differences.append(f"{file_name} doesn't match")
     else:
-        if expectedFilePath.read_text() != outputFilePath.read_text():
-            differences.append(f"{fileName} doesn't match")
+        if expectedfile_path.read_text() != outputfile_path.read_text():
+            differences.append(f"{file_name} doesn't match")
     return differences
 
 
-def isAsExpected(outputPath, expectedPath):
-    logger.info(f"Comparing {outputPath} and {expectedPath}")
+def isAsExpected(output_path, expected_path):
+    logger.info(f"Comparing {output_path} and {expected_path}")
     res = []
 
     # compare the two list of output files, except for the source directory and tars
     filters = ["source/", ".tar.gz", ".sagemaker-uploading"]
-    outputFiles = getSortedFileList(outputPath, filters)
-    expectedFiles = getSortedFileList(expectedPath, filters)
+    outputFiles = getSortedFileList(output_path, filters)
+    expectedFiles = getSortedFileList(expected_path, filters)
     if expectedFiles != outputFiles:
         res.append(f"Not in output: {expectedFiles-outputFiles}")
         res.append(f"Not in expected: {outputFiles-expectedFiles}")
 
     # compare files content
-    for fileName in expectedFiles & outputFiles:
-        expectedFilePath = Path(expectedPath) / fileName
-        outputFilePath = Path(outputPath) / fileName
-        differences = compareFileContent(expectedFilePath, outputFilePath, fileName)
+    for file_name in expectedFiles & outputFiles:
+        expectedfile_path = Path(expected_path) / file_name
+        outputfile_path = Path(output_path) / file_name
+        differences = compareFileContent(expectedfile_path, outputfile_path, file_name)
         res.extend(differences)
 
     # log differences

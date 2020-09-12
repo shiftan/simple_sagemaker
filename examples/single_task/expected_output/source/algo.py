@@ -51,17 +51,17 @@ if __name__ == "__main__":
     logBefore(args)
 
     # copy the entire input dir to the output dir
-    outputDataDir = os.path.join(args.output_data_dir, args.current_host)
-    shutil.copytree(args.input_dir, f"{outputDataDir}/input_dir_copy")
+    output_data_dir = os.path.join(args.output_data_dir, args.current_host)
+    shutil.copytree(args.input_dir, f"{output_data_dir}/input_dir_copy")
     # copy state dir
-    shutil.copytree(args.state, f"{outputDataDir}/state_copy")
+    shutil.copytree(args.state, f"{output_data_dir}/state_copy")
     # cteaye a file
-    open(f"{outputDataDir}/output_data_dir", "wt").write("output_data_dir")
+    open(f"{output_data_dir}/output_data_dir", "wt").write("output_data_dir")
 
     # create one file in the output dir
-    outputDir = os.path.join(args.output_dir, args.current_host)
-    os.makedirs(outputDir, exist_ok=True)
-    open(f"{outputDir}/output_dir", "wt").write("output_dir")
+    output_dir = os.path.join(args.output_dir, args.current_host)
+    os.makedirs(output_dir, exist_ok=True)
+    open(f"{output_dir}/output_dir", "wt").write("output_dir")
 
     # create one file in the output model dir
     modelDir = os.path.join(args.model_dir, args.current_host)
@@ -69,8 +69,8 @@ if __name__ == "__main__":
     open(f"{modelDir}/model_dir", "wt").write("model_dir")
 
     # delete other instances state, write file in instance state folder.
-    stateDir = algo_lib.initMultiWorkersState(args)
-    open(f"{stateDir}/state_{args.current_host}", "wt").write(
+    state_dir = algo_lib.initMultiWorkersState(args)
+    open(f"{state_dir}/state_{args.current_host}", "wt").write(
         f"state_{args.current_host}"
     )
     algo_lib.markCompleted(args)
