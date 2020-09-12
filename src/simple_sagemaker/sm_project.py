@@ -7,6 +7,7 @@ import sagemaker
 
 from .ecr_sync import ECRSync
 from .sm_task import SageMakerTask
+from .constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class SageMakerProject:
         self,
         projectName,
         boto3Session=None,
-        roleName="SageMakerIAMRole",
+        roleName=DEFAULT_IAM_ROLE,
         bucketName=None,
         smSession=None,
     ):
@@ -57,7 +58,7 @@ class SageMakerProject:
         # self.createBucket()
 
     def setDefaultImageParams(
-        self, awsRepoName=None, repoName=None, imgTag=None, dockerFilePathOrContent=None
+        self, awsRepoName=None, repoName=None, imgTag=DEFAULT_REPO_TAG, dockerFilePathOrContent=None
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
             awsRepoName, repoName, imgTag, dockerFilePathOrContent
@@ -72,12 +73,12 @@ class SageMakerProject:
 
     def setDefaultInstanceParams(
         self,
-        instanceType="ml.m5.large",
-        instanceCount=1,
-        volumeSize=30,
-        useSpotInstances=True,
-        maxRun=24 * 60 * 60,
-        maxWait=24 * 60 * 60,
+        instanceType=DEFAULT_INSTANCE_TYPE,
+        instanceCount=DEFAULT_INSTANCE_COUNT,
+        volumeSize=DEFAULT_VOLUME_SIZE,
+        useSpotInstances=DEFAULT_USE_SPOT,
+        maxRun=DEFAULT_MAX_RUN,
+        maxWait=DEFAULT_MAX_WAIT,
     ):
         self.defaultInstanceParams = SageMakerProject.InstanceParams(
             instanceType, instanceCount, volumeSize, useSpotInstances, maxRun, maxWait

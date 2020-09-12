@@ -6,6 +6,7 @@ import sys
 
 import configargparse
 from sagemaker.inputs import TrainingInput
+from .constants import *
 
 
 def fileValidation(parser, arg):
@@ -70,16 +71,18 @@ def parseArgs():
         "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
     )
     # instance params
-    parser.add_argument("--instance_type", "--it", default="ml.m5.large")
-    parser.add_argument("--instance_count", "--ic", type=int, default=1)
-    parser.add_argument("--volume_size", "-v", type=int)
-    parser.add_argument("--use_spot", default=True, type=bool)
-    parser.add_argument("--max_wait", type=int)
-    parser.add_argument("--max_run", type=int)
+    parser.add_argument("--instance_type", "--it", default=DEFAULT_INSTANCE_TYPE)
+    parser.add_argument("--instance_count", "--ic", type=int, default=DEFAULT_INSTANCE_COUNT)
+    parser.add_argument("--volume_size", "-v", type=int, default=DEFAULT_VOLUME_SIZE)
+    parser.add_argument("--no_spot", dest="use_spot", action='store_false')
+    parser.add_argument("--use_spot", dest="use_spot", action='store_true')
+    parser.set_defaults(use_spot=DEFAULT_USE_SPOT)
+    parser.add_argument("--max_wait", type=int, default=DEFAULT_MAX_WAIT)
+    parser.add_argument("--max_run", type=int, default=DEFAULT_MAX_RUN)
     # image params
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag")
+    parser.add_argument("--image_tag", "--tag", DEFAULT_REPO_TAG)
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument(
@@ -109,7 +112,7 @@ def parseArgs():
 def addParam(args, argName, paramName, params):
     if hasattr(args, argName):
         arg = args.__getattribute__(argName)
-        if arg:
+        if None != arg:
             params[paramName] = arg
 
 

@@ -155,7 +155,6 @@ class SageMakerTask:
             checkpoint_local_path=self.stateLocalPath,
             output_path=self.baseTaskS3Uri,
             code_location=self.baseTaskS3Uri,
-            # To check
             dependencies=dependencies,
             container_log_level=logging.INFO,
             volume_size=volumeSize,
@@ -164,7 +163,6 @@ class SageMakerTask:
             use_spot_instances=useSpotInstances,
             max_wait=maxWait,
         )
-
         inputs = dict()
         if self.inputS3Uri:
             inputs.update(
