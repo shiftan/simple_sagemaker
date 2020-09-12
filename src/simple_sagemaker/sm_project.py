@@ -126,11 +126,11 @@ class SageMakerProject:
             client.get_role(RoleName=self.role_name)
         except:  # noqa: E722
             client.create_role(
-                role_name=self.role_name,
+                RoleName=self.role_name,
                 AssumeRolePolicyDocument=json.dumps(trustRelationship),
             )
         response = client.attach_role_policy(
-            role_name=self.role_name,
+            RoleName=self.role_name,
             PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
         )
         assert (
