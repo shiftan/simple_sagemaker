@@ -1,8 +1,9 @@
 import logging
-import sys
 import re
+import sys
 from functools import partial
 from pathlib import Path
+
 from simple_sagemaker import constants
 
 logger = logging.getLogger(__name__)
@@ -26,20 +27,25 @@ def getRelevantLogBlocks(content):
     consts = constants.TEST_LOG_LINE_BLOCK_PREFIX, constants.TEST_LOG_LINE_BLOCK_SUFFIX
     consts = [re.escape(x) for x in consts]
     pattern = "|".join([f":{x}" for x in consts])
-    consts2 = ":"+constants.TEST_LOG_LINE_PREFIX, "INFO:__main__", "INFO:task_toolkit.algo_lib:"
+    consts2 = (
+        ":" + constants.TEST_LOG_LINE_PREFIX,
+        "INFO:__main__",
+        "INFO:task_toolkit.algo_lib:",
+    )
     consts2 = [re.escape(x) for x in consts2]
     pattern2 = "|".join(consts2) + "(.*)"
     splited = re.split(f"({pattern})", content, flags=re.MULTILINE)
     i = 0
     while i < len(splited):
         if splited[i][1:] == constants.TEST_LOG_LINE_BLOCK_PREFIX:
-            res.append(splited[i+1])
-            i+=3
+            res.append(splited[i + 1])
+            i += 3
         else:
             relevant_lines = re.findall(pattern2, splited[i], flags=re.MULTILINE)
             res.extend(relevant_lines)
             i += 1
     return [x for x in res if x]
+
 
 def compareLog(expected_content, output_content):
     expected_blocks = getRelevantLogBlocks(expected_content)
@@ -58,8 +64,8 @@ def compareLog(expected_content, output_content):
                     if line_exp != line_out:
                         return False
         else:
-           if lines_exp != lines_out:
-               return False
+            if lines_exp != lines_out:
+                return False
 
     return True
 
