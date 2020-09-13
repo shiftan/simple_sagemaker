@@ -5,6 +5,7 @@ import os
 import sys
 
 import configargparse
+import sagemaker
 from sagemaker.inputs import TrainingInput
 
 from . import constants
@@ -130,7 +131,7 @@ def getAllParams(args, mapping):
     return params
 
 
-def parseInputs(args, sm_project):
+def parseInputsAndAllowAccess(args, sm_project):
     if not args.input_task and not args.input_s3:
         return None
 
@@ -141,6 +142,8 @@ def parseInputs(args, sm_project):
             inputs[input_name] = sm_project.getInputConfig(task_name, **{ttype: True})
     if args.input_s3:
         for (input_name, s3_uri) in args.input_s3:
+            bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
+            sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
         # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", state=True)
@@ -221,7 +224,7 @@ def main():
         },
     )
 
-    inputs = parseInputs(args, sm_project)
+    inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
 
     sm_project.runTask(

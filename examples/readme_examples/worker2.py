@@ -1,6 +1,4 @@
-import torch
+from task_toolkit import algo_lib
 
-num_devices = torch.cuda.device_count()
-print(f"Number of Cuda devices: {num_devices}")
-for i in range(num_devices):
-    print(f"Device: {i} {torch.cuda.get_device_properties(0)}")
+args = algo_lib.parseArgs()
+print(args.hps["msg"])
