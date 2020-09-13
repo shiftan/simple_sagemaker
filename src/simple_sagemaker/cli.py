@@ -111,6 +111,7 @@ def parseArgs():
         metavar=TaskInputTuple._fields,
     )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
+    parser.add_argument("--keep_state", "--ks", action="store_false", dest="cs")
     parser.add_argument("--output_path", "-o", default=None)
 
     args, rest = parser.parse_known_args()
