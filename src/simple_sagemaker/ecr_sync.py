@@ -94,7 +94,7 @@ class ECRSync:
         image = client.images.build(**build_args)
 
         images = self.ecrClient.describe_images(repositoryName=aws_repo_name)
-        images_digests = [x["imageDigest"] for x in images["image_details"]]
+        images_digests = [x["imageDigest"] for x in images["imageDetails"]]
         build_repo_digests = image[0].attrs["RepoDigests"]
         if build_repo_digests:
             builtImageDigest = build_repo_digests[0].split("@")[1]
@@ -112,7 +112,7 @@ class ECRSync:
         else:
             logging.info("Image already exists!")
             image_idx = images_digests.index(builtImageDigest)
-            image_details = images["image_details"][image_idx]
+            image_details = images["imageDetails"][image_idx]
             # see https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-pull-ecr-image.html
             image_uri = f'{repo_uri}@{image_details["imageDigest"]}'
         logging.info(f"Image uri: {image_uri}")
