@@ -1,38 +1,64 @@
 # Simple Sagemaker 
 A **very simple** way to run your python code on the cloud (AWS).
 
+**Note: the (initial) work is still in progress...**
+
 Lets start with a very basic example. 
-Assuming one would like to run the following `worker.py` on the cloud:
+Assuming one would like to run the following `worker1.py` on the cloud:
 
 ```python
-import torch
-num_devices = torch.cuda.device_count()
-print(f"Number of Cuda devices: {num_devices}")
-for i in range(num_devices):
-    print(f"Device: {i} {torch.cuda.get_device_properties(0)}")
+print("Hello, world!")
 ```
 It's as easy as running the following command to get it running on a *ml.p3.2xlarge* spot instance:
 ```bash
-ssm -p simple-sagemaker-example-cli --instance_type "ml.p3.2xlarge" -t task1 -e worker.py -o ./output
+ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1
 ```
-The output, including logs will be save to the `output`:
+The output, including logs will be save to `./output/example1`. The relevant part from the log file
+```
+Invoking script with the following command:
+
+/opt/conda/bin/python worker1.py
+
+Hello, world!
+2020-09-13 01:39:58,344 sagemaker-training-toolkit INFO     Reporting training SUCCESS
+```
+
 
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task output](#Task-output)
-- [Poviding input data](#Poviding-input-data)
+- [Providing input data](#Providing-input-data)
 - [Chaining tasks](#Chaining-tasks)
 - [Maintaining task state](#Maintaining-task-state)
 - [Configuring the docker image](#Configuring-the-docker-image)
 
 ## Passing command line arguments
-Any extra argument passed to the command line 
-TBD
+Any extra argument passed to the command line in assumed to be an hypermarameter, 
+worker code `worker2.py`:
+```python
+from task_toolkit import algo_lib
 
+args = algo_lib.parseArgs()
+print(args.hps["msg"])
+```
+Running command:
+```bash
+ssm -p simple-sagemaker-example-cli -t task2 -e worker2.py --msg "Hello, world!" -o ./output/example2
+```
+Output from the log file
+```
+Invoking script with the following command:
+
+/opt/conda/bin/python worker2.py --msg Hello, world!
+
+Hello, world!
+2020-09-13 01:40:36,832 sagemaker-training-toolkit INFO     Reporting training SUCCESS
+```
 ## Task output
 TBD
 
-## Poviding input data
-TBD
+## Providing input data
+local path
+s3 bucket
 
 ## Chaining tasks
 TBD
@@ -46,8 +72,6 @@ TBD
 ---
 
 Simple Sagemaker is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
-
-**Note: the (initial) work is still in progress...**
 
 The idea is simple - 
 

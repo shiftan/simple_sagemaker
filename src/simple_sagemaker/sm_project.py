@@ -192,6 +192,7 @@ class SageMakerProject:
                 smSession=self.smSession,
             )
             job_name = self.getCompletionJobName(task_name)
+            assert job_name, f"Task {task_name} isn't completed!"
             smTask.bindToJob(job_name)
 
         return smTask.getInputConfig(distribution, model, output, state)
