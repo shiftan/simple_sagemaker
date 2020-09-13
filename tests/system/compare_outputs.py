@@ -137,7 +137,7 @@ if __name__ == "__main__":
     # sTask = aa.parent.parent/"examples"/"multiple_tasks"
     outs = ["test_single_task0", "test_readme_examples0"]
     exps = ["single_task", "readme_examples"]
-    for exp,out in zip(exps, outs):
+    for exp, out in zip(exps, outs):
         exp = examplesDir / exp / "expected_output"
         out = examplesDir / "out" / out / "output"
         print(exp, out, isAsExpected(out, exp))
