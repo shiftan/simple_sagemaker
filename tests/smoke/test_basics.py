@@ -9,8 +9,8 @@ def test_project(caplog, tmp_path):
 
     from simple_sagemaker.sm_project import SageMakerProject
 
-    smProject = SageMakerProject(projectName="test")
-    smProject = smProject
+    sm_project = SageMakerProject(project_name="test")
+    sm_project = sm_project
 
 
 def test_task(caplog, tmp_path):
@@ -19,7 +19,7 @@ def test_task(caplog, tmp_path):
 
     from simple_sagemaker.sm_task import SageMakerTask
 
-    boto3Session = boto3.Session()
-    imageUri = None
-    smTask = SageMakerTask(boto3Session, "taskName", imageUri, prefix="tests/smoke")
+    boto3_session = boto3.Session()
+    image_uri = None
+    smTask = SageMakerTask(boto3_session, "taskName", image_uri, prefix="tests/smoke")
     smTask = smTask

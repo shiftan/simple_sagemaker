@@ -5,6 +5,7 @@ import logging
 import boto3
 import sagemaker
 
+from . import constants
 from .ecr_sync import ECRSync
 from .sm_task import SageMakerTask
 
@@ -13,90 +14,100 @@ logger = logging.getLogger(__name__)
 
 class SageMakerProject:
     ImageParams = collections.namedtuple(
-        "ImageParams", ["awsRepoName", "repoName", "imgTag", "dockerFilePathOrContent"]
+        "ImageParams",
+        ["aws_repo_name", "repo_name", "img_tag", "docker_file_path_or_content"],
     )
     CodeParams = collections.namedtuple(
-        "CodeParams", ["sourceDir", "entryPoint", "dependencies"]
+        "CodeParams", ["source_dir", "entryPoint", "dependencies"]
     )
     InstanceParams = collections.namedtuple(
         "InstanceParams",
         [
-            "instanceType",
-            "instanceCount",
-            "volumeSize",
-            "useSpotInstances",
-            "maxRun",
+            "instance_type",
+            "instance_count",
+            "volume_size",
+            "use_spot_instances",
+            "max_run",
             "maxWait",
         ],
     )
-    # IOParams = collections.namedtuple("IOParams", ["inputDataPath", "distribution", "modelUri"])
+    # IOParams = collections.namedtuple("IOParams", ["input_data_path", "distribution", "model_uri"])
 
     def __init__(
         self,
-        projectName,
-        boto3Session=None,
-        roleName="SageMakerIAMRole",
-        bucketName=None,
+        project_name,
+        boto3_session=None,
+        role_name=constants.DEFAULT_IAM_ROLE,
+        bucket_name=None,
         smSession=None,
     ):
-        self.projectName = projectName
-        self.roleName = roleName
+        self.project_name = project_name
+        self.role_name = role_name
         self.tasks = {}
 
-        if boto3Session is None:
-            boto3Session = boto3.Session()
-        self.boto3Session = boto3Session
+        if boto3_session is None:
+            boto3_session = boto3.Session()
+        self.boto3_session = boto3_session
 
         if smSession is None:
-            smSession = sagemaker.Session(boto_session=boto3Session)
+            smSession = sagemaker.Session(boto_session=boto3_session)
         self.smSession = smSession
 
-        if not bucketName:
-            bucketName = self.smSession.default_bucket()
-        self.bucketName = bucketName
+        if not bucket_name:
+            bucket_name = self.smSession.default_bucket()
+        self.bucket_name = bucket_name
         # self.createBucket()
 
     def setDefaultImageParams(
-        self, awsRepoName=None, repoName=None, imgTag=None, dockerFilePathOrContent=None
+        self,
+        aws_repo_name=None,
+        repo_name=None,
+        img_tag=constants.DEFAULT_REPO_TAG,
+        docker_file_path_or_content=None,
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
-            awsRepoName, repoName, imgTag, dockerFilePathOrContent
+            aws_repo_name, repo_name, img_tag, docker_file_path_or_content
         )
 
     def setDefaultCodeParams(
-        self, sourceDir=None, entryPoint=None, dependencies=list()
+        self, source_dir=None, entryPoint=None, dependencies=list()
     ):
         self.defaultCodeParams = SageMakerProject.CodeParams(
-            sourceDir, entryPoint, dependencies
+            source_dir, entryPoint, dependencies
         )
 
     def setDefaultInstanceParams(
         self,
-        instanceType="ml.m5.large",
-        instanceCount=1,
-        volumeSize=30,
-        useSpotInstances=True,
-        maxRun=24 * 60 * 60,
-        maxWait=24 * 60 * 60,
+        instance_type=constants.DEFAULT_INSTANCE_TYPE,
+        instance_count=constants.DEFAULT_INSTANCE_COUNT,
+        volume_size=constants.DEFAULT_VOLUME_SIZE,
+        use_spot_instances=constants.DEFAULT_USE_SPOT,
+        max_run=constants.DEFAULT_MAX_RUN,
+        maxWait=constants.DEFAULT_MAX_WAIT,
     ):
         self.defaultInstanceParams = SageMakerProject.InstanceParams(
-            instanceType, instanceCount, volumeSize, useSpotInstances, maxRun, maxWait
+            instance_type,
+            instance_count,
+            volume_size,
+            use_spot_instances,
+            max_run,
+            maxWait,
         )
 
     def createBucket(self):
-        client = self.boto3Session.client("s3")
+        client = self.boto3_session.client("s3")
 
-        if "us-east-1" != self.boto3Session.region_name:
-            location = {"LocationConstraint": self.boto3Session.region_name}
+        if "us-east-1" != self.boto3_session.region_name:
+            location = {"LocationConstraint": self.boto3_session.region_name}
             client.create_bucket(
-                Bucket=self.bucketName, CreateBucketConfiguration=location
+                Bucket=self.bucket_name, CreateBucketConfiguration=location
             )
         else:
-            client.create_bucket(Bucket=self.bucketName)
+            client.create_bucket(Bucket=self.bucket_name)
 
     def createIAMRole(self):
         logger.info(
-            f"Creating SageMaker IAM Role: {self.roleName} with an attached AmazonSageMakerFullAccess policy..."
+            f"Creating SageMaker IAM Role: {self.role_name} with an attached AmazonSageMakerFullAccess policy..."
         )
 
         trustRelationship = {
@@ -110,107 +121,107 @@ class SageMakerProject:
                 }
             ],
         }
-        client = self.boto3Session.client("iam")
+        client = self.boto3_session.client("iam")
         try:
-            client.get_role(RoleName=self.roleName)
+            client.get_role(RoleName=self.role_name)
         except:  # noqa: E722
             client.create_role(
-                RoleName=self.roleName,
+                RoleName=self.role_name,
                 AssumeRolePolicyDocument=json.dumps(trustRelationship),
             )
         response = client.attach_role_policy(
-            RoleName=self.roleName,
+            RoleName=self.role_name,
             PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
         )
         assert (
             response["ResponseMetadata"]["HTTPStatusCode"] == 200
-        ), f"Couldn't attach AmazonSageMakerFullAccess policy to role {self.roleName}"
+        ), f"Couldn't attach AmazonSageMakerFullAccess policy to role {self.role_name}"
 
-    def addTask(self, taskName, smTask):
-        assert taskName not in self.tasks, f"{taskName} already exists!"
-        self.tasks[taskName] = smTask
+    def addTask(self, task_name, smTask):
+        assert task_name not in self.tasks, f"{task_name} already exists!"
+        self.tasks[task_name] = smTask
 
-    def buildOrGetImage(self, instanceType, **kwargs):
+    def buildOrGetImage(self, instance_type, **kwargs):
         args = self.defaultImageParams._replace(**kwargs)
-        dockerSync = ECRSync(self.boto3Session)
-        imageUri = dockerSync.buildAndPushDockerImage(
-            instanceType=instanceType, **(args._asdict())
+        dockerSync = ECRSync(self.boto3_session)
+        image_uri = dockerSync.buildAndPushDockerImage(
+            instance_type=instance_type, **(args._asdict())
         )
-        return imageUri
+        return image_uri
 
     def runTask(
         self,
-        taskName,
-        imageUri,
+        task_name,
+        image_uri,
         hyperparameters,
-        inputDataPath=None,
-        cleanState=False,
+        input_data_path=None,
+        clean_state=False,
         forceRunning=False,
         **kwargs,
     ):
-        assert taskName not in self.tasks, f"{taskName} already exists!"
+        assert task_name not in self.tasks, f"{task_name} already exists!"
         smTask = SageMakerTask(
-            self.boto3Session,
-            taskName,
-            imageUri,
-            self.projectName,
-            self.bucketName,
+            self.boto3_session,
+            task_name,
+            image_uri,
+            self.project_name,
+            self.bucket_name,
             smSession=self.smSession,
         )
-        if inputDataPath:
-            smTask.uploadOrSetInputData(inputDataPath)
+        if input_data_path:
+            smTask.uploadOrSetInputData(input_data_path)
         args = self.defaultCodeParams._asdict()
         args.update(self.defaultInstanceParams._asdict())
 
         args.update(kwargs)
 
-        if cleanState:
-            smTask.cleanState()
+        if clean_state:
+            smTask.clean_state()
 
-        jobName = None if forceRunning else self.getCompletionJobName(taskName)
-        if jobName:
-            logger.info(f"Task {taskName} is already completed by {jobName}")
-            smTask.bindToJob(jobName)
+        job_name = None if forceRunning else self.getCompletionJobName(task_name)
+        if job_name:
+            logger.info(f"Task {task_name} is already completed by {job_name}")
+            smTask.bindToJob(job_name)
         else:
-            jobName = smTask.runTrainingJob(
-                roleName=self.roleName, hyperparameters=hyperparameters, **args
+            job_name = smTask.runTrainingJob(
+                role_name=self.role_name, hyperparameters=hyperparameters, **args
             )
 
-        self.addTask(taskName, smTask)
-        return smTask, jobName
+        self.addTask(task_name, smTask)
+        return smTask, job_name
 
     def cleanFolder(self):
-        s3c = self.boto3Session.client("s3")
-        for file in self.smSession.list_s3_files(self.bucketName, self.projectName):
-            s3c.delete_object(Bucket=self.bucketName, Key=file)
+        s3c = self.boto3_session.client("s3")
+        for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
+            s3c.delete_object(Bucket=self.bucket_name, Key=file)
 
     def getInputConfig(
         self,
-        taskName,
+        task_name,
         distribution="FullyReplicated",
         model=False,
         output=False,
         state=False,
     ):
-        if taskName in self.tasks:
-            smTask = self.tasks[taskName]
+        if task_name in self.tasks:
+            smTask = self.tasks[task_name]
         else:
             smTask = SageMakerTask(
-                self.boto3Session,
-                taskName,
+                self.boto3_session,
+                task_name,
                 None,
-                self.projectName,
-                self.bucketName,
+                self.project_name,
+                self.bucket_name,
                 smSession=self.smSession,
             )
-            jobName = self.getCompletionJobName(taskName)
-            smTask.bindToJob(jobName)
+            job_name = self.getCompletionJobName(task_name)
+            smTask.bindToJob(job_name)
 
         return smTask.getInputConfig(distribution, model, output, state)
 
     def downloadResults(
         self,
-        taskName,
+        task_name,
         outputBase,
         logs=True,
         state=True,
@@ -218,7 +229,7 @@ class SageMakerProject:
         output=True,
         source=True,
     ):
-        smTask = self.tasks[taskName]
+        smTask = self.tasks[task_name]
         return smTask.downloadResults(
             outputBase,
             logs=logs,
@@ -229,7 +240,7 @@ class SageMakerProject:
         )
 
     def _getS3Subdirs(self, bucket, prefix):
-        client = self.boto3Session.client("s3")
+        client = self.boto3_session.client("s3")
         result = client.list_objects(Bucket=bucket, Prefix=prefix + "/", Delimiter="/")
         if "CommonPrefixes" not in result:
             return list()
@@ -238,9 +249,9 @@ class SageMakerProject:
             for commonPreifx in result["CommonPrefixes"]
         ]
 
-    def getCompletionStatus(self, taskName):
+    def getCompletionStatus(self, task_name):
         taskS3Uri = SageMakerTask.getStateS3Uri(
-            self.bucketName, self.projectName, taskName
+            self.bucket_name, self.project_name, task_name
         )
         (bucket, key) = sagemaker.s3.parse_s3_url(taskS3Uri)
         subdirs = self._getS3Subdirs(bucket, key)
@@ -255,8 +266,8 @@ class SageMakerProject:
                 logger.warning(f"Couldn't get completion status for {subdir}")
         return results
 
-    def getCompletionJobName(self, taskName):
-        completionResults = self.getCompletionStatus(taskName)
+    def getCompletionJobName(self, task_name):
+        completionResults = self.getCompletionStatus(task_name)
         values = list(set(completionResults.values()))
         if len(values) == 1 and values[0] is not None:
             return values[0]

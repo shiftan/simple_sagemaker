@@ -5,138 +5,145 @@ import sys
 
 logger = logging.getLogger(__name__)
 
-filePath = os.path.split(__file__)[0]
+file_path = os.path.split(__file__)[0]
 if "TOX_ENV_NAME" not in os.environ:
-    srcPath = os.path.abspath(os.path.join(filePath, "..", "..", "src"))
+    srcPath = os.path.abspath(os.path.join(file_path, "..", "..", "src"))
     sys.path.append(srcPath)
 from simple_sagemaker.sm_project import SageMakerProject  # noqa: E402
 
 
-def setDefaultParams(smProject):
+def setDefaultParams(sm_project):
     # docker image params
-    awsRepoName = "task_repo"  # remote (ECR) rpository name
-    repoName = "task_repo"  # local repository name
-    imgTag = "latest"  # tag for local & remote images
-    dockerFilePath = os.path.join(
-        filePath, "..", "single_task", "docker"
+    aws_repo_name = "task_repo"  # remote (ECR) rpository name
+    repo_name = "task_repo"  # local repository name
+    img_tag = "latest"  # tag for local & remote images
+    docker_file_path = os.path.join(
+        file_path, "..", "single_task", "docker"
     )  # path of the local Dockerfile
-    smProject.setDefaultImageParams(awsRepoName, repoName, imgTag, dockerFilePath)
+    sm_project.setDefaultImageParams(
+        aws_repo_name, repo_name, img_tag, docker_file_path
+    )
 
     # job code path, entrypoint and params
-    sourceDir = os.path.join(filePath, "code")
+    source_dir = os.path.join(file_path, "code")
     entryPoint = "algo_multi.py"
     dependencies = []
-    smProject.setDefaultCodeParams(sourceDir, entryPoint, dependencies)
+    sm_project.setDefaultCodeParams(source_dir, entryPoint, dependencies)
 
     # instances type an count
-    instanceType = "ml.m5.large"
-    trainingInstanceCount = 2
-    volumeSize = (
+    instance_type = "ml.m5.large"
+    training_instance_count = 2
+    volume_size = (
         30  # Size in GB of the EBS volume to use for storing input data during training
     )
-    useSpotInstances = True  # False
-    maxRun = 24 * 60 * 60
+    use_spot_instances = True  # False
+    max_run = 24 * 60 * 60
     maxWait = None
-    if useSpotInstances:
-        maxWait = maxRun  # should be >= maxRun
-    smProject.setDefaultInstanceParams(
-        instanceType,
-        trainingInstanceCount,
-        volumeSize,
-        useSpotInstances,
-        maxRun,
+    if use_spot_instances:
+        maxWait = max_run  # should be >= max_run
+    sm_project.setDefaultInstanceParams(
+        instance_type,
+        training_instance_count,
+        volume_size,
+        use_spot_instances,
+        max_run,
         maxWait,
     )
 
 
-def buildImage(smProject, fallbackUri=None):
+def buildImage(sm_project, fallback_uri=None):
     try:
         # build a local image
-        imageUri = smProject.buildOrGetImage(
-            instanceType=smProject.defaultInstanceParams.instanceType
+        image_uri = sm_project.buildOrGetImage(
+            instance_type=sm_project.defaultInstanceParams.instance_type
         )
         # use an AWS pre-built image
-        # imageUri = "763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3"
+        # image_uri = "763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3"
     except:  # noqa: E722
         logger.exception("Couldn't build image")
-        if not fallbackUri:
+        if not fallback_uri:
             raise
-        logger.info(f"falling back to {fallbackUri}")
+        logger.info(f"falling back to {fallback_uri}")
         # for debugging whe're
-        imageUri = fallbackUri
+        image_uri = fallback_uri
 
-    return imageUri
+    return image_uri
 
 
 def runner(
-    projectName="simple-sagemaker-example-multi", prefix="", postfix="", outputPath=None
+    project_name="simple-sagemaker-example-multi",
+    prefix="",
+    postfix="",
+    output_path=None,
 ):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-    smProject = SageMakerProject(prefix + projectName + postfix)
-    setDefaultParams(smProject)
-    imageUri = buildImage(
-        smProject, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
+    sm_project = SageMakerProject(prefix + project_name + postfix)
+    setDefaultParams(sm_project)
+    image_uri = buildImage(
+        sm_project, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
     )
-    smProject.createIAMRole()
+    sm_project.createIAMRole()
 
     # task name
-    taskName = (
+    task_name = (
         "Task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     )
     # input data params
-    inputDataPath = os.path.join(
-        filePath, "..", "single_task", "input_data"
+    input_data_path = os.path.join(
+        file_path, "..", "single_task", "input_data"
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
-    # inputDataPath = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
+    # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
-    modelUri = None  # Can be used to supply model data as an additional input, local/s3
+    model_uri = (
+        None  # Can be used to supply model data as an additional input, local/s3
+    )
     hyperparameters = {"stage": 1}
-    smProject.runTask(
-        taskName,
-        imageUri,
+    sm_project.runTask(
+        task_name,
+        image_uri,
         hyperparameters,
-        inputDataPath,
-        modelUri=modelUri,
+        input_data_path,
+        model_uri=model_uri,
         distribution=distribution,
-        cleanState=True,
+        clean_state=True,
     )
 
-    if not outputPath:
-        outputPath = os.path.join(filePath, "output")
+    if not output_path:
+        output_path = os.path.join(file_path, "output")
     # delete the output directory
-    outputDir1 = os.path.join(outputPath, "output1")
+    outputDir1 = os.path.join(output_path, "output1")
     shutil.rmtree(outputDir1, ignore_errors=True)
-    smProject.downloadResults(taskName, outputDir1)
+    sm_project.downloadResults(task_name, outputDir1)
 
-    taskName2 = "Task2"
+    task_name2 = "Task2"
     hyperparameters = {"stage": 2}
-    additionalInputs = dict()
-    additionalInputs["task1_state1"] = smProject.getInputConfig(taskName, state=True)
-    additionalInputs["task1_state2"] = smProject.getInputConfig(
-        taskName, distribution="ShardedByS3Key", state=True
+    additional_inputs = dict()
+    additional_inputs["task1_state1"] = sm_project.getInputConfig(task_name, state=True)
+    additional_inputs["task1_state2"] = sm_project.getInputConfig(
+        task_name, distribution="ShardedByS3Key", state=True
     )
-    additionalInputs["task1_state3"] = smProject.getInputConfig(
-        taskName, distribution="ShardedByS3Key", output=True
+    additional_inputs["task1_state3"] = sm_project.getInputConfig(
+        task_name, distribution="ShardedByS3Key", output=True
     )
-    modelUri = smProject.tasks[taskName].getOutputTargetUri(model=True)
-    smProject.runTask(
-        taskName2,
-        imageUri,
+    model_uri = sm_project.tasks[task_name].getOutputTargetUri(model=True)
+    sm_project.runTask(
+        task_name2,
+        image_uri,
         hyperparameters,
-        inputDataPath,
-        modelUri=modelUri,
+        input_data_path,
+        model_uri=model_uri,
         distribution=distribution,
-        additionalInputs=additionalInputs,
-        cleanState=True,
+        additional_inputs=additional_inputs,
+        clean_state=True,
     )
 
     # delete the output directory
-    outputDir2 = os.path.join(outputPath, "output2")
-    shutil.rmtree(outputDir2, ignore_errors=True)
-    smProject.downloadResults(taskName2, outputDir2)
+    output_dir2 = os.path.join(output_path, "output2")
+    shutil.rmtree(output_dir2, ignore_errors=True)
+    sm_project.downloadResults(task_name2, output_dir2)
 
-    return smProject
+    return sm_project
 
 
 if __name__ == "__main__":

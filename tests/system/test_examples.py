@@ -7,9 +7,9 @@ from time import gmtime, strftime
 
 from .compare_outputs import isAsExpected
 
-filePath = os.path.split(__file__)[0]
-examplesPath = os.path.abspath(os.path.join(filePath, "..", "..", "examples"))
-sys.path.append(examplesPath)
+file_path = os.path.split(__file__)[0]
+examples_path = os.path.abspath(os.path.join(file_path, "..", "..", "examples"))
+sys.path.append(examples_path)
 
 
 def test_single_task(caplog, tmp_path):
@@ -36,26 +36,26 @@ def _internalTestExample(caplog, tmp_path, runner):
     print("Temp path:", tmp_path)
     print("Running", runner, runner.__name__, runner.__module__)
 
-    examplePath = os.path.dirname(runner.__code__.co_filename)
-    outputPath = os.path.join(tmp_path, "output")
+    example_path = os.path.dirname(runner.__code__.co_filename)
+    output_path = os.path.join(tmp_path, "output")
     # remove current local output
-    shutil.rmtree(outputPath, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
-    pyVersionString = f"py{sys.version_info.major}{sys.version_info.minor}"
-    timeString = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{timeString}_{pyVersionString}"
+    py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
+    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+    postfix = f"_{time_string}_{py_version_string}"
     prefix = "tests/"
 
-    smProject = runner(postfix=postfix, prefix=prefix, outputPath=outputPath)
-    smProject = smProject
-    # smProject.cleanFolder()
+    sm_project = runner(postfix=postfix, prefix=prefix, output_path=output_path)
+    sm_project = sm_project
+    # sm_project.cleanFolder()
 
-    expectedPath = os.path.join(examplePath, "expected_output")
+    expected_path = os.path.join(example_path, "expected_output")
     # check for expected_output also one level up
-    if not os.path.isdir(expectedPath):
-        expectedPath = os.path.join(os.path.dirname(examplePath), "expected_output")
+    if not os.path.isdir(expected_path):
+        expected_path = os.path.join(os.path.dirname(example_path), "expected_output")
 
-    assert isAsExpected(outputPath, expectedPath)
+    assert isAsExpected(output_path, expected_path)
 
 
 def test_cli(caplog, tmp_path):
@@ -63,17 +63,17 @@ def test_cli(caplog, tmp_path):
     print("Temp path:", tmp_path)
     print("Running cli:")
 
-    outputPath = os.path.join(tmp_path, "output")
+    output_path = os.path.join(tmp_path, "output")
     # remove current local output
-    shutil.rmtree(outputPath, ignore_errors=True)
+    shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
-    pyVersionString = f"py{sys.version_info.major}{sys.version_info.minor}"
-    timeString = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{timeString}_{pyVersionString}"
+    py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
+    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+    postfix = f"_{time_string}_{py_version_string}"
     prefix = "tests/"
 
-    runShell = os.path.join(examplesPath, "cli_simple", "run.sh")
-    subprocess.run([runShell, outputPath, prefix, postfix, "--cs"], check=True)
+    run_shell = os.path.join(examples_path, "cli_multi", "run.sh")
+    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
 
-    expectedPath = os.path.join(examplesPath, "cli_simple", "expected_output")
-    assert isAsExpected(outputPath, expectedPath)
+    expected_path = os.path.join(examples_path, "cli_multi", "expected_output")
+    assert isAsExpected(output_path, expected_path)

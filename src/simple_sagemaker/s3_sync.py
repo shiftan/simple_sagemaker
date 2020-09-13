@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class S3Sync:
-    def __init__(self, boto3Sessions):
-        self.s3Client = boto3Sessions.client("s3")
+    def __init__(self, boto3_sessions):
+        self.s3_client = boto3_sessions.client("s3")
 
     def syncFolderToS3(self, source: str, dest: str, prefix: str) -> [str]:
         paths = self.listFolderFiles(source)
@@ -25,34 +25,34 @@ class S3Sync:
         object_keys_length = len(object_keys)
 
         for path in paths:
-            fileName = os.path.join(source, path)
-            shouldUpload = True
+            file_name = os.path.join(source, path)
+            should_upload = True
             # Binary search.
             index = bisect_left(object_keys, path)
             # Check if the file already exists
             if index != object_keys_length and object_keys[index] == path:
                 # Check size
-                fileStat = os.stat(fileName)
-                if fileStat.st_size == objects[index]["Size"]:
+                file_stat = os.stat(file_name)
+                if file_stat.st_size == objects[index]["Size"]:
                     # Validate MD5
-                    md = md5(open(fileName, "rb").read()).hexdigest()
+                    md = md5(open(file_name, "rb").read()).hexdigest()
                     if objects[index]["ETag"].strip('"') == md:
-                        shouldUpload = False
+                        should_upload = False
 
-            if shouldUpload:
-                logger.info(f"Uploading {fileName}")
-                self.s3Client.upload_file(
+            if should_upload:
+                logger.info(f"Uploading {file_name}")
+                self.s3_client.upload_file(
                     str(Path(source).joinpath(path)),
                     Bucket=dest,
                     Key=prefix + "/" + path,
                 )
             else:
-                logger.info(f"Skipping {fileName}")
+                logger.info(f"Skipping {file_name}")
 
     def listS3Bucket(self, bucket, prefix):
         res = []
         try:
-            paginator = self.s3Client.get_paginator("list_objects_v2")
+            paginator = self.s3_client.get_paginator("list_objects_v2")
             pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
 
             for page in pages:
@@ -64,14 +64,14 @@ class S3Sync:
             return res
 
     @staticmethod
-    def listFolderFiles(folderPath):
+    def listFolderFiles(folder_path):
         """
         Recursively list all files within the given folder
         """
-        folderPath = folderPath.rstrip("/")
+        folder_path = folder_path.rstrip("/")
         files = [
-            str(x)[len(folderPath) + 1 :]
-            for x in Path(folderPath).rglob("*")
+            str(x)[len(folder_path) + 1 :]
+            for x in Path(folder_path).rglob("*")
             if not x.is_dir()
         ]
         return files
@@ -79,8 +79,8 @@ class S3Sync:
 
 if __name__ == "__main__":
     # Test
-    boto3Session = boto3.Session()
-    s = S3Sync(boto3Session)
+    boto3_session = boto3.Session()
+    s = S3Sync(boto3_session)
     path = ".."
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     logger.info(f"listing {path}: {s.listFolderFiles(path)}")

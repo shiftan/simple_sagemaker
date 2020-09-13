@@ -7,6 +7,8 @@ import sys
 import configargparse
 from sagemaker.inputs import TrainingInput
 
+from . import constants
+
 
 def fileValidation(parser, arg):
     if not os.path.exists(arg):
@@ -70,16 +72,24 @@ def parseArgs():
         "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
     )
     # instance params
-    parser.add_argument("--instance_type", "--it", default="ml.m5.large")
-    parser.add_argument("--instance_count", "--ic", type=int, default=1)
-    parser.add_argument("--volume_size", "-v", type=int)
-    parser.add_argument("--use_spot", default=True, type=bool)
-    parser.add_argument("--max_wait", type=int)
-    parser.add_argument("--max_run", type=int)
+    parser.add_argument(
+        "--instance_type", "--it", default=constants.DEFAULT_INSTANCE_TYPE
+    )
+    parser.add_argument(
+        "--instance_count", "--ic", type=int, default=constants.DEFAULT_INSTANCE_COUNT
+    )
+    parser.add_argument(
+        "--volume_size", "-v", type=int, default=constants.DEFAULT_VOLUME_SIZE
+    )
+    parser.add_argument("--no_spot", dest="use_spot", action="store_false")
+    parser.add_argument("--use_spot", dest="use_spot", action="store_true")
+    parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
+    parser.add_argument("--max_wait", type=int, default=constants.DEFAULT_MAX_WAIT)
+    parser.add_argument("--max_run", type=int, default=constants.DEFAULT_MAX_RUN)
     # image params
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag")
+    parser.add_argument("--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG)
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument(
@@ -109,7 +119,7 @@ def parseArgs():
 def addParam(args, argName, paramName, params):
     if hasattr(args, argName):
         arg = args.__getattribute__(argName)
-        if arg:
+        if arg is not None:
             params[paramName] = arg
 
 
@@ -120,7 +130,7 @@ def getAllParams(args, mapping):
     return params
 
 
-def parseInputs(args, smProject):
+def parseInputs(args, sm_project):
     if not args.input_task and not args.input_s3:
         return None
 
@@ -128,13 +138,13 @@ def parseInputs(args, smProject):
     distribution = "FullyReplicated"
     if args.input_task:
         for (input_name, task_name, ttype) in args.input_task:
-            inputs[input_name] = smProject.getInputConfig(task_name, **{ttype: True})
+            inputs[input_name] = sm_project.getInputConfig(task_name, **{ttype: True})
     if args.input_s3:
         for (input_name, s3_uri) in args.input_s3:
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
-        # smProject.getInputConfig(taskName, distribution="ShardedByS3Key", state=True)
-        # smProject.getInputConfig(taskName, distribution="ShardedByS3Key", output=True)
+        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", state=True)
+        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", output=True)
     return inputs
 
 
@@ -149,82 +159,82 @@ def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     args, rest = parseArgs()
 
-    filePath = os.path.split(__file__)[0]
-    examplesPath = os.path.abspath(os.path.join(filePath, ".."))
-    sys.path.append(examplesPath)
+    file_path = os.path.split(__file__)[0]
+    examples_path = os.path.abspath(os.path.join(file_path, ".."))
+    sys.path.append(examples_path)
     from simple_sagemaker.sm_project import SageMakerProject
 
-    smProject = SageMakerProject(
+    sm_project = SageMakerProject(
         **getAllParams(
             args,
             {
-                "project_name": "projectName",
-                "bucket_name": "bucketName",
+                "project_name": "project_name",
+                "bucket_name": "bucket_name",
             },
         )
     )
-    smProject.setDefaultCodeParams(
+    sm_project.setDefaultCodeParams(
         **getAllParams(
             args,
             {
-                "source_dir": "sourceDir",
+                "source_dir": "source_dir",
                 "entry_point": "entryPoint",
                 "dependencies": "dependencies",
             },
         )
     )
-    smProject.setDefaultInstanceParams(
+    sm_project.setDefaultInstanceParams(
         **getAllParams(
             args,
             {
-                "instance_count": "instanceCount",
-                "instance_type": "instanceType",
-                "volume_size": "volumeSize",
-                "use_spot": "useSpotInstances",
-                "max_run": "maxRun",
+                "instance_count": "instance_count",
+                "instance_type": "instance_type",
+                "volume_size": "volume_size",
+                "use_spot": "use_spot_instances",
+                "max_run": "max_run",
                 "max_wait": "maxWait",
             },
         )
     )
-    smProject.setDefaultImageParams(
+    sm_project.setDefaultImageParams(
         **getAllParams(
             args,
             {
-                "aws_repo": "awsRepoName",
-                "repo_name": "repoName",
-                "image_tag": "imgTag",
-                "docker_file": "dockerFilePathOrContent",
+                "aws_repo": "aws_repo_name",
+                "repo_name": "repo_name",
+                "image_tag": "img_tag",
+                "docker_file": "docker_file_path_or_content",
             },
         )
     )
 
-    smProject.createIAMRole()
-    imageUri = smProject.buildOrGetImage(
-        instanceType=smProject.defaultInstanceParams.instanceType
+    sm_project.createIAMRole()
+    image_uri = sm_project.buildOrGetImage(
+        instance_type=sm_project.defaultInstanceParams.instance_type
     )
 
-    runningParams = getAllParams(
+    running_params = getAllParams(
         args,
         {
-            "input_path": "inputDataPath",
-            "clean_state": "cleanState",
+            "input_path": "input_data_path",
+            "clean_state": "clean_state",
         },
     )
 
-    inputs = parseInputs(args, smProject)
+    inputs = parseInputs(args, sm_project)
     hyperparameters = parseHyperparams(rest)
 
-    smProject.runTask(
+    sm_project.runTask(
         args.task_name,
-        imageUri,
+        image_uri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters=hyperparameters,
-        additionalInputs=inputs,
-        **runningParams,
+        additional_inputs=inputs,
+        **running_params,
     )
 
     if args.output_path:
-        smProject.downloadResults(args.task_name, args.output_path, source=False)
+        sm_project.downloadResults(args.task_name, args.output_path, source=False)
 
 
 if __name__ == "__main__":

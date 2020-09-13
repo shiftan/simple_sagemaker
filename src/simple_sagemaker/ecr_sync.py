@@ -10,75 +10,75 @@ logger = logging.getLogger(__name__)
 
 
 class ECRSync:
-    def __init__(self, boto3Session):
-        self.boto3Session = boto3Session
-        self.ecrClient = self.boto3Session.client("ecr")
+    def __init__(self, boto3_session):
+        self.boto3_session = boto3_session
+        self.ecrClient = self.boto3_session.client("ecr")
 
-    def getRpoUri(self, awsRepoName):
-        repoURI = None
+    def getRpoUri(self, aws_repo_name):
+        repo_uri = None
         for repo in self.ecrClient.describe_repositories()["repositories"]:
-            if repo["repositoryName"] == awsRepoName:
-                repoURI = repo["repositoryUri"]
-        return repoURI
+            if repo["repositoryName"] == aws_repo_name:
+                repo_uri = repo["repositoryUri"]
+        return repo_uri
 
-    def getOrCreateRepo(self, awsRepoName):
-        repoURI = self.getRpoUri(awsRepoName)
-        if repoURI is None:
-            logging.info(f"Creating ECR repository: {awsRepoName}")
-            repo = self.ecrClient.create_repository(repositoryName=awsRepoName)
-            repoURI = repo["repository"]["repositoryUri"]
-        return repoURI
+    def getOrCreateRepo(self, aws_repo_name):
+        repo_uri = self.getRpoUri(aws_repo_name)
+        if repo_uri is None:
+            logging.info(f"Creating ECR repository: {aws_repo_name}")
+            repo = self.ecrClient.create_repository(repositoryName=aws_repo_name)
+            repo_uri = repo["repository"]["repositoryUri"]
+        return repo_uri
 
     def buildAndPushDockerImage(
         self,
-        dockerFilePathOrContent,
-        awsRepoName,
-        repoName,
-        imgTag,
-        instanceType,
+        docker_file_path_or_content,
+        aws_repo_name,
+        repo_name,
+        img_tag,
+        instance_type,
         framework="pytorch",
         version="1.6.0",
         py_version="py3",
         image_scope="training",
     ):
-        region_name = self.boto3Session.region_name
+        region_name = self.boto3_session.region_name
 
         # Get the base image name, validate Dockerfile is based on it (TODO: replace in file)
-        baseImageUri = image_uris.retrieve(
+        baseimage_uri = image_uris.retrieve(
             framework,
             region=region_name,
             version=version,
             py_version=py_version,
             image_scope=image_scope,
-            instance_type=instanceType,
+            instance_type=instance_type,
         )
 
-        if not dockerFilePathOrContent:
-            logging.info(f"Using a pre-built image {dockerFilePathOrContent}...")
-            return baseImageUri
+        if not docker_file_path_or_content:
+            logging.info(f"Using a pre-built image {docker_file_path_or_content}...")
+            return baseimage_uri
 
-        repoURI = self.getOrCreateRepo(awsRepoName)
+        repo_uri = self.getOrCreateRepo(aws_repo_name)
 
-        buildArgs = dict()
-        buildArgs["tag"] = repoName + ":" + imgTag
+        build_args = dict()
+        build_args["tag"] = repo_name + ":" + img_tag
 
-        if os.path.isdir(dockerFilePathOrContent) or os.path.isfile(
-            dockerFilePathOrContent
+        if os.path.isdir(docker_file_path_or_content) or os.path.isfile(
+            docker_file_path_or_content
         ):
-            dockerFilePathOrContent = open(
-                os.path.join(dockerFilePathOrContent, "Dockerfile"), "rt"
+            docker_file_path_or_content = open(
+                os.path.join(docker_file_path_or_content, "Dockerfile"), "rt"
             ).read()
 
-        dockerFilePathOrContent = dockerFilePathOrContent.replace(
-            "__BASE_IMAGE__", baseImageUri
+        docker_file_path_or_content = docker_file_path_or_content.replace(
+            "__BASE_IMAGE__", baseimage_uri
         )
 
         logging.info(
-            f"Building {dockerFilePathOrContent} to {repoName}:{repoName} and pushing to {awsRepoName}..."
+            f"Building {docker_file_path_or_content} to {repo_name}:{repo_name} and pushing to {aws_repo_name}..."
         )
 
-        fileObj = BytesIO(dockerFilePathOrContent.encode("utf-8"))
-        buildArgs["fileobj"] = fileObj
+        fileObj = BytesIO(docker_file_path_or_content.encode("utf-8"))
+        build_args["fileobj"] = fileObj
 
         # Create auth config
         resp = self.ecrClient.get_authorization_token()
@@ -89,31 +89,31 @@ class ECRSync:
 
         client = docker.from_env()
         # pull the base image
-        client.images.pull(baseImageUri, auth_config=auth_config)
+        client.images.pull(baseimage_uri, auth_config=auth_config)
         # build and tag the image
-        image = client.images.build(**buildArgs)
+        image = client.images.build(**build_args)
 
-        images = self.ecrClient.describe_images(repositoryName=awsRepoName)
-        imagesDigests = [x["imageDigest"] for x in images["imageDetails"]]
-        buildRepoDigests = image[0].attrs["RepoDigests"]
-        if buildRepoDigests:
-            builtImageDigest = buildRepoDigests[0].split("@")[1]
-        if not buildRepoDigests or (builtImageDigest not in imagesDigests):
+        images = self.ecrClient.describe_images(repositoryName=aws_repo_name)
+        images_digests = [x["imageDigest"] for x in images["imageDetails"]]
+        build_repo_digests = image[0].attrs["RepoDigests"]
+        if build_repo_digests:
+            builtImageDigest = build_repo_digests[0].split("@")[1]
+        if not build_repo_digests or (builtImageDigest not in images_digests):
             logging.info("Tagging and pushing the image...")
-            res = image[0].tag(repoURI, imgTag)
+            res = image[0].tag(repo_uri, img_tag)
             assert res
 
             # push the image to ECR
             for line in client.images.push(
-                repoURI, imgTag, auth_config=auth_config, stream=True, decode=True
+                repo_uri, img_tag, auth_config=auth_config, stream=True, decode=True
             ):
                 logging.info(line)
-            imageUri = f"{repoURI}:{imgTag}"
+            image_uri = f"{repo_uri}:{img_tag}"
         else:
             logging.info("Image already exists!")
-            imageIdx = imagesDigests.index(builtImageDigest)
-            imageDetails = images["imageDetails"][imageIdx]
+            image_idx = images_digests.index(builtImageDigest)
+            image_details = images["imageDetails"][image_idx]
             # see https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-pull-ecr-image.html
-            imageUri = f'{repoURI}@{imageDetails["imageDigest"]}'
-        logging.info(f"Image uri: {imageUri}")
-        return imageUri
+            image_uri = f'{repo_uri}@{image_details["imageDigest"]}'
+        logging.info(f"Image uri: {image_uri}")
+        return image_uri

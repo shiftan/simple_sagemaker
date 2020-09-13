@@ -113,10 +113,10 @@ def parseArgs():
 
     args, rest = parser.parse_known_args()
 
-    for channelName in args.channel_names:
-        envName = f"SM_CHANNEL_{channelName.upper()}"
-        if envName in os.environ:
-            args.__setattr__(f"input_{channelName}", os.environ[envName])
+    for channel_name in args.channel_names:
+        env_name = f"SM_CHANNEL_{channel_name.upper()}"
+        if env_name in os.environ:
+            args.__setattr__(f"input_{channel_name}", os.environ[env_name])
 
     logger.info(f"Args: {args}")
     logger.info(f"Unmatched: {rest}")
