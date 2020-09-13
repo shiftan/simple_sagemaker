@@ -74,7 +74,7 @@ def compareFileContent(expectedfile_path, outputfile_path, file_name):
     differences = []
     if expectedfile_path.is_dir():
         pass
-    if "logs/" in file_name:
+    if "logs/" in file_name or "_stdout" in file_name:
         if not compareLog(expectedfile_path.read_text(), outputfile_path.read_text()):
             differences.append(f"{file_name} doesn't match")
     elif file_name.endswith(".tar.gz"):
@@ -135,6 +135,9 @@ if __name__ == "__main__":
     aa = Path(__file__)
     examplesDir = aa.parent.parent.parent / "examples"
     # sTask = aa.parent.parent/"examples"/"multiple_tasks"
-    exp = examplesDir / "single_task" / "expected_output"
-    out = examplesDir / "out" / "test_single_task0" / "output"
-    print(isAsExpected(out, out))
+    outs = ["test_single_task0", "test_readme_examples0"]
+    exps = ["single_task", "readme_examples"]
+    for exp,out in zip(exps, outs):
+        exp = examplesDir / exp / "expected_output"
+        out = examplesDir / "out" / out / "output"
+        print(exp, out, isAsExpected(out, exp))
