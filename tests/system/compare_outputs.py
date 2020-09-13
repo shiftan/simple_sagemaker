@@ -57,7 +57,7 @@ def compareLog(expected_content, output_content):
             if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
                 return False
             for (line_exp, line_out) in zip(lines_exp[1:], lines_out[1:]):
-                if re.match("[drwx\-]{10}", lines_exp[4]):
+                if re.match("[drwx\\-]{10}", lines_exp[4]):
                     if line_exp.split(" ")[-1] != line_out.split(" ")[-1]:
                         return False
                 else:
