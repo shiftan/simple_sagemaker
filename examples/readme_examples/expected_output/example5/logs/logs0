@@ -1,13 +1,13 @@
 bash: cannot set terminal process group (-1): Inappropriate ioctl for device
 bash: no job control in this shell
-2020-09-13 10:05:32,076 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
-2020-09-13 10:05:32,078 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 10:05:32,088 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
-2020-09-13 10:05:38,305 sagemaker_pytorch_container.training INFO     Invoking user training script.
-2020-09-13 10:05:38,558 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 10:05:38,570 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 10:05:38,582 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 10:05:38,592 sagemaker-training-toolkit INFO     Invoking user script
+2020-09-13 13:23:30,697 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-09-13 13:23:30,702 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-13 13:23:30,711 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-09-13 13:23:33,730 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-09-13 13:23:33,996 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-13 13:23:34,008 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-13 13:23:34,020 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-13 13:23:34,030 sagemaker-training-toolkit INFO     Invoking user script
 
 Training Env:
 
@@ -32,11 +32,11 @@ Training Env:
     },
     "input_dir": "/opt/ml/input",
     "is_master": true,
-    "job_name": "task5-2020-09-13-10-02-36-mCVMP0Ex",
+    "job_name": "task5-2020-09-13-13-20-31-Cz53I5to",
     "log_level": 20,
     "master_hostname": "algo-1",
     "model_dir": "/opt/ml/model",
-    "module_dir": "s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-cli$/task5/task5-2020-09-13-10-02-36-mCVMP0Ex/source/sourcedir.tar.gz",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task5/task5-2020-09-13-13-20-31-Cz53I5to/source/sourcedir.tar.gz",
     "module_name": "worker4",
     "network_interface_name": "eth0",
     "num_cpus": 2,
@@ -75,8 +75,8 @@ SM_OUTPUT_DIR=/opt/ml/output
 SM_NUM_CPUS=2
 SM_NUM_GPUS=0
 SM_MODEL_DIR=/opt/ml/model
-SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-cli$/task5/task5-2020-09-13-10-02-36-mCVMP0Ex/source/sourcedir.tar.gz
-SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"bucket":"/opt/ml/input/data/bucket"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1"],"hyperparameters":{},"input_config_dir":"/opt/ml/input/config","input_data_config":{"bucket":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"task5-2020-09-13-10-02-36-mCVMP0Ex","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/simple-sagemaker-example-cli$/task5/task5-2020-09-13-10-02-36-mCVMP0Ex/source/sourcedir.tar.gz","module_name":"worker4","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"},"user_entry_point":"worker4.py"}
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task5/task5-2020-09-13-13-20-31-Cz53I5to/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"bucket":"/opt/ml/input/data/bucket"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1"],"hyperparameters":{},"input_config_dir":"/opt/ml/input/config","input_data_config":{"bucket":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"task5-2020-09-13-13-20-31-Cz53I5to","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task5/task5-2020-09-13-13-20-31-Cz53I5to/source/sourcedir.tar.gz","module_name":"worker4","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"},"user_entry_point":"worker4.py"}
 SM_USER_ARGS=[]
 SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
 SM_CHANNEL_BUCKET=/opt/ml/input/data/bucket
@@ -87,10 +87,17 @@ Invoking script with the following command:
 /opt/conda/bin/python worker4.py
 
 
-/opt/ml/input/data/bucket:
+INFO:task_toolkit.algo_lib:Args: Namespace(batch_size=64, channel_names=['bucket'], current_host='algo-1', epochs=50, hosts=['algo-1'], hps={}, input_bucket='/opt/ml/input/data/bucket', input_config_dir='/opt/ml/input/config', input_data='', input_data_config='{"bucket":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='', job_name='task5-2020-09-13-13-20-31-Cz53I5to', learning_rate=0.05, model_dir='/opt/ml/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
+INFO:task_toolkit.algo_lib:Unmatched: []
+INFO:__main__:*** START listing files in 
+INFO:__main__:
+INFO:__main__:*** END file listing 
+INFO:__main__:*** START listing files in /opt/ml/input/data/bucket
+INFO:__main__:/opt/ml/input/data/bucket:
 total 12
-drwxr-xr-x 2 root root 4096 Sep 13 10:05 .
-drwxr-xr-x 3 root root 4096 Sep 13 10:05 ..
--rw-r--r-- 1 root root  129 Sep 13 10:05 model.tar.gz
+drwxr-xr-x 2 root root 4096 Sep 13 13:23 .
+drwxr-xr-x 3 root root 4096 Sep 13 13:23 ..
+-rw-r--r-- 1 root root  127 Sep 13 13:23 model.tar.gz
 
-2020-09-13 10:05:38,667 sagemaker-training-toolkit INFO     Reporting training SUCCESS
+INFO:__main__:*** END file listing /opt/ml/input/data/bucket
+2020-09-13 13:23:34,107 sagemaker-training-toolkit INFO     Reporting training SUCCESS

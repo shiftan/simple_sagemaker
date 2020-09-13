@@ -1,7 +1,9 @@
 import logging
 import sys
+import re
 from functools import partial
 from pathlib import Path
+from simple_sagemaker import constants
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +21,56 @@ def getSortedFileList(path, filters):
     return set(filter(partial(applyFilter, filters=filters), files))
 
 
+def getRelevantLogBlocks(content):
+    res = list()
+    consts = constants.TEST_LOG_LINE_BLOCK_PREFIX, constants.TEST_LOG_LINE_BLOCK_SUFFIX
+    consts = [re.escape(x) for x in consts]
+    pattern = "|".join([f":{x}" for x in consts])
+    consts2 = ":"+constants.TEST_LOG_LINE_PREFIX, "INFO:__main__", "INFO:task_toolkit.algo_lib:"
+    consts2 = [re.escape(x) for x in consts2]
+    pattern2 = "|".join(consts2) + "(.*)"
+    splited = re.split(f"({pattern})", content, flags=re.MULTILINE)
+    i = 0
+    while i < len(splited):
+        if splited[i][1:] == constants.TEST_LOG_LINE_BLOCK_PREFIX:
+            res.append(splited[i+1])
+            i+=3
+        else:
+            relevant_lines = re.findall(pattern2, splited[i], flags=re.MULTILINE)
+            res.extend(relevant_lines)
+            i += 1
+    return [x for x in res if x]
+
+def compareLog(expected_content, output_content):
+    expected_blocks = getRelevantLogBlocks(expected_content)
+    output_blocks = getRelevantLogBlocks(output_content)
+    for (block_exp, block_out) in zip(expected_blocks, output_blocks):
+        lines_exp = block_exp.splitlines()
+        lines_out = block_exp.splitlines()
+        if block_exp.startswith("listing files in "):
+            if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
+                return False
+            for (line_exp, line_out) in zip(lines_exp[1:], lines_out[1:]):
+                if re.match("[drwx\-]{10}", lines_exp[4]):
+                    if line_exp.split(" ")[-1] != line_out.split(" ")[-1]:
+                        return False
+                else:
+                    if line_exp != line_out:
+                        return False
+        else:
+           if lines_exp != lines_out:
+               return False
+
+    return True
+
+
 def compareFileContent(expectedfile_path, outputfile_path, file_name):
     differences = []
     if expectedfile_path.is_dir():
         pass
     if "logs/" in file_name:
-        pass
+        if not compareLog(expectedfile_path.read_text(), outputfile_path.read_text()):
+            differences.append(f"{file_name} doesn't match")
     elif file_name.endswith(".tar.gz"):
         pass
     elif file_name.endswith("-manifest") or file_name.endswith("init-config.json"):
@@ -81,8 +127,8 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     aa = Path(__file__)
-    sTask = aa.parent.parent / "examples" / "single_task"
+    examplesDir = aa.parent.parent.parent / "examples"
     # sTask = aa.parent.parent/"examples"/"multiple_tasks"
-    exp = sTask / "expected_output"
-    out = sTask / "output"
-    print(isAsExpected(out, exp))
+    exp = examplesDir / "single_task" / "expected_output"
+    out = examplesDir / "out" / "test_single_task0" / "output"
+    print(isAsExpected(out, out))
