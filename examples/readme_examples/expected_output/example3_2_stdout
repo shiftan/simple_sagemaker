@@ -1,98 +1,10 @@
-INFO:botocore.credentials:Found credentials in environment variables.
+INFO:simple_sagemaker.cli:Running ssm cli, args:['/home/user/proj/simple_sagemaker/.tox/single_proc/bin/ssm', '-p', 'tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37', '-t', 'task3', '-e', '/home/user/proj/simple_sagemaker/examples/readme_examples/worker3.py', '-o', '/home/user/proj/simple_sagemaker/.tox/single_proc/tmp/test_readme_examples0/output/example3_2', '--cs', '--ks']
+INFO:simple_sagemaker.cli:Parsed arguments:Namespace(aws_repo=None, bucket_name=None, clean_state=False, config_file=None, dependencies=None, docker_file=None, entry_point='/home/user/proj/simple_sagemaker/examples/readme_examples/worker3.py', image_tag='latest', input_path=None, input_s3=None, input_task=None, instance_count=1, instance_type='ml.m5.large', max_run=86400, max_wait=86400, output_path='/home/user/proj/simple_sagemaker/.tox/single_proc/tmp/test_readme_examples0/output/example3_2', project_name='tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37', repo_name=None, source_dir=None, task_name='task3', use_spot=True, volume_size=30)
+INFO:botocore.credentials:Found credentials in shared credentials file: ~/.aws/credentials
 INFO:simple_sagemaker.iam_utils:Creating SageMaker IAM Role: SageMakerIAMRole with an attached AmazonSageMakerFullAccess policy...
 INFO:root:Using a pre-built image None...
-INFO:simple_sagemaker.sm_task:Running a training job source_dir=None entryPoint=/home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/worker3.py hyperparameters={}...
-INFO:sagemaker:Creating training-job with name: task3-2020-09-13-13-20-31-f6osgaSU
-2020-09-13 13:20:32 Starting - Starting the training job...
-2020-09-13 13:20:34 Starting - Launching requested ML instances......
-2020-09-13 13:21:48 Starting - Preparing the instances for training...
-2020-09-13 13:22:29 Downloading - Downloading input data...
-2020-09-13 13:23:02 Training - Downloading the training image...
-2020-09-13 13:23:18 Training - Training image download completed. Training in progress.bash: cannot set terminal process group (-1): Inappropriate ioctl for device
-bash: no job control in this shell
-2020-09-13 13:23:18,591 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
-2020-09-13 13:23:18,595 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:23:18,612 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
-2020-09-13 13:23:20,041 sagemaker_pytorch_container.training INFO     Invoking user training script.
-
-2020-09-13 13:24:01 Uploading - Uploading generated training model
-2020-09-13 13:24:01 Completed - Training job completed
-2020-09-13 13:23:51,904 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:23:51,916 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:23:51,928 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:23:51,938 sagemaker-training-toolkit INFO     Invoking user script
-
-Training Env:
-
-{
-    "additional_framework_parameters": {},
-    "channel_input_dirs": {},
-    "current_host": "algo-1",
-    "framework_module": "sagemaker_pytorch_container.training:main",
-    "hosts": [
-        "algo-1"
-    ],
-    "hyperparameters": {},
-    "input_config_dir": "/opt/ml/input/config",
-    "input_data_config": {},
-    "input_dir": "/opt/ml/input",
-    "is_master": true,
-    "job_name": "task3-2020-09-13-13-20-31-f6osgaSU",
-    "log_level": 20,
-    "master_hostname": "algo-1",
-    "model_dir": "/opt/ml/model",
-    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task3/task3-2020-09-13-13-20-31-f6osgaSU/source/sourcedir.tar.gz",
-    "module_name": "worker3",
-    "network_interface_name": "eth0",
-    "num_cpus": 2,
-    "num_gpus": 0,
-    "output_data_dir": "/opt/ml/output/data",
-    "output_dir": "/opt/ml/output",
-    "output_intermediate_dir": "/opt/ml/output/intermediate",
-    "resource_config": {
-        "current_host": "algo-1",
-        "hosts": [
-            "algo-1"
-        ],
-        "network_interface_name": "eth0"
-    },
-    "user_entry_point": "worker3.py"
-}
-
-Environment variables:
-
-SM_HOSTS=["algo-1"]
-SM_NETWORK_INTERFACE_NAME=eth0
-SM_HPS={}
-SM_USER_ENTRY_POINT=worker3.py
-SM_FRAMEWORK_PARAMS={}
-SM_RESOURCE_CONFIG={"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"}
-SM_INPUT_DATA_CONFIG={}
-SM_OUTPUT_DATA_DIR=/opt/ml/output/data
-SM_CHANNELS=[]
-SM_CURRENT_HOST=algo-1
-SM_MODULE_NAME=worker3
-SM_LOG_LEVEL=20
-SM_FRAMEWORK_MODULE=sagemaker_pytorch_container.training:main
-SM_INPUT_DIR=/opt/ml/input
-SM_INPUT_CONFIG_DIR=/opt/ml/input/config
-SM_OUTPUT_DIR=/opt/ml/output
-SM_NUM_CPUS=2
-SM_NUM_GPUS=0
-SM_MODEL_DIR=/opt/ml/model
-SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task3/task3-2020-09-13-13-20-31-f6osgaSU/source/sourcedir.tar.gz
-SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1"],"hyperparameters":{},"input_config_dir":"/opt/ml/input/config","input_data_config":{},"input_dir":"/opt/ml/input","is_master":true,"job_name":"task3-2020-09-13-13-20-31-f6osgaSU","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-13-13-16-10_py37/task3/task3-2020-09-13-13-20-31-f6osgaSU/source/sourcedir.tar.gz","module_name":"worker3","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"},"user_entry_point":"worker3.py"}
-SM_USER_ARGS=[]
-SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
-PYTHONPATH=/opt/ml/code:/opt/conda/bin:/opt/conda/lib/python36.zip:/opt/conda/lib/python3.6:/opt/conda/lib/python3.6/lib-dynload:/opt/conda/lib/python3.6/site-packages
-
-Invoking script with the following command:
-
-/opt/conda/bin/python worker3.py
-
-
-2020-09-13 13:23:52,003 sagemaker-training-toolkit INFO     Reporting training SUCCESS
-Training seconds: 92
-Billable seconds: 42
-Managed Spot Training savings: 54.3%
-INFO:simple_sagemaker.sm_task:Downloading results to /home/runner/work/simple_sagemaker/simple_sagemaker/.tox/py/tmp/popen-gw4/test_readme_examples0/output/example3_2
+INFO:simple_sagemaker.sm_project:result: {'ResponseMetadata': {'RequestId': '9617559CA710A258', 'HostId': 'Q/gQPYgU189C1j0/zcbDa1fzwI7Q3v9ftSyNYJGUWLEYMAOmFiGVIaI378G00ubguE0yiB7PAdI=', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amz-id-2': 'Q/gQPYgU189C1j0/zcbDa1fzwI7Q3v9ftSyNYJGUWLEYMAOmFiGVIaI378G00ubguE0yiB7PAdI=', 'x-amz-request-id': '9617559CA710A258', 'date': 'Mon, 14 Sep 2020 14:45:45 GMT', 'x-amz-bucket-region': 'us-east-1', 'content-type': 'application/xml', 'transfer-encoding': 'chunked', 'server': 'AmazonS3'}, 'RetryAttempts': 0}, 'IsTruncated': False, 'Marker': '', 'Contents': [{'Key': 'tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37/task3/state/state_dir', 'LastModified': datetime.datetime(2020, 9, 14, 14, 44, 39, tzinfo=tzlocal()), 'ETag': '"4a5376727cd09607cd5b6ea1805c7e48"', 'Size': 14, 'StorageClass': 'STANDARD', 'Owner': {'DisplayName': 'ariel.shiftan', 'ID': '899dac056bb9e5cef98c1aca7f7ba6b6674a8bae0a2841f34e51043d93f9aa4b'}}], 'Name': 'sagemaker-us-east-1-667232328135', 'Prefix': 'tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37/task3/state/', 'Delimiter': '/', 'MaxKeys': 1000, 'CommonPrefixes': [{'Prefix': 'tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37/task3/state/algo-1/'}], 'EncodingType': 'url'}
+INFO:simple_sagemaker.sm_project:CommonPrefixes: [{'Prefix': 'tests/simple-sagemaker-example-cli_2020-09-14-14-41-14_py37/task3/state/algo-1/'}]
+INFO:simple_sagemaker.sm_project:subdirs: ['algo-1']
+INFO:simple_sagemaker.sm_project:Task task3 is already completed by task3-2020-09-14-14-41-19-l7bXfIZg
+INFO:simple_sagemaker.sm_task:Downloading results to /home/user/proj/simple_sagemaker/.tox/single_proc/tmp/test_readme_examples0/output/example3_2
