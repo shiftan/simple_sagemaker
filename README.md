@@ -7,7 +7,9 @@ Lets start with a very basic example.
 Assuming one would like to run the following `worker1.py` on the cloud:
 
 ```python
-print("Hello, world!")
+import torch
+for i in range(torch.cuda.device_count()):
+    print(f"Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
 It's as easy as running the following command to get it running on a *ml.m5.large* *spot* instance:
 ```bash
@@ -15,11 +17,9 @@ ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1
 ```
 The output, including logs will be save to `./output/example1`. The relevant part from the log file is:
 ```
-Invoking script with the following command:
-
-/opt/conda/bin/python worker1.py
-
-Hello, world!
+...
+-***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
+...
 ```
 
 ## More ssm CLI examples (below)
@@ -27,6 +27,7 @@ Hello, world!
 - [Task state and output](#Task-state-and-output)
 - [Providing input data](#Providing-input-data)
 - [Chaining tasks](#Chaining-tasks)
+- [Defining code dependencies](#Defining-code-dependencies)
 - [Configuring the docker image](#Configuring-the-docker-image)
 
 
@@ -52,7 +53,7 @@ On top of that, the rest (mostly) behaves "normally" as defined by AWS, e.g.
 # Background
 *Simple Sagemaker* is a thin warpper around SageMaker's training jobs, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
-The solutions is composed of two partsm one on each side: a **runner** on the client machine, and a **worker** which is distributed on AWS. 
+The solutions is composed of two partsm one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
 * The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customised using code
 * The **worker** is basically your code, but a small `task_tollkit` library is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
 
@@ -163,6 +164,9 @@ s3 bucket
 TBD
 
 ## Configuring the docker image
+TBD
+
+## Defining code dependencies
 TBD
 
 ---
