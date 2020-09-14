@@ -54,7 +54,7 @@ class ECRSync:
         )
 
         if not docker_file_path_or_content:
-            logging.info(f"Using a pre-built image {docker_file_path_or_content}...")
+            logging.info(f"Using a pre-built image {baseimage_uri}...")
             return baseimage_uri
 
         repo_uri = self.getOrCreateRepo(aws_repo_name)

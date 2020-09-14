@@ -26,14 +26,14 @@ def getRelevantLogBlocks(content):
     res = list()
     consts = constants.TEST_LOG_LINE_BLOCK_PREFIX, constants.TEST_LOG_LINE_BLOCK_SUFFIX
     consts = [re.escape(x) for x in consts]
-    pattern = "|".join([f":{x}" for x in consts])
+    pattern = "|".join(consts)
     consts2 = (
-        ":" + constants.TEST_LOG_LINE_PREFIX,
+        constants.TEST_LOG_LINE_PREFIX,
         "INFO:__main__",
         "INFO:task_toolkit.algo_lib:",
     )
     consts2 = [re.escape(x) for x in consts2]
-    pattern2 = "|".join(consts2) + "(.*)"
+    pattern2 = "|".join(consts2)
     splited = re.split(f"({pattern})", content, flags=re.MULTILINE)
     i = 0
     while i < len(splited):
@@ -41,8 +41,9 @@ def getRelevantLogBlocks(content):
             res.append(splited[i + 1])
             i += 3
         else:
-            relevant_lines = re.findall(pattern2, splited[i], flags=re.MULTILINE)
-            res.extend(relevant_lines)
+            relevant_lines = re.findall(f"({pattern2})(.*)", splited[i], flags=re.MULTILINE)
+            if relevant_lines:
+                res.extend([x[1] for x in relevant_lines if x])
             i += 1
     return [x for x in res if x]
 
@@ -50,6 +51,8 @@ def getRelevantLogBlocks(content):
 def compareLog(expected_content, output_content):
     expected_blocks = getRelevantLogBlocks(expected_content)
     output_blocks = getRelevantLogBlocks(output_content)
+    if len(output_blocks) != len (expected_blocks):
+        return False
     for (block_exp, block_out) in zip(expected_blocks, output_blocks):
         lines_exp = block_exp.splitlines()
         lines_out = block_exp.splitlines()
@@ -57,6 +60,7 @@ def compareLog(expected_content, output_content):
             if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
                 return False
             for (line_exp, line_out) in zip(lines_exp[1:], lines_out[1:]):
+                # 'ls -la' output
                 if re.match("[drwx\\-]{10}", line_exp):
                     if line_exp.split(" ")[-1] != line_out.split(" ")[-1]:
                         return False
@@ -134,22 +138,26 @@ if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     aa = Path(__file__)
     examplesDir = aa.parent.parent.parent / "examples"
-    # sTask = aa.parent.parent/"examples"/"multiple_tasks"
-    outs = [
-        "test_single_task0",
-        "test_single_file_tasks0",
-        "test_multiple_tasks0",
-        "test_readme_examples0",
-        "test_cli_multi0",
-    ]
-    exps = [
-        "single_task",
-        "single_file",
-        "multiple_tasks",
-        "readme_examples",
-        "cli_multi",
-    ]
-    for exp, out in zip(exps, outs):
-        exp = examplesDir / exp / "expected_output"
-        out = examplesDir / "out" / out / "output"
+    if False:
+        outs = [
+            "test_single_task0",
+            "test_single_file_tasks0",
+            "test_multiple_tasks0",
+            "test_readme_examples0",
+            "test_cli_multi0",
+        ]
+        exps = [
+            "single_task",
+            "single_file",
+            "multiple_tasks",
+            "readme_examples",
+            "cli_multi",
+        ]
+        for exp, out in zip(exps, outs):
+            exp = examplesDir / exp / "expected_output"
+            out = examplesDir / "out" / out / "output"
+            print(exp, out, isAsExpected(out, exp))
+    else:
+        exp = examplesDir / "readme_examples" / "expected_output"
+        out = examplesDir / "readme_examples" / "output"
         print(exp, out, isAsExpected(out, exp))

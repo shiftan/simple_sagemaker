@@ -5,7 +5,7 @@
 BASEDIR=$(dirname "$0")
 
 # Example 1 - hello world
-ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $1/example1 ${@:4} &
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $1/example1 --it ml.p3.2xlarge ${@:4} &
 
 # Example 2 - passing hyperparams as command line arguments
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task2 -e $BASEDIR/worker2.py --msg "Hello, world!" -o $1/example2 ${@:4} &
