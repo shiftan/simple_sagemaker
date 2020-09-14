@@ -22,13 +22,72 @@ Invoking script with the following command:
 Hello, world!
 ```
 
-
+## More ssm CLI examples (below)
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
 - [Providing input data](#Providing-input-data)
 - [Chaining tasks](#Chaining-tasks)
-- [Maintaining task state](#Maintaining-task-state)
 - [Configuring the docker image](#Configuring-the-docker-image)
+
+
+# Main features
+1. Except for having an AWS account, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :), including
+    - IAM role creation
+    - Building and uploading a docker image to AWS (ECS service)
+    - Synchronizing local source code / input data to a S3 bucket
+    - Downloading the results from S3
+2. Save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) - spot instances are used by default! (see [pricing](https://aws.amazon.com/sagemaker/pricing))
+3. Abstraction of how data is maintianed on AWS (S3 service)
+    - No need to mess with S3 paths, the data is automatically
+    - *State* is automaticall maintained between consequetive execution of *jobs* that belongs to the same *task*
+4. A simple way to define how data flows between *tasks* of the same *project*, i.e. how the first *task*'s outputs is used as an input for the second *task*
+5. The API is mostly wrapped by a command line interface (named ***ssm***), to make your life even easier
+6. Easily customize the docker image (based on a pre-built one)
+
+On top of that, the rest (mostly) behaves "normally" as defined by AWS, e.g.
+- (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
+- (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
+
+
+# Background
+*Simple Sagemaker* is a thin warpper around SageMaker's training jobs, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+
+The solutions is composed of two partsm one on each side: a **runner** on the client machine, and a **worker** which is distributed on AWS. 
+* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customised using code
+* The **worker** is basically your code, but a small `task_tollkit` library is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
+
+## Definitions
+
+- A *prjoect* is a series of related *tasks*
+- A *task* is a logical step that runs on input and provide output. It's defined by providing a local package path, entrypoint, and list of additional local dependencies
+    - A SageMaker *job* is a *task* instance, i.e. a *job* is created each time you run the task
+    - State is maintained between consecutive execution of the same *task*
+
+## Details
+
+As [documented](https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms.html), there're a few to run anything with SageMaker:
+
+1. Use a built-in algorithms
+2. Use a pre-built container image
+3. Extending an existing container 
+    - [Example](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/pytorch_extending_our_containers)
+4. Bringing a fully customized container 
+    - [Examples](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/custom-training-containers)
+
+This project currently uses the 3rd option (currently only PyTorch is implemented), as it's the simplest one that still allows full customization of the environment. 
+Future work extend the project to allow the container image to be based on any existing image
+
+## Requirements
+
+1. Python 3.6+
+2. An AWS account with Administrator (???) credentials
+3. ???
+
+## How to run
+
+1. Configure the AWS credentials for boto, see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
+2. 
+
 
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
@@ -57,7 +116,7 @@ Hello, world!
 State is maintained between executions of the same task, i.e. between execution jobs that belongs to the same task.
 The local path is available in `args.state`. 
 When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the task as completed: `algo_lib.markCompleted(args)`. If all instances of the job mark it as completed, the task is assumed to be completed by that job, which allows:
-1. To skip it next time (unlesss eforced otherwise), and
+1. To skip it next time (unlesss eforced otherwise)
 2. To use its output as input for other tasks (see below: [chaining tasks](#Chaining-tasks))
 
 ### Output
@@ -101,9 +160,6 @@ local path
 s3 bucket
 
 ## Chaining tasks
-TBD
-
-## Maintaining task state
 TBD
 
 ## Configuring the docker image
@@ -295,60 +351,6 @@ INFO:__main__:finished!
 
 As mentioned, the complete code can be found in [this directory](./examples/single_file), 
 
-## Main features
-1. A pure python implementation, i.e. no shell script are required
-2. Save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) - spot instances are used the default! (see [pricing](https://aws.amazon.com/sagemaker/pricing))
-2. Except for having an AWS account, There's no assumptions on AWS pre-configuration nor AWS knowledge (well, almost :)
-    - A single lime for IAM role creation
-    - A single line for building a docker image and uploading to AWS (ECS service)
-3. Abstraction of how data is maintianed on AWS (S3 service)
-    - *State* is automaticall maintained between consequetive execution of *jobs* that belongs to the same *task*
-    - A simple way to define how data flows between *tasks* of the same *project*, i.e. how the first *task*'s outputs is used as an input for the second *task*
-
-Except for the above, the rest (mostly) behaves "normally" as defined by AWS, e.g.
-- (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
-- (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
-
-## Definitions
-
-- A *prjoect* is a series of related *tasks*
-- A *task* is defined by providing a local package path, entrypoint, and list of additional local dependencies
-    - a *job* is a instance SageMaker Job that is executing it
-- A *task* 
-
-## Details
-
-As [documented](https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms.html), there're a few to run anything with SageMaker:
-
-1. Use a built-in algorithms
-2. Use a pre-built container image
-3. Extending an existing container 
-    - [Example](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/pytorch_extending_our_containers)
-4. Bringing a fully customized container 
-    - [Examples](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/custom-training-containers)
-
-This project currently uses the 3rd option (currently only PyTorch is implemented), as it's the simplest one that still allows full customization of the environment. 
-Future work extend the project to allow the container image to be based on any existing image
-
-## Requirements
-
-1. Python 3.6+
-2. An AWS account with Administrator (???) credentials
-3. ???
-
-## Highlighted Features
-One stop shop Python based solution, all you need is AWS credentials and you can simply
-1. Fully customize the docker image (based on a pre-built one)
-2. Provide the input, maintain state, and set the output for any task
-3. Define input distribution method
-4. Get the output data and logs
-5. Save money by using spot instances
-6. And many many other features which are supported by SageMaker....
-
-## How to run
-
-1. Configure the AWS credentials for boto, see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-2. 
 
 # Development
 ## Pushing a code change
@@ -366,13 +368,13 @@ tox -e clean
 ```bash
 tox
 ```
-4. Generate & test coveraeg
+4. Generate & test coverage
 ```bash
 tox -e report
 ```
 5. [Optionally] - bump the version string on /src/simple_sagemaker/__init__ to allow the release of a new version
 5. Push your code to a development branch
-    - Every push is tested for linting
+    - Every push is tested for linting + some
 6. Create a pull request to the master branch
     - Every master push is fully tested
-7 If the tests succeed, the new version is publihed on P
+7. If the tests succeed, the new version is publihed to [PyPi](https://pypi.org/project/simple-sagemaker/)
