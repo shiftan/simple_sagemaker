@@ -5,9 +5,12 @@ import os
 import sys
 
 import configargparse
+import sagemaker
 from sagemaker.inputs import TrainingInput
 
 from . import constants
+
+logger = logging.getLogger(__name__)
 
 
 def fileValidation(parser, arg):
@@ -110,6 +113,9 @@ def parseArgs():
         metavar=TaskInputTuple._fields,
     )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
+    parser.add_argument(
+        "--keep_state", "--ks", action="store_false", dest="clean_state"
+    )
     parser.add_argument("--output_path", "-o", default=None)
 
     args, rest = parser.parse_known_args()
@@ -130,7 +136,7 @@ def getAllParams(args, mapping):
     return params
 
 
-def parseInputs(args, sm_project):
+def parseInputsAndAllowAccess(args, sm_project):
     if not args.input_task and not args.input_s3:
         return None
 
@@ -141,6 +147,8 @@ def parseInputs(args, sm_project):
             inputs[input_name] = sm_project.getInputConfig(task_name, **{ttype: True})
     if args.input_s3:
         for (input_name, s3_uri) in args.input_s3:
+            bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
+            sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
         # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", state=True)
@@ -157,6 +165,7 @@ def parseHyperparams(rest):
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
 
     file_path = os.path.split(__file__)[0]
@@ -221,7 +230,7 @@ def main():
         },
     )
 
-    inputs = parseInputs(args, sm_project)
+    inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
 
     sm_project.runTask(

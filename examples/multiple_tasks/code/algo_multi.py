@@ -10,12 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 def listDir(path, recursive=True):
-    logger.info(f"*** Listing files in {path}")
+    logger.info(f"*** START listing files in {path}")
     args = ["ls", "-la", path]
     if recursive:
         args.append("-R")
     process = subprocess.run(args, stdout=subprocess.PIPE, universal_newlines=True)
     logger.info(process.stdout)
+    logger.info(f"*** END file listing {path}")
 
 
 def logBefore(args):

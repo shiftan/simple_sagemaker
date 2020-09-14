@@ -1,11 +1,10 @@
 import collections
-import json
 import logging
 
 import boto3
 import sagemaker
 
-from . import constants
+from . import constants, iam_utils
 from .ecr_sync import ECRSync
 from .sm_task import SageMakerTask
 
@@ -106,36 +105,14 @@ class SageMakerProject:
             client.create_bucket(Bucket=self.bucket_name)
 
     def createIAMRole(self):
-        logger.info(
-            f"Creating SageMaker IAM Role: {self.role_name} with an attached AmazonSageMakerFullAccess policy..."
-        )
+        iam_utils.createSageMakerIAMRole(self.boto3_session, self.role_name)
 
-        trustRelationship = {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Sid": "",
-                    "Effect": "Allow",
-                    "Principal": {"Service": "sagemaker.amazonaws.com"},
-                    "Action": "sts:AssumeRole",
-                }
-            ],
-        }
-        client = self.boto3_session.client("iam")
-        try:
-            client.get_role(RoleName=self.role_name)
-        except:  # noqa: E722
-            client.create_role(
-                RoleName=self.role_name,
-                AssumeRolePolicyDocument=json.dumps(trustRelationship),
-            )
-        response = client.attach_role_policy(
-            RoleName=self.role_name,
-            PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
+    def allowAccessToS3Bucket(
+        self, bucket_name, policy_name=constants.DEFAULT_IAM_BUCKET_POLICY
+    ):
+        iam_utils.allowAccessToS3Bucket(
+            self.boto3_session, self.role_name, policy_name, bucket_name
         )
-        assert (
-            response["ResponseMetadata"]["HTTPStatusCode"] == 200
-        ), f"Couldn't attach AmazonSageMakerFullAccess policy to role {self.role_name}"
 
     def addTask(self, task_name, smTask):
         assert task_name not in self.tasks, f"{task_name} already exists!"
@@ -215,6 +192,7 @@ class SageMakerProject:
                 smSession=self.smSession,
             )
             job_name = self.getCompletionJobName(task_name)
+            assert job_name, f"Task {task_name} isn't completed!"
             smTask.bindToJob(job_name)
 
         return smTask.getInputConfig(distribution, model, output, state)

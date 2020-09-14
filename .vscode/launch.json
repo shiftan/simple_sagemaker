@@ -10,7 +10,33 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
             "cwd": "${fileDirname}"
+        },
+        {
+            "name": "Python: Cli",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli_launcher.py",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "-p", "tests/simple-sagemaker-example-cli_2020-09-13-17-48-15_py37", 
+                //"--instance_type", "ml.p3.2xlarge",
+                "-t", "task3",
+                "-e",  "${workspaceFolder}/examples/readme_examples/worker3.py",
+                "-o", "${workspaceFolder}/output",
+                "--no_spot",
+                //"--iis", "bucket", "s3://awsglue-datasets/examples/us-legislators/all/persons.json"
+                //"--iit", "bucket", "task3", "model"
+                //"--cs", 
+                "--ks"
+            ]
         }
     ]
 }

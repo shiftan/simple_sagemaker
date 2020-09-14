@@ -1,38 +1,104 @@
 # Simple Sagemaker 
 A **very simple** way to run your python code on the cloud (AWS).
 
+**Note: the (initial) work is still in progress...**
+
 Lets start with a very basic example. 
-Assuming one would like to run the following `worker.py` on the cloud:
+Assuming one would like to run the following `worker1.py` on the cloud:
 
 ```python
-import torch
-num_devices = torch.cuda.device_count()
-print(f"Number of Cuda devices: {num_devices}")
-for i in range(num_devices):
-    print(f"Device: {i} {torch.cuda.get_device_properties(0)}")
+print("Hello, world!")
 ```
-It's as easy as running the following command to get it running on a *ml.p3.2xlarge* spot instance:
+It's as easy as running the following command to get it running on a *ml.m5.large* *spot* instance:
 ```bash
-ssm -p simple-sagemaker-example-cli --instance_type "ml.p3.2xlarge" -t task1 -e worker.py -o ./output
+ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1
 ```
-The output, including logs will be save to the `output`:
+The output, including logs will be save to `./output/example1`. The relevant part from the log file is:
+```
+Invoking script with the following command:
+
+/opt/conda/bin/python worker1.py
+
+Hello, world!
+```
+
 
 - [Passing command line arguments](#Passing-command-line-arguments)
-- [Task output](#Task-output)
-- [Poviding input data](#Poviding-input-data)
+- [Task state and output](#Task-state-and-output)
+- [Providing input data](#Providing-input-data)
 - [Chaining tasks](#Chaining-tasks)
 - [Maintaining task state](#Maintaining-task-state)
 - [Configuring the docker image](#Configuring-the-docker-image)
 
 ## Passing command line arguments
-Any extra argument passed to the command line 
-TBD
+Any extra argument passed to the command line in assumed to be an hypermarameter. 
+To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
+```python
+from task_toolkit import algo_lib
 
-## Task output
-TBD
+args = algo_lib.parseArgs()
+print(args.hps["msg"])
+```
+Running command:
+```bash
+ssm -p simple-sagemaker-example-cli -t task2 -e worker2.py --msg "Hello, world!" -o ./output/example2
+```
+Output from the log file
+```
+Invoking script with the following command:
 
-## Poviding input data
-TBD
+/opt/conda/bin/python worker2.py --msg Hello, world!
+
+Hello, world!
+```
+## Task state and output
+
+### State
+State is maintained between executions of the same task, i.e. between execution jobs that belongs to the same task.
+The local path is available in `args.state`. 
+When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the task as completed: `algo_lib.markCompleted(args)`. If all instances of the job mark it as completed, the task is assumed to be completed by that job, which allows:
+1. To skip it next time (unlesss eforced otherwise), and
+2. To use its output as input for other tasks (see below: [chaining tasks](#Chaining-tasks))
+
+### Output
+There're 3 main output mechanisms:
+1. Logs - any output writen to standard output
+2. Output data - args.output_data_dir is compressed into a tar.gz file, only the main instance data is kept
+3. Model - args.model_dir is compressed into a tar.gz file, data from all instance is merged, so be carful with collisions.
+
+A complete example can be seen in `worker3.py`:
+```python
+import os
+
+from task_toolkit import algo_lib
+
+args = algo_lib.parseArgs()
+
+open(os.path.join(args.output_data_dir, "output_data_dir"), "wt").write(
+    "output_data_dir file"
+)
+open(os.path.join(args.model_dir, "model_dir"), "wt").write("model_dir file")
+open(os.path.join(args.state, "state_dir"), "wt").write("state_dir file")
+
+# Mark the tasks as completed, to allow other tasks using its output, and to avoid re-running it (unless enforced)
+algo_lib.markCompleted(args)
+```
+Running command:
+```bash
+ssm -p simple-sagemaker-example-cli$ -t task3 -e worker3.py -o ./output/example3
+```
+Output from the log file
+```
+Invoking script with the following command:
+
+/opt/conda/bin/python worker2.py --msg Hello, world!
+
+Hello, world!
+```
+
+## Providing input data
+local path
+s3 bucket
 
 ## Chaining tasks
 TBD
@@ -46,8 +112,6 @@ TBD
 ---
 
 Simple Sagemaker is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
-
-**Note: the (initial) work is still in progress...**
 
 The idea is simple - 
 

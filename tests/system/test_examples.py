@@ -58,10 +58,10 @@ def _internalTestExample(caplog, tmp_path, runner):
     assert isAsExpected(output_path, expected_path)
 
 
-def test_cli(caplog, tmp_path):
+def _internalTestCli(test_path, caplog, tmp_path):
     caplog.set_level(logging.INFO)
     print("Temp path:", tmp_path)
-    print("Running cli:")
+    print("Running cli:", test_path)
 
     output_path = os.path.join(tmp_path, "output")
     # remove current local output
@@ -72,8 +72,16 @@ def test_cli(caplog, tmp_path):
     postfix = f"_{time_string}_{py_version_string}"
     prefix = "tests/"
 
-    run_shell = os.path.join(examples_path, "cli_multi", "run.sh")
+    run_shell = os.path.join(examples_path, test_path, "run.sh")
     subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
 
-    expected_path = os.path.join(examples_path, "cli_multi", "expected_output")
+    expected_path = os.path.join(examples_path, test_path, "expected_output")
     assert isAsExpected(output_path, expected_path)
+
+
+def test_cli_multi(caplog, tmp_path):
+    _internalTestCli("cli_multi", caplog, tmp_path)
+
+
+def test_readme_examples(caplog, tmp_path):
+    _internalTestCli("readme_examples", caplog, tmp_path)
