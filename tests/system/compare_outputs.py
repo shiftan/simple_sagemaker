@@ -41,7 +41,9 @@ def getRelevantLogBlocks(content):
             res.append(splited[i + 1])
             i += 3
         else:
-            relevant_lines = re.findall(f"({pattern2})(.*)", splited[i], flags=re.MULTILINE)
+            relevant_lines = re.findall(
+                f"({pattern2})(.*)", splited[i], flags=re.MULTILINE
+            )
             if relevant_lines:
                 res.extend([x[1] for x in relevant_lines if x])
             i += 1
@@ -51,7 +53,7 @@ def getRelevantLogBlocks(content):
 def compareLog(expected_content, output_content):
     expected_blocks = getRelevantLogBlocks(expected_content)
     output_blocks = getRelevantLogBlocks(output_content)
-    if len(output_blocks) != len (expected_blocks):
+    if len(output_blocks) != len(expected_blocks):
         return False
     for (block_exp, block_out) in zip(expected_blocks, output_blocks):
         lines_exp = block_exp.splitlines()
