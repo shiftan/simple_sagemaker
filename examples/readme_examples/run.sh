@@ -10,6 +10,8 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $
 # Example 2 - passing hyperparams as command line arguments
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task2 -e $BASEDIR/worker2.py --msg "Hello, world!" -o $1/example2 ${@:4} &
 
+wait # wait for all processes, to avoid AWS resource limits... :(
+
 # Example 3 - outputs
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task3 -e $BASEDIR/worker3.py -o $1/example3 ${@:4} &
 
