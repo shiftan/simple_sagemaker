@@ -61,7 +61,7 @@ def _internalTestExample(caplog, tmp_path, runner):
 def _internalTestCli(test_path, caplog, tmp_path):
     caplog.set_level(logging.INFO)
     print("Temp path:", tmp_path)
-    print("Running cli:")
+    print("Running cli:", test_path)
 
     output_path = os.path.join(tmp_path, "output")
     # remove current local output

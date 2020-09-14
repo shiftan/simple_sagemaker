@@ -135,8 +135,8 @@ if __name__ == "__main__":
     aa = Path(__file__)
     examplesDir = aa.parent.parent.parent / "examples"
     # sTask = aa.parent.parent/"examples"/"multiple_tasks"
-    outs = ["test_single_task0", "test_readme_examples0"]
-    exps = ["single_task", "readme_examples"]
+    outs = ["test_single_task0", "test_single_file_tasks0", "test_multiple_tasks0", "test_readme_examples0", "test_cli_multi0"]
+    exps = ["single_task", "single_file", "multiple_tasks", "readme_examples", "cli_multi"]
     for exp, out in zip(exps, outs):
         exp = examplesDir / exp / "expected_output"
         out = examplesDir / "out" / out / "output"

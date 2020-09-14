@@ -9,6 +9,7 @@ import sagemaker
 from sagemaker.inputs import TrainingInput
 
 from . import constants
+logger = logging.getLogger(__name__)
 
 
 def fileValidation(parser, arg):
@@ -111,7 +112,7 @@ def parseArgs():
         metavar=TaskInputTuple._fields,
     )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
-    parser.add_argument("--keep_state", "--ks", action="store_false", dest="cs")
+    parser.add_argument("--keep_state", "--ks", action="store_false", dest="clean_state")
     parser.add_argument("--output_path", "-o", default=None)
 
     args, rest = parser.parse_known_args()
@@ -161,6 +162,7 @@ def parseHyperparams(rest):
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
 
     file_path = os.path.split(__file__)[0]
