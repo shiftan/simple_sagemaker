@@ -240,7 +240,7 @@ def main():
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters=hyperparameters,
         additional_inputs=inputs,
-        tags = tags,
+        tags=tags,
         **running_params,
     )
 

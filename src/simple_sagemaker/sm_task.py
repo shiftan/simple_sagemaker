@@ -171,7 +171,7 @@ class SageMakerTask:
             model_uri=model_uri,
             use_spot_instances=use_spot_instances,
             max_wait=maxWait,
-            **additionalEstimatorArgs
+            **additionalEstimatorArgs,
         )
         inputs = dict()
         if self.inputS3Uri:
