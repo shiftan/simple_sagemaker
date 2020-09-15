@@ -66,6 +66,10 @@ Code only:
     - (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
 
 
+## High level flow diagram
+![High level flow diagram](docs/high_level_flow.png?raw=true "High level flow")
+
+
 # Background
 *Simple Sagemaker* is a thin warpper around SageMaker's training jobs, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
