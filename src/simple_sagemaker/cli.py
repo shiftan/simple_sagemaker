@@ -232,6 +232,7 @@ def main():
 
     inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
+    tags = [{"Key": "SimpleSagemaker", "Value": "ssm"}]
 
     sm_project.runTask(
         args.task_name,
@@ -239,6 +240,7 @@ def main():
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters=hyperparameters,
         additional_inputs=inputs,
+        tags = tags,
         **running_params,
     )
 

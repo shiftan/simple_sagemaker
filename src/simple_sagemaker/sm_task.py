@@ -126,6 +126,7 @@ class SageMakerTask:
         volume_size=30,
         max_run=24 * 60 * 60,
         distribution="FullyReplicated",
+        **additionalEstimatorArgs,
     ):
         """
         Runs a training job
@@ -170,6 +171,7 @@ class SageMakerTask:
             model_uri=model_uri,
             use_spot_instances=use_spot_instances,
             max_wait=maxWait,
+            **additionalEstimatorArgs
         )
         inputs = dict()
         if self.inputS3Uri:
