@@ -232,7 +232,7 @@ def main():
 
     inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
-    tags = [{"Key": "SimpleSagemaker", "Value": "ssm"}]
+    tags = list()
 
     sm_project.runTask(
         args.task_name,

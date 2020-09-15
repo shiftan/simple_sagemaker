@@ -134,6 +134,7 @@ class SageMakerProject:
         input_data_path=None,
         clean_state=False,
         forceRunning=False,
+        tags=[],
         **kwargs,
     ):
         assert task_name not in self.tasks, f"{task_name} already exists!"
@@ -152,6 +153,16 @@ class SageMakerProject:
 
         args.update(kwargs)
 
+        tags.append({"Key": "SimpleSagemakerProject", "Value": self.project_name})
+        import inspect
+
+        tags.append(
+            {
+                "Key": "SimpleSagemakerCallingModule",
+                "Value": inspect.stack()[1].filename,
+            }
+        )
+
         if clean_state:
             smTask.clean_state()
 
@@ -161,7 +172,10 @@ class SageMakerProject:
             smTask.bindToJob(job_name)
         else:
             job_name = smTask.runTrainingJob(
-                role_name=self.role_name, hyperparameters=hyperparameters, **args
+                role_name=self.role_name,
+                hyperparameters=hyperparameters,
+                tags=tags,
+                **args,
             )
 
         self.addTask(task_name, smTask)
