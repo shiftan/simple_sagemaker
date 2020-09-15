@@ -3,17 +3,31 @@ A **very simple** way to run your python code on the cloud (AWS).
 
 **Note: the (initial) work is still in progress...**
 
-Lets start with a very basic example. 
+## Requirements
+
+1. Python 3.6+
+2. An AWS account credentials
+
+## Getting started
+To install *Simple Sagemaker*
+```
+pip install simple-sagemaker
+```
+
+The only additional step needed to configure the environment is to set the AWS credentials for boto3, as explained on [boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).
+
+Then, here's a very simple example.
 Assuming one would like to run the following `worker1.py` on the cloud:
 
 ```python
 import torch
+
 for i in range(torch.cuda.device_count()):
-    print(f"Device {i}: {torch.cuda.get_device_properties(i)}")
+    print(f"-***- Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
-It's as easy as running the following command to get it running on a *ml.m5.large* *spot* instance:
+It's as easy as running the following command to get it running on a *ml.p3.2xlarge* *spot* instance:
 ```bash
-ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1
+ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge
 ```
 The output, including logs will be save to `./output/example1`. The relevant part from the log file is:
 ```
@@ -22,7 +36,8 @@ The output, including logs will be save to `./output/example1`. The relevant par
 ...
 ```
 
-## More ssm CLI examples (below)
+## More examples (below)
+Command line based examples:
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
 - [Providing input data](#Providing-input-data)
@@ -30,6 +45,8 @@ The output, including logs will be save to `./output/example1`. The relevant par
 - [Defining code dependencies](#Defining-code-dependencies)
 - [Configuring the docker image](#Configuring-the-docker-image)
 
+Code only:
+- [Single file example](#Single-file-example)
 
 # Main features
 1. Except for having an AWS account, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :), including
@@ -44,52 +61,28 @@ The output, including logs will be save to `./output/example1`. The relevant par
 4. A simple way to define how data flows between *tasks* of the same *project*, i.e. how the first *task*'s outputs is used as an input for the second *task*
 5. The API is mostly wrapped by a command line interface (named ***ssm***), to make your life even easier
 6. Easily customize the docker image (based on a pre-built one)
-
-On top of that, the rest (mostly) behaves "normally" as defined by AWS, e.g.
-- (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
-- (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
+7. The rest of the SageMaker advantages, which  (mostly) behaves "normally" as defined by AWS, e.g.
+    - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
+    - (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
 
 
 # Background
 *Simple Sagemaker* is a thin warpper around SageMaker's training jobs, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
-The solutions is composed of two partsm one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
+The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
 * The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customised using code
 * The **worker** is basically your code, but a small `task_tollkit` library is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
 
-## Definitions
-
-- A *prjoect* is a series of related *tasks*
-- A *task* is a logical step that runs on input and provide output. It's defined by providing a local package path, entrypoint, and list of additional local dependencies
-    - A SageMaker *job* is a *task* instance, i.e. a *job* is created each time you run the task
+The runner is used to configure *tasks* and *projects*: 
+- A *task* is a logical step that runs on define input and provide output. It's defined by providing a local code path, entrypoint, and list of additional local dependencies
+- A SageMaker *job* is a *task* instance, i.e. a single *job* is created each time a task is executed
     - State is maintained between consecutive execution of the same *task*
+- A *prjoect* is a series of related *tasks*, with possible depencencies
 
-## Details
+# S3
+TBD
 
-As [documented](https://docs.aws.amazon.com/sagemaker/latest/dg/your-algorithms.html), there're a few to run anything with SageMaker:
-
-1. Use a built-in algorithms
-2. Use a pre-built container image
-3. Extending an existing container 
-    - [Example](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/pytorch_extending_our_containers)
-4. Bringing a fully customized container 
-    - [Examples](https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/custom-training-containers)
-
-This project currently uses the 3rd option (currently only PyTorch is implemented), as it's the simplest one that still allows full customization of the environment. 
-Future work extend the project to allow the container image to be based on any existing image
-
-## Requirements
-
-1. Python 3.6+
-2. An AWS account with Administrator (???) credentials
-3. ???
-
-## How to run
-
-1. Configure the AWS credentials for boto, see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-2. 
-
-
+# Examples
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
 To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
@@ -118,7 +111,7 @@ State is maintained between executions of the same task, i.e. between execution 
 The local path is available in `args.state`. 
 When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the task as completed: `algo_lib.markCompleted(args)`. If all instances of the job mark it as completed, the task is assumed to be completed by that job, which allows:
 1. To skip it next time (unlesss eforced otherwise)
-2. To use its output as input for other tasks (see below: [chaining tasks](#Chaining-tasks))
+2. To use its output as input for other tasks (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ### Output
 There're 3 main output mechanisms:
@@ -145,7 +138,7 @@ algo_lib.markCompleted(args)
 ```
 Running command:
 ```bash
-ssm -p simple-sagemaker-example-cli$ -t task3 -e worker3.py -o ./output/example3
+ssm -p simple-sagemaker-example-cli -t task3 -e worker3.py -o ./output/example3
 ```
 Output from the log file
 ```
@@ -157,11 +150,90 @@ Hello, world!
 ```
 
 ## Providing input data
-local path
-s3 bucket
+Job can be configured to get a few data sources:
+* A single local path can be used with the `-i` argument. This path is synchronized to the *task* directory on the S3 bucket before running the task. On the **worker** side the data is accesible in `args.input_data`
+* Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `args.input_[name]` when [name] is the same one as was provided on the command line.
+* Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
+
+Assuming a local `data` folder containtin a single `sample_data.txt` file, a complete example can be seen in `worker4.py`:
+```python
+import logging
+import subprocess
+import sys
+
+from task_toolkit import algo_lib
+
+logger = logging.getLogger(__name__)
+
+
+def listDir(path):
+    logger.info(f"*** START listing files in {path}")
+    logger.info(
+        subprocess.run(
+            ["ls", "-la", "-R", path], stdout=subprocess.PIPE, universal_newlines=True
+        ).stdout
+    )
+    logger.info(f"*** END file listing {path}")
+
+
+if __name__ == "__main__":
+    logging.basicConfig(stream=sys.stdout)
+    algo_lib.setDebugLevel()
+    args = algo_lib.parseArgs()
+    listDir(args.input_data)
+    listDir(args.input_bucket)
+```
+Running command:
+```bash
+ssm -p simple-sagemaker-example-cli -t task4 -e worker4.py -i ./data --iis bucket s3://awsglue-datasets/examples/us-legislators/all/persons.json -o ./output/example4
+```
+Output from the log file
+```
+...
+INFO:__main__:*** START listing files in /opt/ml/input/data/data
+INFO:__main__:/opt/ml/input/data/data:
+total 12
+drwxr-xr-x 2 root root 4096 Sep 14 21:51 .
+drwxr-xr-x 4 root root 4096 Sep 14 21:51 ..
+-rw-r--r-- 1 root root   19 Sep 14 21:51 sample_data.txt
+
+INFO:__main__:*** END file listing /opt/ml/input/data/data
+INFO:__main__:*** START listing files in /opt/ml/input/data/bucket
+INFO:__main__:/opt/ml/input/data/bucket:
+total 7796
+drwxr-xr-x 2 root root    4096 Sep 14 21:51 .
+drwxr-xr-x 4 root root    4096 Sep 14 21:51 ..
+-rw-r--r-- 1 root root 7973806 Sep 14 21:51 persons.json
+
+INFO:__main__:*** END file listing /opt/ml/input/data/bucket
+...
+```
 
 ## Chaining tasks
-TBD
+The output of a completed **task** on the same **project** can be used as an input to another **task**, by using the `--iit [name] [task name] [output type]` command line parameter, where:
+- [name] - is the name of the input source, caccesible by the worker with `args.input_[name]`
+- [task name] - the name of the task whose output is used as input 
+- [output type] - the task output type, one of "model", "output", "state"
+
+Using the output of *task3* and the same `worker4.py` code, we can now run:
+```bash
+ssm -p simple-sagemaker-example-cli -t task5 -e worker4.py --iit bucket task3 model -o ./output/example5
+```
+
+And get the following output from in the log file:
+```
+INFO:__main__:*** START listing files in 
+INFO:__main__:
+INFO:__main__:*** END file listing 
+INFO:__main__:*** START listing files in /opt/ml/input/data/bucket
+INFO:__main__:/opt/ml/input/data/bucket:
+total 12
+drwxr-xr-x 2 root root 4096 Sep 14 21:55 .
+drwxr-xr-x 3 root root 4096 Sep 14 21:55 ..
+-rw-r--r-- 1 root root  128 Sep 14 21:55 model.tar.gz
+
+INFO:__main__:*** END file listing /opt/ml/input/data/bucket
+```
 
 ## Configuring the docker image
 TBD
@@ -171,13 +243,13 @@ TBD
 
 ---
 
-Simple Sagemaker is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
+*Simple Sagemaker* is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
 
 The idea is simple - 
 
 You define a series of *tasks* within a *project*, provide the code, define how the input and outputs flows through the *tasks*, set the running instance(s) parameters, and let simple-sagemaker do the rest
 
-## Example
+## Single file example
 A [single file example](./examples/single_file/code/example.py) can be found in the [examples directory](./examples).
 First, define the runner:
 ```python
