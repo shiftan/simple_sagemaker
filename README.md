@@ -50,16 +50,17 @@ Code only:
 
 # Main features
 1. Except for having an AWS account, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :), including
-    - IAM role creation
-    - Building and uploading a docker image to AWS (ECS service)
+    - Jobs IAM role creation, including policies for accesing specific S3 buckets
+    - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
     - Downloading the results from S3
 2. Save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) - spot instances are used by default! (see [pricing](https://aws.amazon.com/sagemaker/pricing))
 3. Abstraction of how data is maintianed on AWS (S3 service)
     - No need to mess with S3 paths, the data is automatically
-    - *State* is automaticall maintained between consequetive execution of *jobs* that belongs to the same *task*
-4. A simple way to define how data flows between *tasks* of the same *project*, i.e. how the first *task*'s outputs is used as an input for the second *task*
-5. The API is mostly wrapped by a command line interface (named ***ssm***), to make your life even easier
+    - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
+4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
+5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named ***ssm***) to control the execution (a.k.a implement the **runner**, see below)
+    - In most cases it's only about getting the environment configuration, i.e. input/output/state paths and running parameters
 6. Easily customize the docker image (based on a pre-built one)
 7. The rest of the SageMaker advantages, which  (mostly) behaves "normally" as defined by AWS, e.g.
     - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
@@ -67,21 +68,21 @@ Code only:
 
 
 ## High level flow diagram
-![High level flow diagram](docs/high_level_flow.png?raw=true "High level flow")
+![High level flow diagram](docs/high_level_flow.svg?raw=true "High level flow")
 
 
 # Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training jobs, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
 The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
-* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customised using code
+* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized using code
 * The **worker** is basically your code, but a small `task_tollkit` library is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
 
-The runner is used to configure *tasks* and *projects*: 
-- A *task* is a logical step that runs on define input and provide output. It's defined by providing a local code path, entrypoint, and list of additional local dependencies
-- A SageMaker *job* is a *task* instance, i.e. a single *job* is created each time a task is executed
-    - State is maintained between consecutive execution of the same *task*
-- A *prjoect* is a series of related *tasks*, with possible depencencies
+The **runner** is used to configure **tasks** and **projects**: 
+- A **task** is a logical step that runs on define input and provide output. It's defined by providing a local code path, entrypoint, and list of additional local dependencies
+- A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
+    - State is maintained between consecutive execution of the same **task**
+- A *prjoect* is a series of related **tasks**, with possible depencencies
 
 # S3
 TBD
@@ -111,11 +112,11 @@ Hello, world!
 ## Task state and output
 
 ### State
-State is maintained between executions of the same task, i.e. between execution jobs that belongs to the same task.
+State is maintained between executions of the same **task**, i.e. between execution **jobs** that belongs to the same **task**.
 The local path is available in `args.state`. 
-When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the task as completed: `algo_lib.markCompleted(args)`. If all instances of the job mark it as completed, the task is assumed to be completed by that job, which allows:
+When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the **task** as completed: `algo_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
 1. To skip it next time (unlesss eforced otherwise)
-2. To use its output as input for other tasks (see below: ["Chaining tasks"](#Chaining-tasks))
+2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ### Output
 There're 3 main output mechanisms:
@@ -154,8 +155,8 @@ Hello, world!
 ```
 
 ## Providing input data
-Job can be configured to get a few data sources:
-* A single local path can be used with the `-i` argument. This path is synchronized to the *task* directory on the S3 bucket before running the task. On the **worker** side the data is accesible in `args.input_data`
+**Job** can be configured to get a few data sources:
+* A single local path can be used with the `-i` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `args.input_data`
 * Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `args.input_[name]` when [name] is the same one as was provided on the command line.
 * Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
 
@@ -216,8 +217,8 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 ## Chaining tasks
 The output of a completed **task** on the same **project** can be used as an input to another **task**, by using the `--iit [name] [task name] [output type]` command line parameter, where:
 - [name] - is the name of the input source, caccesible by the worker with `args.input_[name]`
-- [task name] - the name of the task whose output is used as input 
-- [output type] - the task output type, one of "model", "output", "state"
+- [task name] - the name of the **task** whose output is used as input 
+- [output type] - the **task** output type, one of "model", "output", "state"
 
 Using the output of *task3* and the same `worker4.py` code, we can now run:
 ```bash
@@ -251,11 +252,11 @@ TBD
 
 The idea is simple - 
 
-You define a series of *tasks* within a *project*, provide the code, define how the input and outputs flows through the *tasks*, set the running instance(s) parameters, and let simple-sagemaker do the rest
+You define a series of **tasks** within a **project**, provide the code, define how the input and outputs flows through the **tasks**, set the running instance(s) parameters, and let simple-sagemaker do the rest
 
 ## Single file example
 A [single file example](./examples/single_file/code/example.py) can be found in the [examples directory](./examples).
-First, define the runner:
+First, define the **runner**:
 ```python
 dockerFileContent = """
 # __BASE_IMAGE__ is automatically replaced with the correct base image
@@ -305,7 +306,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     shutil.rmtree(output_path, ignore_errors=True)
     sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 ```
-An additional *task* that depends on the previous one can now be scheduled as well:
+An additional **task** that depends on the previous one can now be scheduled as well:
 ```python
     # *** Task 2 - process the results of Task 1
     task2_name = "task2"
@@ -330,7 +331,7 @@ An additional *task* that depends on the previous one can now be scheduled as we
     return sm_project
 ```
 
-Then, the worker code (note: the same function is used for the two different tasks, depending on the `task` hyperparameter):
+Then, the worker code (note: the same function is used for the two different **tasks**, depending on the `task` hyperparameter):
 ```python
 def worker():
     from task_toolkit import algo_lib
@@ -367,7 +368,7 @@ def worker():
     logger.info("finished!")
 ```
 
-To pack everything in a single file, we use the command line argumen `--worker` (as defined in the `runner` function) to distinguish between runner and worker runs
+To pack everything in a single file, we use the command line argumen `--worker` (as defined in the `runner` function) to distinguish between **runner** and worker runs
 ```python
 import logging
 import shutil

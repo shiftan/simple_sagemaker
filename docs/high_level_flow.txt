@@ -1,5 +1,7 @@
+#https://sequencediagram.org/ asdf asdf asdf
+
 title High level flow
-actor "Client" as c
+actor "Client (**runner**)" as c
 
 database "ECS" as ecs #1da1f2
 fontawesome f0a0 "S3" as s3 #1da1f2
@@ -22,7 +24,7 @@ activate s1 #blue
 activate s2 #blue
 parallel off
 parallel
-note over s1, s2: The job is running.\ncode, data and state\nget mounted into it 
+note over s1, s2: The (**worker**) job is running.\nCode, data and state get\n mounted into it.
 deactivateafter s1
 deactivateafter s2
 parallel off
