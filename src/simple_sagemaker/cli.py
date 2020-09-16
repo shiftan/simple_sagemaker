@@ -260,7 +260,7 @@ def main():
         )
     )
 
-    #sm_project.createIAMRole()
+    sm_project.createIAMRole()
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
@@ -280,8 +280,8 @@ def main():
         args.task_name,
         image_uri,
         hyperparameters=hyperparameters,
-        input_data_path = input_data_path,
-        distribution = distribution,
+        input_data_path=input_data_path,
+        distribution=distribution,
         additional_inputs=inputs,
         tags=tags,
         **running_params,
