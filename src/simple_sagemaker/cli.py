@@ -33,8 +33,10 @@ TaskInputTuple = collections.namedtuple(
     "TaskInput", ("input_name", "task_name", "type", "distribution")
 )
 
+
 def help_for_input_type(tuple):
     return f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+
 
 class InputActionBase(argparse.Action):
     def __init__(self, option_strings, dest, tuple, nargs=None, **kwargs):
@@ -49,9 +51,13 @@ class InputActionBase(argparse.Action):
             values.append(default_dist)
         elif len(values) == self.__nargs:
             if values[-1] not in dist_options:
-                raise argparse.ArgumentTypeError(f"distribution has to be one of {dist_options}")    
+                raise argparse.ArgumentTypeError(
+                    f"distribution has to be one of {dist_options}"
+                )
         else:
-            raise argparse.ArgumentTypeError(f"{self.dest} has to contain {self.__nargs}/{self.__nargs+1} arguments")
+            raise argparse.ArgumentTypeError(
+                f"{self.dest} has to contain {self.__nargs}/{self.__nargs+1} arguments"
+            )
         value = self.__tuple(*values)
         if not args.__getattribute__(self.dest):
             setattr(args, self.dest, [value])
@@ -128,21 +134,21 @@ def parseArgs():
         "--input_path",
         "-i",
         action=InputAction,
-        help = help_for_input_type(InputTuple),
+        help=help_for_input_type(InputTuple),
         tuple=InputTuple,
     )
     parser.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
-        help = help_for_input_type(S3InputTuple),
+        help=help_for_input_type(S3InputTuple),
         tuple=S3InputTuple,
     )
     parser.add_argument(
         "--input_task",
         "--iit",
         action=TaskInputAction,
-        help = help_for_input_type(TaskInputTuple),
+        help=help_for_input_type(TaskInputTuple),
         tuple=TaskInputTuple,
     )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
@@ -173,20 +179,24 @@ def parseInputsAndAllowAccess(args, sm_project):
     if not args.input_task and not args.input_s3:
         return None
 
-    inputs = dict()
+    input_data_path = None
     distribution = "FullyReplicated"
+    if args.input_path:
+        input_data_path, distribution = args.input_path[0]
+
+    inputs = dict()
     if args.input_task:
-        for (input_name, task_name, ttype) in args.input_task:
-            inputs[input_name] = sm_project.getInputConfig(task_name, **{ttype: True})
+        for (input_name, task_name, ttype, distribution) in args.input_task:
+            inputs[input_name] = sm_project.getInputConfig(
+                task_name, **{ttype: True}, distribution=distribution
+            )
     if args.input_s3:
-        for (input_name, s3_uri) in args.input_s3:
+        for (input_name, s3_uri, distribution) in args.input_s3:
             bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
             sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
-        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", state=True)
-        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", output=True)
-    return inputs
+    return input_data_path, distribution, inputs
 
 
 def parseHyperparams(rest):
@@ -250,7 +260,7 @@ def main():
         )
     )
 
-    sm_project.createIAMRole()
+    #sm_project.createIAMRole()
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
@@ -258,20 +268,20 @@ def main():
     running_params = getAllParams(
         args,
         {
-            "input_path": "input_data_path",
             "clean_state": "clean_state",
         },
     )
 
-    inputs = parseInputsAndAllowAccess(args, sm_project)
+    input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
     tags = list()
 
     sm_project.runTask(
         args.task_name,
         image_uri,
-        distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters=hyperparameters,
+        input_data_path = input_data_path,
+        distribution = distribution,
         additional_inputs=inputs,
         tags=tags,
         **running_params,
