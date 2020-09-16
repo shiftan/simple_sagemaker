@@ -25,35 +25,64 @@ def fileOrS3Validation(parser, arg):
     return arg
 
 
-S3InputTuple = collections.namedtuple("S3Input", ("input_name", "s3_uri"))
-TaskInputTuple = collections.namedtuple("S3Input", ("input_name", "task_name", "type"))
+InputTuple = collections.namedtuple("Input", ("path", "distribution"))
+S3InputTuple = collections.namedtuple(
+    "S3Input", ("input_name", "s3_uri", "distribution")
+)
+TaskInputTuple = collections.namedtuple(
+    "TaskInput", ("input_name", "task_name", "type", "distribution")
+)
+
+def help_for_input_type(tuple):
+    return f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+
+class InputActionBase(argparse.Action):
+    def __init__(self, option_strings, dest, tuple, nargs=None, **kwargs):
+        self.__nargs = len(tuple._fields)
+        self.__tuple = tuple
+        super(InputActionBase, self).__init__(option_strings, dest, "+", **kwargs)
+
+    def __append__(self, args, values):
+        dist_options = ["FullyReplicated", "ShardedByS3Key"]
+        default_dist = "FullyReplicated"
+        if len(values) == self.__nargs - 1:
+            values.append(default_dist)
+        elif len(values) == self.__nargs:
+            if values[-1] not in dist_options:
+                raise argparse.ArgumentTypeError(f"distribution has to be one of {dist_options}")    
+        else:
+            raise argparse.ArgumentTypeError(f"{self.dest} has to contain {self.__nargs}/{self.__nargs+1} arguments")
+        value = self.__tuple(*values)
+        if not args.__getattribute__(self.dest):
+            setattr(args, self.dest, [value])
+        else:
+            args.__getattribute__(self.dest).append(value)
 
 
-class S3InputAction(argparse.Action):
+class InputAction(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
-        # print (f'{args} {values} {option_string}')
-        # print ("****", values)
+        if not os.path.exists(values[0]) and not values[0].startswith("s3://"):
+            raise ValueError(f"{values[1]} has to be a local/s3 path!")
+
+        self.__append__(args, values)
+
+
+class S3InputAction(InputActionBase):
+    def __call__(self, parser, args, values, option_string=None):
         if not values[1].startswith("s3://"):
             raise ValueError(f"{values[1]} has to be a s3 path!")
 
-        if not args.__getattribute__(self.dest):
-            setattr(args, self.dest, [S3InputTuple(*values)])
-        else:
-            args.__getattribute__(self.dest).append(S3InputTuple(*values))
+        self.__append__(args, values)
 
 
-class TaskInputAction(argparse.Action):
+class TaskInputAction(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
         # print (f'{args} {values} {option_string}')
         # print("****", values, hasattr(args, self.dest))
         taskInputTypes = ["state", "model", "source", "output"]
         if values[2] not in taskInputTypes:
             raise ValueError(f"{values[2]} has to be one of {taskInputTypes}!")
-
-        if not args.__getattribute__(self.dest):
-            setattr(args, self.dest, [TaskInputTuple(*values)])
-        else:
-            args.__getattribute__(self.dest).append(TaskInputTuple(*values))
+        self.__append__(args, values)
 
 
 def parseArgs():
@@ -96,21 +125,25 @@ def parseArgs():
     parser.add_argument("--docker_file", "--df")
     # run params
     parser.add_argument(
-        "--input_path", "-i", type=lambda x: fileOrS3Validation(parser, x)
+        "--input_path",
+        "-i",
+        action=InputAction,
+        help = help_for_input_type(InputTuple),
+        tuple=InputTuple,
     )
     parser.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
-        nargs=2,
-        metavar=S3InputTuple._fields,
+        help = help_for_input_type(S3InputTuple),
+        tuple=S3InputTuple,
     )
     parser.add_argument(
         "--input_task",
         "--iit",
         action=TaskInputAction,
-        nargs=3,
-        metavar=TaskInputTuple._fields,
+        help = help_for_input_type(TaskInputTuple),
+        tuple=TaskInputTuple,
     )
     parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
     parser.add_argument(
