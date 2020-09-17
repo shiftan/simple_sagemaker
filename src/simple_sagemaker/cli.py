@@ -128,7 +128,7 @@ def parseArgs():
     parser.add_argument("--aws_repo", "--ar")
     parser.add_argument("--repo_name", "--rn")
     parser.add_argument("--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG)
-    parser.add_argument("--docker_file", "--df")
+    parser.add_argument("--docker_file_path", "--df")
     # run params
     parser.add_argument(
         "--input_path",
@@ -255,7 +255,7 @@ def main():
                 "aws_repo": "aws_repo_name",
                 "repo_name": "repo_name",
                 "image_tag": "img_tag",
-                "docker_file": "docker_file_path_or_content",
+                "docker_file_path": "docker_file_path_or_content",
             },
         )
     )
