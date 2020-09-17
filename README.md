@@ -1,20 +1,19 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
 
-**Note: the (initial) work is still in progress...**
+**Note: this (initial) work is still in progress, currently warps [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) implementation...**
 
 ## Requirements
 
 1. Python 3.6+
-2. An AWS account credentials
+2. AWS account credentials
+3. Configuration of AWS credentials for boto3, as explained on [boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).
 
 ## Getting started
 To install *Simple Sagemaker*
 ```
 pip install simple-sagemaker
 ```
-
-The only additional step needed to configure the environment is to set the AWS credentials for boto3, as explained on [boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).
 
 Then, here's a very simple example.
 Assuming one would like to run the following `worker1.py` on the cloud:
@@ -29,7 +28,7 @@ It's as easy as running the following command to get it running on a *ml.p3.2xla
 ```bash
 ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge
 ```
-The output, including logs will be save to `./output/example1`. The relevant part from the log file is:
+The output, including logs is saved to `./output/example1`. The relevant part from the log file (`./output/example1/logs/logs0`) is:
 ```
 ...
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)

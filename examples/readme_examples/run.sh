@@ -10,7 +10,7 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $
 # Example 6_1 - a complete example part 1
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e $BASEDIR/example6/code/worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6/Dockerfile --repo_name "task6_repo", --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo", --aws_repo "task6_repo" \
     --task_type 1 -o $1/example6_1 ${@:4} &
 
 wait # wait for all processes
