@@ -68,9 +68,9 @@ def worker():
     # get the instance specific state path
     state_dir = algo_lib.initMultiWorkersState(args)
 
-    if int(args.hps["task"]) == 1:
+    if int(args.hps["task_type"]) == 1:
         worker1(args, state_dir)
-    elif int(args.hps["task"]) == 2:
+    elif int(args.hps["task_type"]) == 2:
         worker2(args, state_dir)
 
     # mark the task as completed
