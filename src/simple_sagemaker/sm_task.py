@@ -10,7 +10,7 @@ from sagemaker.inputs import TrainingInput
 from sagemaker.processing import ProcessingOutput, ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
 
-from . import constants
+from . import VERSION, constants
 from .s3_sync import S3Sync
 
 logger = logging.getLogger(__name__)
@@ -125,7 +125,9 @@ class SageMakerTask:
         maxWait=None,
         volume_size=30,
         max_run=24 * 60 * 60,
+        tags=[],
         distribution="FullyReplicated",
+        **additionalEstimatorArgs,
     ):
         """
         Runs a training job
@@ -150,6 +152,9 @@ class SageMakerTask:
         # append the internal dependencies
         dependencies.extend(self.internalDependencies)
 
+        tags.append({"Key": "SimpleSagemakerTask", "Value": self.task_name})
+        tags.append({"Key": "SimpleSagemakerVersion", "Value": VERSION})
+
         pytorch_estimator = PyTorch(
             entry_point=entryPoint,
             source_dir=source_dir,
@@ -170,6 +175,8 @@ class SageMakerTask:
             model_uri=model_uri,
             use_spot_instances=use_spot_instances,
             max_wait=maxWait,
+            tags=tags,
+            **additionalEstimatorArgs,
         )
         inputs = dict()
         if self.inputS3Uri:

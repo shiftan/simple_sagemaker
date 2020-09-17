@@ -25,98 +25,228 @@ def fileOrS3Validation(parser, arg):
     return arg
 
 
-S3InputTuple = collections.namedtuple("S3Input", ("input_name", "s3_uri"))
-TaskInputTuple = collections.namedtuple("S3Input", ("input_name", "task_name", "type"))
+InputTuple = collections.namedtuple("Input", ("path", "distribution"))
+S3InputTuple = collections.namedtuple(
+    "S3Input", ("input_name", "s3_uri", "distribution")
+)
+TaskInputTuple = collections.namedtuple(
+    "TaskInput", ("input_name", "task_name", "type", "distribution")
+)
 
 
-class S3InputAction(argparse.Action):
+def help_for_input_type(tuple, additional_text=""):
+    res = f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+    if additional_text:
+        res += "\n" + additional_text
+    return res
+
+
+class InputActionBase(argparse.Action):
+    def __init__(self, option_strings, dest, tuple, nargs=None, **kwargs):
+        self.__nargs = len(tuple._fields)
+        self.__tuple = tuple
+        super(InputActionBase, self).__init__(option_strings, dest, "+", **kwargs)
+
+    def __append__(self, args, values):
+        dist_options = ["FullyReplicated", "ShardedByS3Key"]
+        default_dist = "FullyReplicated"
+        if len(values) == self.__nargs - 1:
+            values.append(default_dist)
+        elif len(values) == self.__nargs:
+            if values[-1] not in dist_options:
+                raise argparse.ArgumentTypeError(
+                    f"distribution has to be one of {dist_options}"
+                )
+        else:
+            raise argparse.ArgumentTypeError(
+                f"{self.dest} has to contain {self.__nargs}/{self.__nargs-1} arguments, got {values}"
+            )
+        value = self.__tuple(*values)
+        if not args.__getattribute__(self.dest):
+            setattr(args, self.dest, [value])
+        else:
+            args.__getattribute__(self.dest).append(value)
+
+
+class InputAction(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
-        # print (f'{args} {values} {option_string}')
-        # print ("****", values)
+        if not os.path.exists(values[0]) and not values[0].startswith("s3://"):
+            raise ValueError(f"{values[1]} has to be a local/s3 path!")
+
+        self.__append__(args, values)
+
+
+class S3InputAction(InputActionBase):
+    def __call__(self, parser, args, values, option_string=None):
         if not values[1].startswith("s3://"):
             raise ValueError(f"{values[1]} has to be a s3 path!")
 
-        if not args.__getattribute__(self.dest):
-            setattr(args, self.dest, [S3InputTuple(*values)])
-        else:
-            args.__getattribute__(self.dest).append(S3InputTuple(*values))
+        self.__append__(args, values)
 
 
-class TaskInputAction(argparse.Action):
+class TaskInputAction(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
         # print (f'{args} {values} {option_string}')
         # print("****", values, hasattr(args, self.dest))
         taskInputTypes = ["state", "model", "source", "output"]
         if values[2] not in taskInputTypes:
             raise ValueError(f"{values[2]} has to be one of {taskInputTypes}!")
-
-        if not args.__getattribute__(self.dest):
-            setattr(args, self.dest, [TaskInputTuple(*values)])
-        else:
-            args.__getattribute__(self.dest).append(TaskInputTuple(*values))
+        self.__append__(args, values)
 
 
 def parseArgs():
     parser = configargparse.ArgParser(
-        config_file_parser_class=configargparse.DefaultConfigFileParser
+        config_file_parser_class=configargparse.DefaultConfigFileParser,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     # general
-    parser.add("--config-file", "-c", is_config_file=True, help="config file path")
-    parser.add_argument("--project_name", "-p", required=True)
-    parser.add_argument("--task_name", "-t", required=True)
-    parser.add_argument("--bucket_name", "-b")
-    # coding params
-    parser.add_argument("--source_dir", "-s", type=lambda x: fileValidation(parser, x))
+    parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
+    parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     parser.add_argument(
-        "--entry_point", "-e", required=True, type=lambda x: fileValidation(parser, x)
+        "--bucket_name",
+        "-b",
+        help="S3 bucket name (a default one is used if not given).",
+    )
+    # coding params
+    parser.add_argument(
+        "--source_dir",
+        "-s",
+        type=lambda x: fileValidation(parser, x),
+        help="""Path (absolute, relative or an S3 URI) to a directory with any other source
+        code dependencies aside from the entry point file. If source_dir is an S3 URI,
+        it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     parser.add_argument(
-        "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
+        "--entry_point",
+        "-e",
+        required=True,
+        # type=lambda x: fileValidation(parser, x),
+        help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+        If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
+    )
+    parser.add_argument(
+        "--dependencies",
+        "-d",
+        nargs="+",
+        type=lambda x: fileValidation(parser, x),
+        help="""aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+        Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     # instance params
     parser.add_argument(
-        "--instance_type", "--it", default=constants.DEFAULT_INSTANCE_TYPE
+        "--instance_type",
+        "--it",
+        default=constants.DEFAULT_INSTANCE_TYPE,
+        help="Type of EC2 instance to use.",
     )
     parser.add_argument(
-        "--instance_count", "--ic", type=int, default=constants.DEFAULT_INSTANCE_COUNT
+        "--instance_count",
+        "--ic",
+        type=int,
+        default=constants.DEFAULT_INSTANCE_COUNT,
+        help="Number of EC2 instances to use.",
     )
     parser.add_argument(
-        "--volume_size", "-v", type=int, default=constants.DEFAULT_VOLUME_SIZE
+        "--volume_size",
+        "-v",
+        type=int,
+        default=constants.DEFAULT_VOLUME_SIZE,
+        help="""Size in GB of the EBS volume to use for storing input data.
+        Must be large enough to store input data.""",
     )
-    parser.add_argument("--no_spot", dest="use_spot", action="store_false")
-    parser.add_argument("--use_spot", dest="use_spot", action="store_true")
+    parser.add_argument(
+        "--no_spot",
+        dest="use_spot",
+        action="store_false",
+        help="Use on demand instances",
+    )
+    parser.add_argument(
+        "--use_spot",
+        dest="use_spot",
+        action="store_true",
+        help="""Specifies whether to use SageMaker Managed Spot instances.
+    If enabled then the max_wait arg should also be set""",
+    )
     parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
-    parser.add_argument("--max_wait", type=int, default=constants.DEFAULT_MAX_WAIT)
-    parser.add_argument("--max_run", type=int, default=constants.DEFAULT_MAX_RUN)
+    parser.add_argument(
+        "--max_wait",
+        type=int,
+        default=constants.DEFAULT_MAX_WAIT,
+        help="""Timeout in seconds waiting for spot instances.
+        After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.""",
+    )
+    parser.add_argument(
+        "--max_run",
+        type=int,
+        default=constants.DEFAULT_MAX_RUN,
+        help="""Timeout in seconds for running.
+        After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
+    )
     # image params
-    parser.add_argument("--aws_repo", "--ar")
-    parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG)
-    parser.add_argument("--docker_file", "--df")
+    parser.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
+    parser.add_argument("--repo_name", "--rn", help="Name of local repository.")
+    parser.add_argument(
+        "--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+    )
+    parser.add_argument(
+        "--docker_file_path",
+        "--df",
+        help="Path to a directory containing the DockerFile",
+    )
     # run params
     parser.add_argument(
-        "--input_path", "-i", type=lambda x: fileOrS3Validation(parser, x)
+        "--input_path",
+        "-i",
+        action=InputAction,
+        help=help_for_input_type(
+            InputTuple,
+            """Local/s3 path for the input data.
+        If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.""",
+        ),
+        tuple=InputTuple,
     )
     parser.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
-        nargs=2,
-        metavar=S3InputTuple._fields,
+        help=help_for_input_type(
+            S3InputTuple, "Additional S3 input sources (a few can be given)."
+        ),
+        tuple=S3InputTuple,
     )
     parser.add_argument(
         "--input_task",
         "--iit",
         action=TaskInputAction,
-        nargs=3,
-        metavar=TaskInputTuple._fields,
+        help=help_for_input_type(
+            TaskInputTuple,
+            "Use an output of a completed task in the same project as an input source (a few can be given).",
+        ),
+        tuple=TaskInputTuple,
     )
-    parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
     parser.add_argument(
-        "--keep_state", "--ks", action="store_false", dest="clean_state"
+        "--clean_state",
+        "--cs",
+        default=False,
+        action="store_true",
+        help="Clear the task state before running it. The task will be running again even if it was already completed before.",
     )
-    parser.add_argument("--output_path", "-o", default=None)
+    parser.add_argument(
+        "--keep_state",
+        "--ks",
+        action="store_false",
+        dest="clean_state",
+        help="Keep the current task state. If the task is already completed, its current output will \
+             be taken without runnin it again",
+    )
+    parser.add_argument(
+        "--output_path",
+        "-o",
+        default=None,
+        help="Local path to download the outputs to.",
+    )
 
     args, rest = parser.parse_known_args()
     return args, rest
@@ -137,23 +267,24 @@ def getAllParams(args, mapping):
 
 
 def parseInputsAndAllowAccess(args, sm_project):
-    if not args.input_task and not args.input_s3:
-        return None
+    input_data_path = None
+    distribution = "FullyReplicated"
+    if args.input_path:
+        input_data_path, distribution = args.input_path[0]
 
     inputs = dict()
-    distribution = "FullyReplicated"
     if args.input_task:
-        for (input_name, task_name, ttype) in args.input_task:
-            inputs[input_name] = sm_project.getInputConfig(task_name, **{ttype: True})
+        for (input_name, task_name, ttype, distribution) in args.input_task:
+            inputs[input_name] = sm_project.getInputConfig(
+                task_name, **{ttype: True}, distribution=distribution
+            )
     if args.input_s3:
-        for (input_name, s3_uri) in args.input_s3:
+        for (input_name, s3_uri, distribution) in args.input_s3:
             bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
             sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
-        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", state=True)
-        # sm_project.getInputConfig(task_name, distribution="ShardedByS3Key", output=True)
-    return inputs
+    return input_data_path, distribution, inputs
 
 
 def parseHyperparams(rest):
@@ -212,7 +343,7 @@ def main():
                 "aws_repo": "aws_repo_name",
                 "repo_name": "repo_name",
                 "image_tag": "img_tag",
-                "docker_file": "docker_file_path_or_content",
+                "docker_file_path": "docker_file_path_or_content",
             },
         )
     )
@@ -225,20 +356,22 @@ def main():
     running_params = getAllParams(
         args,
         {
-            "input_path": "input_data_path",
             "clean_state": "clean_state",
         },
     )
 
-    inputs = parseInputsAndAllowAccess(args, sm_project)
+    input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
+    tags = list()
 
     sm_project.runTask(
         args.task_name,
         image_uri,
-        distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters=hyperparameters,
+        input_data_path=input_data_path,
+        distribution=distribution,
         additional_inputs=inputs,
+        tags=tags,
         **running_params,
     )
 

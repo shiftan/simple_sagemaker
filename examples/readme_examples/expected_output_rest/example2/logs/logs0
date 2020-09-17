@@ -1,0 +1,85 @@
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control in this shell
+2020-09-14 21:46:30,898 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-09-14 21:46:30,901 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-14 21:46:30,910 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-09-14 21:46:32,341 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-09-14 21:46:32,613 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-14 21:46:32,625 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-14 21:46:32,638 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-14 21:46:32,648 sagemaker-training-toolkit INFO     Invoking user script
+
+Training Env:
+
+{
+    "additional_framework_parameters": {},
+    "channel_input_dirs": {},
+    "current_host": "algo-1",
+    "framework_module": "sagemaker_pytorch_container.training:main",
+    "hosts": [
+        "algo-1"
+    ],
+    "hyperparameters": {
+        "msg": "Hello, world!"
+    },
+    "input_config_dir": "/opt/ml/input/config",
+    "input_data_config": {},
+    "input_dir": "/opt/ml/input",
+    "is_master": true,
+    "job_name": "task2-2020-09-14-21-43-32-oKDGLvk6",
+    "log_level": 20,
+    "master_hostname": "algo-1",
+    "model_dir": "/opt/ml/model",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/readme/simple-sagemaker-example-cli/task2/task2-2020-09-14-21-43-32-oKDGLvk6/source/sourcedir.tar.gz",
+    "module_name": "worker2",
+    "network_interface_name": "eth0",
+    "num_cpus": 2,
+    "num_gpus": 0,
+    "output_data_dir": "/opt/ml/output/data",
+    "output_dir": "/opt/ml/output",
+    "output_intermediate_dir": "/opt/ml/output/intermediate",
+    "resource_config": {
+        "current_host": "algo-1",
+        "hosts": [
+            "algo-1"
+        ],
+        "network_interface_name": "eth0"
+    },
+    "user_entry_point": "worker2.py"
+}
+
+Environment variables:
+
+SM_HOSTS=["algo-1"]
+SM_NETWORK_INTERFACE_NAME=eth0
+SM_HPS={"msg":"Hello, world!"}
+SM_USER_ENTRY_POINT=worker2.py
+SM_FRAMEWORK_PARAMS={}
+SM_RESOURCE_CONFIG={"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"}
+SM_INPUT_DATA_CONFIG={}
+SM_OUTPUT_DATA_DIR=/opt/ml/output/data
+SM_CHANNELS=[]
+SM_CURRENT_HOST=algo-1
+SM_MODULE_NAME=worker2
+SM_LOG_LEVEL=20
+SM_FRAMEWORK_MODULE=sagemaker_pytorch_container.training:main
+SM_INPUT_DIR=/opt/ml/input
+SM_INPUT_CONFIG_DIR=/opt/ml/input/config
+SM_OUTPUT_DIR=/opt/ml/output
+SM_NUM_CPUS=2
+SM_NUM_GPUS=0
+SM_MODEL_DIR=/opt/ml/model
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/readme/simple-sagemaker-example-cli/task2/task2-2020-09-14-21-43-32-oKDGLvk6/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1"],"hyperparameters":{"msg":"Hello, world!"},"input_config_dir":"/opt/ml/input/config","input_data_config":{},"input_dir":"/opt/ml/input","is_master":true,"job_name":"task2-2020-09-14-21-43-32-oKDGLvk6","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/readme/simple-sagemaker-example-cli/task2/task2-2020-09-14-21-43-32-oKDGLvk6/source/sourcedir.tar.gz","module_name":"worker2","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"},"user_entry_point":"worker2.py"}
+SM_USER_ARGS=["--msg","Hello, world!"]
+SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
+SM_HP_MSG=Hello, world!
+PYTHONPATH=/opt/ml/code:/opt/conda/bin:/opt/conda/lib/python36.zip:/opt/conda/lib/python3.6:/opt/conda/lib/python3.6/lib-dynload:/opt/conda/lib/python3.6/site-packages
+
+Invoking script with the following command:
+
+/opt/conda/bin/python worker2.py --msg Hello, world!
+
+
+-***- Hello, world!
+2020-09-14 21:46:32,715 sagemaker-training-toolkit INFO     Reporting training SUCCESS

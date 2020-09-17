@@ -1,0 +1,39 @@
+#https://sequencediagram.org/ asdf asdf asdf
+
+title High level flow
+actor "Client (**runner**)" as c
+
+database "ECS" as ecs #1da1f2
+fontawesome f0a0 "S3" as s3 #1da1f2
+control "SageMaker" as sm #1da1f2
+fontawesome f233 "EC2 instance 1" as s1 #1da1f2
+fontawesome f233 "EC2 instance 2" as s2 #1da1f2
+c->ecs: docker image
+c->s3: code, data
+c->sm: job params
+sm<->ecs: download image
+sm<->s3: download code, data, state
+sm->*s1: start (params, code, data, state)
+sm->*s2: start (params, code, data, state)
+parallel
+s1->s1: run docker image
+s2->s2: run docker image
+parallel off
+parallel
+activate s1 #blue
+activate s2 #blue
+parallel off
+parallel
+note over s1, s2: The (**worker**) job is running.\nCode, data and state get\n mounted into it.
+deactivateafter s1
+deactivateafter s2
+parallel off
+s1->sm: output, model, state
+destroysilent s1
+s2->sm: output, model, state
+destroysilent s2
+sm->sm: merge output, model, state
+sm->s3: merged output, model, state
+c<->s3: download merged output, model, state
+
+
