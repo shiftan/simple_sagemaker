@@ -12,11 +12,13 @@ from task_toolkit import algo_lib
 logger = logging.getLogger(__name__)
 
 
-def listDir(path, ignore_pattern=""):
+def listDir(path, ignore_patterns=[]):
     logger.info(f"*** START listing files in {path}")
     for file in sorted(Path(path).rglob("*")):
-        if (not ignore_pattern) or (ignore_pattern not in str(file)):
-            logger.info(file)
+        if (not ignore_patterns) or all(
+            [pattern not in str(file) for pattern in ignore_patterns]
+        ):
+            logger.info(f"[{['Dir ', 'File'][file.is_dir()]}] {file}")
     logger.info(f"*** END file listing {path}")
 
 
@@ -31,7 +33,7 @@ def worker1(args, state_dir):
     # "process" input data into model output
     for file in Path(args.input_data).rglob("*"):
         relp = file.relative_to(args.input_data)
-        path = Path(args.model_dir) / (f"{relp} _proc_by_ {args.current_host}")
+        path = Path(args.model_dir) / (f"{relp}_proc_by_{args.current_host}")
         path.write_text(f"{file.read_text()} processed by {args.current_host}")
     # write to output dir
     (Path(args.output_data_dir) / f"output_{args.current_host}").write_text(
@@ -50,13 +52,13 @@ def show_inputs(args, state_dir):
         input_path = args.__getattribute__(f"input_{channel_name}")
         logger.info(f"input channel {channel_name} is at {input_path}")
 
-    listDir("/opt/ml")
+    listDir("/opt/ml", ["__pycache__"])
     listDir(args.state)
 
 
 def show_output(args, state_dir):
     # show the final directory structue
-    listDir("/opt/ml", "/opt/ml/input")
+    listDir("/opt/ml", ["/opt/ml/input", "/opt/ml/code", "__pycache__"])
     listDir(args.state)
 
 
