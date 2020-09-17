@@ -56,8 +56,8 @@ def show_inputs(args, state_dir):
 
 def show_output(args, state_dir):
     # show the final directory structue
-    listDir("/opt/ml")
-    listDir(args.state, "/opt/ml/input")
+    listDir("/opt/ml", "/opt/ml/input")
+    listDir(args.state)
 
 
 def worker():
@@ -67,6 +67,7 @@ def worker():
     args = algo_lib.parseArgs()
     # get the instance specific state path
     state_dir = algo_lib.initMultiWorkersState(args)
+    show_inputs(args, state_dir)
 
     if int(args.hps["task_type"]) == 1:
         worker1(args, state_dir)
@@ -75,6 +76,7 @@ def worker():
 
     # mark the task as completed
     algo_lib.markCompleted(args)
+    show_output(args, state_dir)
 
     logger.info("finished!")
 
