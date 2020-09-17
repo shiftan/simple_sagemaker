@@ -3,6 +3,7 @@ set -e # fail if any test fails
 
 # Params: [output] [prefix] [suffix] [additional ssm params...]
 BASEDIR=$(dirname "$0")
+echo "Running with", $@
 
 # Example 1 - hello world
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $1/example1 --it ml.p3.2xlarge ${@:4} &
@@ -24,7 +25,7 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code
 # running task6_1 again with --ks (keep state) to demonstrate tgat existing output is used, without running the task again
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo", --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
     --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_2_stdout --ks &
 
 
