@@ -27,3 +27,16 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task3 -e $BASEDIR/worker3.py -o $
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task5 -e $BASEDIR/worker4.py --iit bucket task3 model -o $1/example5 ${@:4} &
 
 wait # wait for all processes
+
+# Example 6_1 - a complete example
+#--df $BASEDIR/example6/Dockerfile \
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e $BASEDIR/example6/code/worker6.py \
+    -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
+    -o $1/example6_1 ${@:4}
+# Example 6_2 - a complete example
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code -e $BASEDIR/example6/code/worker6.py \
+    -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
+     -o $1/example5 ${@:4} --ks
+
+
+wait # wait for all processes
