@@ -34,8 +34,11 @@ TaskInputTuple = collections.namedtuple(
 )
 
 
-def help_for_input_type(tuple):
-    return f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+def help_for_input_type(tuple, additional_text=""):
+    res = f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+    if additional_text:
+        res += "\n" + additional_text
+    return res
 
 
 class InputActionBase(argparse.Action):
@@ -93,82 +96,157 @@ class TaskInputAction(InputActionBase):
 
 def parseArgs():
     parser = configargparse.ArgParser(
-        config_file_parser_class=configargparse.DefaultConfigFileParser
+        config_file_parser_class=configargparse.DefaultConfigFileParser,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     # general
-    parser.add("--config-file", "-c", is_config_file=True, help="config file path")
-    parser.add_argument("--project_name", "-p", required=True, help="project name")
-    parser.add_argument("--task_name", "-t", required=True, help="task name")
+    parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
+    parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     parser.add_argument(
         "--bucket_name",
         "-b",
-        help="S3 bucket name (a default one is used if not given)",
+        help="S3 bucket name (a default one is used if not given).",
     )
     # coding params
     parser.add_argument(
         "--source_dir",
         "-s",
         type=lambda x: fileValidation(parser, x),
-        help="directory containing the source code for this task",
+        help="""Path (absolute, relative or an S3 URI) to a directory with any other source
+        code dependencies aside from the entry point file. If source_dir is an S3 URI,
+        it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     parser.add_argument(
         "--entry_point",
         "-e",
         required=True,
         # type=lambda x: fileValidation(parser, x),
-        help="the entry point for this task. ",
+        help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+        If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
     )
     parser.add_argument(
-        "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
+        "--dependencies",
+        "-d",
+        nargs="+",
+        type=lambda x: fileValidation(parser, x),
+        help="""aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+        Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     # instance params
     parser.add_argument(
-        "--instance_type", "--it", default=constants.DEFAULT_INSTANCE_TYPE
+        "--instance_type",
+        "--it",
+        default=constants.DEFAULT_INSTANCE_TYPE,
+        help="Type of EC2 instance to use.",
     )
     parser.add_argument(
-        "--instance_count", "--ic", type=int, default=constants.DEFAULT_INSTANCE_COUNT
+        "--instance_count",
+        "--ic",
+        type=int,
+        default=constants.DEFAULT_INSTANCE_COUNT,
+        help="Number of EC2 instances to use.",
     )
     parser.add_argument(
-        "--volume_size", "-v", type=int, default=constants.DEFAULT_VOLUME_SIZE
+        "--volume_size",
+        "-v",
+        type=int,
+        default=constants.DEFAULT_VOLUME_SIZE,
+        help="""Size in GB of the EBS volume to use for storing input data.
+        Must be large enough to store input data.""",
     )
-    parser.add_argument("--no_spot", dest="use_spot", action="store_false")
-    parser.add_argument("--use_spot", dest="use_spot", action="store_true")
+    parser.add_argument(
+        "--no_spot",
+        dest="use_spot",
+        action="store_false",
+        help="Use on demand instances",
+    )
+    parser.add_argument(
+        "--use_spot",
+        dest="use_spot",
+        action="store_true",
+        help="""Specifies whether to use SageMaker Managed Spot instances.
+    If enabled then the max_wait arg should also be set""",
+    )
     parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
-    parser.add_argument("--max_wait", type=int, default=constants.DEFAULT_MAX_WAIT)
-    parser.add_argument("--max_run", type=int, default=constants.DEFAULT_MAX_RUN)
+    parser.add_argument(
+        "--max_wait",
+        type=int,
+        default=constants.DEFAULT_MAX_WAIT,
+        help="""Timeout in seconds waiting for spot instances.
+        After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.""",
+    )
+    parser.add_argument(
+        "--max_run",
+        type=int,
+        default=constants.DEFAULT_MAX_RUN,
+        help="""Timeout in seconds for running.
+        After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
+    )
     # image params
-    parser.add_argument("--aws_repo", "--ar")
-    parser.add_argument("--repo_name", "--rn")
-    parser.add_argument("--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG)
-    parser.add_argument("--docker_file_path", "--df")
+    parser.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
+    parser.add_argument("--repo_name", "--rn", help="Name of local repository.")
+    parser.add_argument(
+        "--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+    )
+    parser.add_argument(
+        "--docker_file_path",
+        "--df",
+        help="Path to a directory containing the DockerFile",
+    )
     # run params
     parser.add_argument(
         "--input_path",
         "-i",
         action=InputAction,
-        help=help_for_input_type(InputTuple),
+        help=help_for_input_type(
+            InputTuple,
+            """Local/s3 path for the input data.
+        If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.""",
+        ),
         tuple=InputTuple,
     )
     parser.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
-        help=help_for_input_type(S3InputTuple),
+        help=help_for_input_type(
+            S3InputTuple, "Additional S3 input sources (a few can be given)."
+        ),
         tuple=S3InputTuple,
     )
     parser.add_argument(
         "--input_task",
         "--iit",
         action=TaskInputAction,
-        help=help_for_input_type(TaskInputTuple),
+        help=help_for_input_type(
+            TaskInputTuple,
+            "Use an output of a completed task in the same project as an input source (a few can be given).",
+        ),
         tuple=TaskInputTuple,
     )
-    parser.add_argument("--clean_state", "--cs", default=False, action="store_true")
     parser.add_argument(
-        "--keep_state", "--ks", action="store_false", dest="clean_state"
+        "--clean_state",
+        "--cs",
+        default=False,
+        action="store_true",
+        help="Clear the task state before running it. The task will be running again even if it was already completed before.",
     )
-    parser.add_argument("--output_path", "-o", default=None)
+    parser.add_argument(
+        "--keep_state",
+        "--ks",
+        action="store_false",
+        dest="clean_state",
+        help="Keep the current task state. If the task is already completed, its current output will \
+             be taken without runnin it again",
+    )
+    parser.add_argument(
+        "--output_path",
+        "-o",
+        default=None,
+        help="Local path to download the outputs to.",
+    )
 
     args, rest = parser.parse_known_args()
     return args, rest
