@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def listDir(path, ignore_pattern=""):
     logger.info(f"*** START listing files in {path}")
     for file in sorted(Path(path).rglob("*")):
-        if (not ignore_pattern) or (ignore_pattern not in file):
+        if (not ignore_pattern) or (ignore_pattern not in str(file)):
             logger.info(file)
     logger.info(f"*** END file listing {path}")
 
