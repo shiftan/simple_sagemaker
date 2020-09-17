@@ -79,7 +79,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     assert isAsExpected(output_path, expected_path)
 
 
-def test_cli_multi(caplog, tmp_path):
+def skip_test_cli_multi(caplog, tmp_path):
     _internalTestCli("cli_multi", caplog, tmp_path)
 
 

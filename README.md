@@ -1,5 +1,5 @@
 # Simple Sagemaker 
-A **very simple** way to run your python code on the cloud (AWS).
+A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
 
 **Note: the (initial) work is still in progress...**
 
@@ -36,6 +36,11 @@ The output, including logs will be save to `./output/example1`. The relevant par
 ...
 ```
 
+And now to a real advanced and fully featured version, yet simple to implement:
+TBD
+```python
+```
+
 ## More examples (below)
 Command line based examples:
 - [Passing command line arguments](#Passing-command-line-arguments)
@@ -49,20 +54,21 @@ Code only:
 - [Single file example](#Single-file-example)
 
 # Main features
-1. Except for having an AWS account, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :), including
-    - Jobs IAM role creation, including policies for accesing specific S3 buckets
+1. Simpler - Except for holding and AWS account credentials, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :). Behind the scenes you get:
+    - Jobs IAM role creation, including policies for accesing needed S3 buckets
     - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
     - Downloading the results from S3
-2. Save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) - spot instances are used by default! (see [pricing](https://aws.amazon.com/sagemaker/pricing))
+    - ...
+2. Cheaper - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
 3. Abstraction of how data is maintianed on AWS (S3 service)
     - No need to mess with S3 paths, the data is automatically
     - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
 4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
 5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named ***ssm***) to control the execution (a.k.a implement the **runner**, see below)
-    - In most cases it's only about getting the environment configuration, i.e. input/output/state paths and running parameters
-6. Easily customize the docker image (based on a pre-built one)
-7. The rest of the SageMaker advantages, which  (mostly) behaves "normally" as defined by AWS, e.g.
+    - In most cases it's only about 2 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
+6. Easy customization of the docker image (based on a pre-built one)
+7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
     - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
     - (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
 
