@@ -116,7 +116,7 @@ def parseArgs():
         "--entry_point",
         "-e",
         required=True,
-        type=lambda x: fileValidation(parser, x),
+        # type=lambda x: fileValidation(parser, x),
         help="the entry point for this task. ",
     )
     parser.add_argument(
