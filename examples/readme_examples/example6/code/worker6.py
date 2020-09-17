@@ -22,7 +22,7 @@ def listDir(path, ignore_pattern):
 
 def worker1(args, state_dir):
     # a library that is pre-installed in the docker image, as defined in the Dockerfile
-    import pandas # noqa: F401
+    import pandas  # noqa: F401
 
     logger.info("{pandas} is pre-installed in this image")
 
