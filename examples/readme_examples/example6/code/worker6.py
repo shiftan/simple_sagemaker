@@ -12,10 +12,10 @@ from task_toolkit import algo_lib
 logger = logging.getLogger(__name__)
 
 
-def listDir(path, ignore_pattern):
+def listDir(path, ignore_pattern=""):
     logger.info(f"*** START listing files in {path}")
     for file in sorted(Path(path).rglob("*")):
-        if ignore_pattern not in file:
+        if (not ignore_pattern) or (ignore_pattern not in file):
             logger.info(file)
     logger.info(f"*** END file listing {path}")
 
