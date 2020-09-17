@@ -56,7 +56,7 @@ class InputActionBase(argparse.Action):
                 )
         else:
             raise argparse.ArgumentTypeError(
-                f"{self.dest} has to contain {self.__nargs}/{self.__nargs+1} arguments"
+                f"{self.dest} has to contain {self.__nargs}/{self.__nargs-1} arguments, got {values}"
             )
         value = self.__tuple(*values)
         if not args.__getattribute__(self.dest):

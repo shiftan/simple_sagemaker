@@ -1,13 +1,12 @@
 import logging
-import subprocess
 import sys
 from pathlib import Path
 
 # a library that was installed due to requirements.txt
-import transformers
+import transformers  # noqa: F401
 
 # importing an internal dependency
-from internal_dependency import lib2
+from internal_dependency import lib2  # noqa: F401
 from task_toolkit import algo_lib
 
 logger = logging.getLogger(__name__)
@@ -23,9 +22,9 @@ def listDir(path, ignore_pattern):
 
 def worker1(args, state_dir):
     # a library that is pre-installed in the docker image, as defined in the Dockerfile
-    #import pandas
+    import pandas # noqa: F401
 
-    #logger.info("{pandas} is pre-installed in this image")
+    logger.info("{pandas} is pre-installed in this image")
 
     # update the state
     (Path(state_dir) / args.current_host).write_text(f"state_{args.current_host}")
@@ -42,7 +41,7 @@ def worker1(args, state_dir):
 
 def worker2(args, state_dir):
     # importing an external dependency
-    from external_dependency import lib1
+    from external_dependency import lib1  # noqa: F401
 
 
 def show_inputs(args, state_dir):
