@@ -80,4 +80,4 @@ def worker():
 
 
 if __name__ == "__main__":
-    worker
+    worker()
