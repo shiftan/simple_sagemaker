@@ -1,0 +1,102 @@
+INFO:simple_sagemaker.cli:Running ssm cli, args:['/home/runner/work/simple_sagemaker/simple_sagemaker/.tox/py/bin/ssm', '-p', 'tests/simple-sagemaker-example-cli_2020-09-17-07-05-30_py37', '-t', 'task6-1', '-s', '/home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/code', '-e', 'worker6.py', '-i', '/home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data', 'ShardedByS3Key', '--iis', 'persons', 's3://awsglue-datasets/examples/us-legislators/all/persons.json', '--df', '/home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6', '--repo_name', 'task6_repo', '--aws_repo', 'task6_repo', '--ic', '2', '--task_type', '1', '-o', '/home/runner/work/simple_sagemaker/simple_sagemaker/.tox/py/tmp/popen-gw3/test_readme_examples0/output/example6_1', '--cs', '--ks']
+INFO:botocore.credentials:Found credentials in environment variables.
+INFO:simple_sagemaker.iam_utils:Creating SageMaker IAM Role: SageMakerIAMRole with an attached AmazonSageMakerFullAccess policy...
+INFO:root:Building # 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3 is automatically replaced with the correct base image
+FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3 
+RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3
+ to task6_repo:latest and pushing to task6_repo...
+INFO:root:Tagging and pushing the image...
+INFO:root:{'status': 'The push refers to repository [667232328135.dkr.ecr.us-east-1.amazonaws.com/task6_repo]'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '6e02cdf87ae5'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'a0b401464be6'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '18f494d3b3bb'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'fffae3b5044c'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '9444aacb7453'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'eef2eaf7cc36'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '037c269ebf9f'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '102783b752b3'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'dcc0cc99372e'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '87c128261339'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': '41a253a417e6'}
+INFO:root:{'status': 'Preparing', 'progressDetail': {}, 'id': 'e06660e80cf4'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': '102783b752b3'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': '9444aacb7453'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': 'eef2eaf7cc36'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': '037c269ebf9f'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': '41a253a417e6'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': 'dcc0cc99372e'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': '87c128261339'}
+INFO:root:{'status': 'Waiting', 'progressDetail': {}, 'id': 'e06660e80cf4'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '6e02cdf87ae5'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '18f494d3b3bb'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': 'a0b401464be6'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': 'fffae3b5044c'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': 'eef2eaf7cc36'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '9444aacb7453'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '102783b752b3'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '037c269ebf9f'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': 'dcc0cc99372e'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 557056, 'total': 87203390}, 'progress': '[>                                                  ]  557.1kB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '87c128261339'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': '41a253a417e6'}
+INFO:root:{'status': 'Layer already exists', 'progressDetail': {}, 'id': 'e06660e80cf4'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 2216448, 'total': 87203390}, 'progress': '[=>                                                 ]  2.216MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 3827712, 'total': 87203390}, 'progress': '[==>                                                ]  3.828MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 5446144, 'total': 87203390}, 'progress': '[===>                                               ]  5.446MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 7117312, 'total': 87203390}, 'progress': '[====>                                              ]  7.117MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 9326080, 'total': 87203390}, 'progress': '[=====>                                             ]  9.326MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 10964992, 'total': 87203390}, 'progress': '[======>                                            ]  10.96MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 12573696, 'total': 87203390}, 'progress': '[=======>                                           ]  12.57MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 14234624, 'total': 87203390}, 'progress': '[========>                                          ]  14.23MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 15865344, 'total': 87203390}, 'progress': '[=========>                                         ]  15.87MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 17508864, 'total': 87203390}, 'progress': '[==========>                                        ]  17.51MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 19144192, 'total': 87203390}, 'progress': '[==========>                                        ]  19.14MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 20747776, 'total': 87203390}, 'progress': '[===========>                                       ]  20.75MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 22325248, 'total': 87203390}, 'progress': '[============>                                      ]  22.33MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 23942693, 'total': 87203390}, 'progress': '[=============>                                     ]  23.94MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 25538898, 'total': 87203390}, 'progress': '[==============>                                    ]  25.54MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 27132954, 'total': 87203390}, 'progress': '[===============>                                   ]  27.13MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 28754944, 'total': 87203390}, 'progress': '[================>                                  ]  28.75MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 30357286, 'total': 87203390}, 'progress': '[=================>                                 ]  30.36MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 32489886, 'total': 87203390}, 'progress': '[==================>                                ]  32.49MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 34628608, 'total': 87203390}, 'progress': '[===================>                               ]  34.63MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 36792281, 'total': 87203390}, 'progress': '[=====================>                             ]  36.79MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 38925824, 'total': 87203390}, 'progress': '[======================>                            ]  38.93MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 41087488, 'total': 87203390}, 'progress': '[=======================>                           ]  41.09MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 42699185, 'total': 87203390}, 'progress': '[========================>                          ]   42.7MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 44845181, 'total': 87203390}, 'progress': '[=========================>                         ]  44.85MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 46985216, 'total': 87203390}, 'progress': '[==========================>                        ]  46.99MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 48613682, 'total': 87203390}, 'progress': '[===========================>                       ]  48.61MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 50218747, 'total': 87203390}, 'progress': '[============================>                      ]  50.22MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 52377600, 'total': 87203390}, 'progress': '[==============================>                    ]  52.38MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 54008832, 'total': 87203390}, 'progress': '[==============================>                    ]  54.01MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 56156295, 'total': 87203390}, 'progress': '[================================>                  ]  56.16MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 58313728, 'total': 87203390}, 'progress': '[=================================>                 ]  58.31MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 59901440, 'total': 87203390}, 'progress': '[==================================>                ]   59.9MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 62064640, 'total': 87203390}, 'progress': '[===================================>               ]  62.06MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 63677952, 'total': 87203390}, 'progress': '[====================================>              ]  63.68MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 65277977, 'total': 87203390}, 'progress': '[=====================================>             ]  65.28MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 67451618, 'total': 87203390}, 'progress': '[======================================>            ]  67.45MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 69046966, 'total': 87203390}, 'progress': '[=======================================>           ]  69.05MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 70656000, 'total': 87203390}, 'progress': '[========================================>          ]  70.66MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 72310275, 'total': 87203390}, 'progress': '[=========================================>         ]  72.31MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 74515968, 'total': 87203390}, 'progress': '[==========================================>        ]  74.52MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 76744192, 'total': 87203390}, 'progress': '[============================================>      ]  76.74MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 78972416, 'total': 87203390}, 'progress': '[=============================================>     ]  78.97MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 81200640, 'total': 87203390}, 'progress': '[==============================================>    ]   81.2MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 83398144, 'total': 87203390}, 'progress': '[===============================================>   ]   83.4MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 85626368, 'total': 87203390}, 'progress': '[=================================================> ]  85.63MB/87.2MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 87854592, 'total': 87203390}, 'progress': '[==================================================>]  87.85MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushing', 'progressDetail': {'current': 89779200, 'total': 87203390}, 'progress': '[==================================================>]  89.78MB', 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'Pushed', 'progressDetail': {}, 'id': 'ed6431a1357d'}
+INFO:root:{'status': 'latest: digest: sha256:615aafc877f308fd04a678d7d4dbffd899967d5129ecff0eb98ef67f29c7a436 size: 3043'}
+INFO:root:{'progressDetail': {}, 'aux': {'Tag': 'latest', 'Digest': 'sha256:615aafc877f308fd04a678d7d4dbffd899967d5129ecff0eb98ef67f29c7a436', 'Size': 3043}}
+INFO:root:Image uri: 667232328135.dkr.ecr.us-east-1.amazonaws.com/task6_repo:latest
+INFO:simple_sagemaker.iam_utils:Allowing access for SageMakerIAMRole to awsglue-datasets using the SageMakerIAMRole policy...
+statement already exist
+INFO:simple_sagemaker.sm_task:Syncing data from /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data to s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-17-07-05-30_py37/task6-1/input...
+INFO:simple_sagemaker.s3_sync:Skipping /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/sample_data2.txt
+INFO:simple_sagemaker.s3_sync:Skipping /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/sample_data1.txt
+INFO:simple_sagemaker.sm_project:Task task6-1 is already completed by task6-1-2020-09-17-07-07-35-iswp5xJl
+INFO:simple_sagemaker.sm_task:Downloading results to /home/runner/work/simple_sagemaker/simple_sagemaker/.tox/py/tmp/popen-gw3/test_readme_examples0/output/example6_1
