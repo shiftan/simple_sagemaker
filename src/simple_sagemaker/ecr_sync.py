@@ -74,7 +74,7 @@ class ECRSync:
         )
 
         logging.info(
-            f"Building {docker_file_path_or_content} to {repo_name}:{repo_name} and pushing to {aws_repo_name}..."
+            f"Building {docker_file_path_or_content} to {repo_name}:{img_tag} and pushing to {aws_repo_name}..."
         )
 
         fileObj = BytesIO(docker_file_path_or_content.encode("utf-8"))

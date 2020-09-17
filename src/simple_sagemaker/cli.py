@@ -98,13 +98,26 @@ def parseArgs():
 
     # general
     parser.add("--config-file", "-c", is_config_file=True, help="config file path")
-    parser.add_argument("--project_name", "-p", required=True)
-    parser.add_argument("--task_name", "-t", required=True)
-    parser.add_argument("--bucket_name", "-b")
-    # coding params
-    parser.add_argument("--source_dir", "-s", type=lambda x: fileValidation(parser, x))
+    parser.add_argument("--project_name", "-p", required=True, help="project name")
+    parser.add_argument("--task_name", "-t", required=True, help="task name")
     parser.add_argument(
-        "--entry_point", "-e", required=True, type=lambda x: fileValidation(parser, x)
+        "--bucket_name",
+        "-b",
+        help="S3 bucket name (a default one is used if not given)",
+    )
+    # coding params
+    parser.add_argument(
+        "--source_dir",
+        "-s",
+        type=lambda x: fileValidation(parser, x),
+        help="directory containing the source code for this task",
+    )
+    parser.add_argument(
+        "--entry_point",
+        "-e",
+        required=True,
+        type=lambda x: fileValidation(parser, x),
+        help="the entry point for this task. ",
     )
     parser.add_argument(
         "--dependencies", "-d", nargs="+", type=lambda x: fileValidation(parser, x)
@@ -176,9 +189,6 @@ def getAllParams(args, mapping):
 
 
 def parseInputsAndAllowAccess(args, sm_project):
-    if not args.input_task and not args.input_s3:
-        return None
-
     input_data_path = None
     distribution = "FullyReplicated"
     if args.input_path:
