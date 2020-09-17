@@ -24,7 +24,7 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code
 # running task6_1 again
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e $BASEDIR/example6/code/worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6/Dockerfile --repo_name "task6_repo", --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo", --aws_repo "task6_repo" \
     --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_stdout --ks &
 
 
