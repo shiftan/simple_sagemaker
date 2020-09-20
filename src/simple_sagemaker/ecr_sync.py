@@ -29,18 +29,27 @@ class ECRSync:
             repo_uri = repo["repository"]["repositoryUri"]
         return repo_uri
 
-    def buildAndPushDockerImage(
+    def getPrebuiltImage(
         self,
-        docker_file_path_or_content,
-        aws_repo_name,
-        repo_name,
-        img_tag,
         instance_type,
-        framework="pytorch",
-        version="1.6.0",
-        py_version="py3",
+        framework,
+        version,
+        py_version,
         image_scope="training",
     ):
+        assert framework, "Framework has to be specified"
+        defaults = {
+            "pytorch": ("1.6.0", "py3"),
+            "tensorflow": ("2.3.0", "py37"),
+        }
+
+        if version is None or py_version is None:
+            version, py_version = defaults[framework]
+
+        logger.info(
+            f"Getting the image for {framework}, version {version}, python version {py_version}"
+        )
+
         region_name = self.boto3_session.region_name
 
         # Get the base image name, validate Dockerfile is based on it (TODO: replace in file)
@@ -52,9 +61,25 @@ class ECRSync:
             image_scope=image_scope,
             instance_type=instance_type,
         )
+        return baseimage_uri
+
+    def buildAndPushDockerImage(
+        self,
+        docker_file_path_or_content,
+        aws_repo_name,
+        repo_name,
+        img_tag,
+        instance_type,
+        framework,
+        version,
+        py_version,
+    ):
+        baseimage_uri = self.getPrebuiltImage(
+            instance_type, framework, version, py_version
+        )
 
         if not docker_file_path_or_content:
-            logging.info(f"Using a pre-built image {baseimage_uri}...")
+            logger.info(f"Using a pre-built image {baseimage_uri}...")
             return baseimage_uri
 
         repo_uri = self.getOrCreateRepo(aws_repo_name)
