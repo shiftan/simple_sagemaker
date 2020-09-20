@@ -25,7 +25,7 @@ def test_multiple_tasks(caplog, tmp_path):
 
 
 def test_single_file_tasks(caplog, tmp_path):
-    from single_file.code.example import runner
+    from single_file.example import runner
 
     _internalTestExample(caplog, tmp_path, runner)
 

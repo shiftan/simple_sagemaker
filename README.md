@@ -255,7 +255,7 @@ TBD
 ---
 
 ## Single file example
-A [single file example](./examples/single_file/code/example.py) can be found in the [examples directory](./examples).
+A [single file example](./examples/single_file/example.py) can be found in the [examples directory](./examples).
 First, define the **runner**:
 ```python
 dockerFileContent = """
