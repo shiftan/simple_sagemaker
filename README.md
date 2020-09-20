@@ -7,7 +7,7 @@ A **simpler** and **cheaper** way to distribute python (training) code on machin
 
 1. Python 3.6+
 2. AWS account credentials
-3. Configuration of AWS credentials for boto3, as explained on [boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).
+3. Configuration of AWS credentials for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -54,7 +54,7 @@ Code only:
 - [Single file example](#Single-file-example)
 
 # Main features
-1. Simpler - Except for holding and AWS account credentials, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :). Behind the scenes you get:
+1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
     - Jobs IAM role creation, including policies for accesing needed S3 buckets
     - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
@@ -253,12 +253,6 @@ TBD
 TBD
 
 ---
-
-*Simple Sagemaker* is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
-
-The idea is simple - 
-
-You define a series of **tasks** within a **project**, provide the code, define how the input and outputs flows through the **tasks**, set the running instance(s) parameters, and let simple-sagemaker do the rest
 
 ## Single file example
 A [single file example](./examples/single_file/code/example.py) can be found in the [examples directory](./examples).
