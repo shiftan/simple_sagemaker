@@ -32,6 +32,7 @@
                 "-e",  "${workspaceFolder}/examples/readme_examples/worker3.py",
                 "-o", "${workspaceFolder}/output",
                 "--no_spot",
+                "-f", "tensorflow",
                 //"--iis", "bucket", "s3://awsglue-datasets/examples/us-legislators/all/persons.json"
                 //"--iit", "bucket", "task3", "model"
                 //"--cs", 

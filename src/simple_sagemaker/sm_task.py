@@ -9,6 +9,7 @@ import sagemaker
 from sagemaker.inputs import TrainingInput
 from sagemaker.processing import ProcessingOutput, ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
+from sagemaker.tensorflow.estimator import TensorFlow
 
 from . import VERSION, constants
 from .s3_sync import S3Sync
@@ -112,6 +113,7 @@ class SageMakerTask:
 
     def runTrainingJob(
         self,
+        framework,
         source_dir,
         entryPoint,
         dependencies,
@@ -155,7 +157,16 @@ class SageMakerTask:
         tags.append({"Key": "SimpleSagemakerTask", "Value": self.task_name})
         tags.append({"Key": "SimpleSagemakerVersion", "Value": VERSION})
 
-        pytorch_estimator = PyTorch(
+        if not use_spot_instances:
+            maxWait = 0
+
+        classes = {
+            "pytorch": PyTorch,
+            "tensorflow": TensorFlow,
+        }
+        estimator_class = classes[framework]
+
+        estimator = estimator_class(
             entry_point=entryPoint,
             source_dir=source_dir,
             hyperparameters=hyperparameters,
@@ -186,11 +197,11 @@ class SageMakerTask:
         if additional_inputs:
             inputs.update(additional_inputs)
 
-        pytorch_estimator.fit(inputs=inputs if inputs else None, job_name=job_name)
-        # training_job_description = pytorch_estimator.latest_training_job.describe()
+        estimator.fit(inputs=inputs if inputs else None, job_name=job_name)
+        # training_job_description = estimator.latest_training_job.describe()
         # logging.info(f"Job is done: {training_job_description}")
 
-        self.estimators.append(pytorch_estimator)
+        self.estimators.append(estimator)
         self.jobNames.append(job_name)
         return job_name
 

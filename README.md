@@ -1,7 +1,7 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress, currently warps [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) implementation...**
+**Note: this (initial) work is still in progress, currently only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are supported...**
 
 ## Requirements
 

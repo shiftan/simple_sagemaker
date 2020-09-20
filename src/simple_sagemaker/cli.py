@@ -195,6 +195,22 @@ def parseArgs():
         "--df",
         help="Path to a directory containing the DockerFile",
     )
+    parser.add_argument(
+        "--framework",
+        "-f",
+        help="The framework to use",
+        choices=["pytorch", "tensorflow"],
+    )
+    parser.add_argument(
+        "--framework_version",
+        "--fv",
+        help="The framework version",
+    )
+    parser.add_argument(
+        "--python_version",
+        "--pv",
+        help="The python framework version",
+    )
     # run params
     parser.add_argument(
         "--input_path",
@@ -344,6 +360,9 @@ def main():
                 "repo_name": "repo_name",
                 "image_tag": "img_tag",
                 "docker_file_path": "docker_file_path_or_content",
+                "framework": "framework",
+                "framework_version": "version",
+                "python_version": "py_version",
             },
         )
     )

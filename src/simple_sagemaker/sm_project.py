@@ -14,7 +14,15 @@ logger = logging.getLogger(__name__)
 class SageMakerProject:
     ImageParams = collections.namedtuple(
         "ImageParams",
-        ["aws_repo_name", "repo_name", "img_tag", "docker_file_path_or_content"],
+        [
+            "aws_repo_name",
+            "repo_name",
+            "img_tag",
+            "docker_file_path_or_content",
+            "framework",
+            "version",
+            "py_version",
+        ],
     )
     CodeParams = collections.namedtuple(
         "CodeParams", ["source_dir", "entryPoint", "dependencies"]
@@ -63,9 +71,18 @@ class SageMakerProject:
         repo_name=None,
         img_tag=constants.DEFAULT_REPO_TAG,
         docker_file_path_or_content=None,
+        framework="pytorch",
+        version=None,
+        py_version=None,
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
-            aws_repo_name, repo_name, img_tag, docker_file_path_or_content
+            aws_repo_name,
+            repo_name,
+            img_tag,
+            docker_file_path_or_content,
+            framework,
+            version,
+            py_version,
         )
 
     def setDefaultCodeParams(
@@ -172,6 +189,7 @@ class SageMakerProject:
             smTask.bindToJob(job_name)
         else:
             job_name = smTask.runTrainingJob(
+                self.defaultImageParams.framework,
                 role_name=self.role_name,
                 hyperparameters=hyperparameters,
                 tags=tags,
