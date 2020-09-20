@@ -199,7 +199,7 @@ def parseArgs():
         "--framework",
         "-f",
         help="The framework to use",
-        choices=['pytorch', 'tensorflow']
+        choices=["pytorch", "tensorflow"],
     )
     parser.add_argument(
         "--framework_version",
