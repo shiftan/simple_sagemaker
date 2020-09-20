@@ -70,10 +70,10 @@ class SageMakerProject:
         aws_repo_name=None,
         repo_name=None,
         img_tag=constants.DEFAULT_REPO_TAG,
+        docker_file_path_or_content=None,
         framework="pytorch",
         version=None,
         py_version=None,
-        docker_file_path_or_content=None,
     ):
         self.defaultImageParams = SageMakerProject.ImageParams(
             aws_repo_name,
