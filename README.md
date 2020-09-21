@@ -150,6 +150,7 @@ The code is then launced a few time by [run.sh](./examples/readme_examples/run.s
 #   - Builds a custom docker image (--df, --repo_name, --aws_repo)
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
+#   - Use an on-demand instance (--no_spot)
 ssm -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
@@ -161,7 +162,6 @@ ssm -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e work
 #   - Uses the tensorflow framework as pre-built image (-f)
 #   - Tags the jobs (--tag)
 #   - Defines sagemaker metrics (-m, --md)
-#   - Use an on-demand instance (--no_spot)
 ssm -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
     -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
