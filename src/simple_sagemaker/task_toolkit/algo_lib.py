@@ -9,25 +9,34 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-def add_argument_default_env_or_other(self, argName, type, envVarName, default):
+def _add_argument_default_env_or_other(self, argName, type, envVarName, default):
     self.add_argument(argName, type=type, default=os.environ.get(envVarName, default))
 
 
 # based on: http://stackoverflow.com/questions/1015307/python-bind-an-unbound-method#comment8431145_1015405
-def bind(instance, func, as_name):
+def _bind(instance, func, as_name):
     setattr(instance, as_name, func.__get__(instance, instance.__class__))
 
 
 def setDebugLevel():
+    """Set the debug level to match the 
+
+    return: the parsed environment
+    """
     # Set root logger level
     logging.getLogger().setLevel(int(os.environ.get("SM_LOG_LEVEL", logging.INFO)))
 
 
 def parseArgs():
+    """Extracting the environment configuration, i.e. input/output/state paths and running parameters
+
+    return: the parsed environment
+    """
+
     # Sagemaker training env vars - see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
 
     parser = argparse.ArgumentParser()
-    bind(parser, add_argument_default_env_or_other, "add_argument_default_env_or_other")
+    _bind(parser, _add_argument_default_env_or_other, "add_argument_default_env_or_other")
 
     # Data and model paths
     parser.add_argument_default_env_or_other(
@@ -123,28 +132,48 @@ def parseArgs():
     return args
 
 
-def getInstanceStatePath(args):
+def _getInstanceStatePath(args):
     path = Path(args.state) / args.current_host
     if not path.is_dir():
         logger.info("Creating instance specific state dir")
         path.mkdir(parents=True, exist_ok=True)
     return str(path)
 
+_otherInstanceStateDeleted = False
+def _deleteOtherInstancesState(args):
+    if _otherInstanceStateDeleted:
+        return
 
-def deleteOtherInstancesState(args):
     logger.info("Deleting other instances' state")
     statePaths = [path for path in Path(args.state).glob("*") if path.is_dir()]
     for path in statePaths:
         if path.parts[-1] != args.current_host:
             shutil.rmtree(str(path), ignore_errors=True)
+    _otherInstanceStateDeleted = True
 
 
 def initMultiWorkersState(args):
-    deleteOtherInstancesState(args)
-    return getInstanceStatePath(args)
+    """Initialize the multi worker state.
+    Creates a per instance state sub-directory and deletes other instances ones, as all instances
+    state is merged after running.
+
+    :param args: The parsed arguments, as returned by :func:`parseArgs`
+
+    return: the path to the instance specific instance state
+    """
+    _deleteOtherInstancesState(args)
+    return _getInstanceStatePath(args)
 
 
 def markCompleted(args):
+    """Mark the task as completed. 
+    Once a task is marked as completed it won't run again, and the current output will be used instead, 
+    unlesss eforced otherwise. In addition, the output of a completed task can be used as input of 
+    other **tasks** in the same project.
+
+    
+    :param args: The parsed arguments, as returned by :func:`parseArgs`
+    """
     logger.info(f"Marking instance {args.current_host} completion")
-    path = Path(getInstanceStatePath(args)) / "__COMPLETED__"
+    path = Path(initMultiWorkersState(args)) / "__COMPLETED__"
     path.write_text(args.job_name)
