@@ -14,7 +14,7 @@ To install *Simple Sagemaker*
 pip install simple-sagemaker
 ```
 
-Then, to run the following `worker1.py` on the cloud on a *ml.p3.2xlarge* *spot* instance
+Then, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
 ```python
 import torch
 
@@ -23,9 +23,9 @@ for i in range(torch.cuda.device_count()):
 ```
 Just run the below command:
 ```bash
-ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge
+ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
-The output, including logs is saved to `./output/example1`. The relevant part from the log file (`./output/example1/logs/logs0`) is:
+The output, including logs is saved to `./output/example1`. The relevant part from the log files (`./output/example1/logs/logs0` and `./output/example1/logs/logs1`) is:
 ```
 ...
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)

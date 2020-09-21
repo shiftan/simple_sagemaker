@@ -105,9 +105,9 @@ class SageMakerProject:
         :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content. If not
             set, the pre-built image is used
         :type docker_file_path_or_content: str
-        :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.,
-            defaults to "pyrorch"
-            See https://github.com/aws/deep-learning-containers/blob/master/available_images.md
+        :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.
+            For more details See https://github.com/aws/deep-learning-containers/blob/master/available_images.md.,
+            defaults to "pyrorch".
         :type framework: str
         :param version: The framework version
         :type version: str
@@ -274,8 +274,9 @@ class SageMakerProject:
         :type force_running: bool, optional
         :param force_running: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
         :type force_running: dict, optional
-        :param metric_definitions: Names and regexps for a SageMaker Metrics Time Series definitions, e.g. {"Score": "Score=(.*?);"}.
-            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html
+        :param metric_definitions: Names and regexps for a SageMaker Metrics Time Series definitions,
+            e.g. {"Score": "Score=(.*?);"}. For more details see
+            https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html
         :type metric_definitions: dict, optional
         :param enable_sagemaker_metrics: Enables SageMaker Metrics Time Series, defaults
         :type enable_sagemaker_metrics: nool, optional
