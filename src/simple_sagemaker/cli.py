@@ -220,7 +220,7 @@ def parseArgs():
         action=InputAction,
         help=help_for_input_type(
             InputTuple,
-            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task 
+            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task
             folder on the selected S3 bucket before launching the task.""",
         ),
         tuple=InputTuple,

@@ -146,6 +146,7 @@ _otherInstanceStateDeleted = False
 
 
 def _deleteOtherInstancesState(args):
+    global _otherInstanceStateDeleted
     if _otherInstanceStateDeleted:
         return
 
