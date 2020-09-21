@@ -35,6 +35,7 @@ The output, including logs is saved to `./output/example1`. The relevant part fr
 ...
 ```
 
+### Advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
 In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](./examples/readme_examples/example6):
 ```
@@ -53,9 +54,17 @@ In order to examplify most of the possible features, the following files are use
 ```
 
 - Dockerfile - the dockerfile specifying how to extend the pre-built image
+    ```bash
+    # __BASE_IMAGE__ is automatically replaced with the correct base image
+    FROM __BASE_IMAGE__ 
+    RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3
+    ```
 - code - the source code folder
     - internal_dependency - a dependency that is part of the source code folder
     - requirements.txt - pip requirements file lists needed packages to be installed before running the worker
+        ```bash
+        transformers==3.0.2
+        ```
     - worker6.py - the worker code
 - data - input data files
 - external_dependency - additional code dependency
