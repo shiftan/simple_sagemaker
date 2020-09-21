@@ -102,7 +102,7 @@ class SageMakerProject:
         :type repo_name: str
         :param img_tag: Tag for both the local and ECS images
         :type img_tag: str
-        :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content. If not 
+        :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content. If not
             set, the pre-built image is used
         :type docker_file_path_or_content: str
         :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.,
