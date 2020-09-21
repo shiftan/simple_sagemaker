@@ -131,7 +131,8 @@ def parseArgs():
         "-d",
         nargs="+",
         type=lambda x: fileValidation(parser, x),
-        help="""aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
+        aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
         Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     # instance params
@@ -198,8 +199,9 @@ def parseArgs():
     parser.add_argument(
         "--framework",
         "-f",
-        help="The framework to use",
+        help="The framework to use, see See https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
         choices=["pytorch", "tensorflow"],
+        default="pytorch",
     )
     parser.add_argument(
         "--framework_version",
@@ -209,7 +211,7 @@ def parseArgs():
     parser.add_argument(
         "--python_version",
         "--pv",
-        help="The python framework version",
+        help="The python version",
     )
     # run params
     parser.add_argument(
@@ -255,8 +257,33 @@ def parseArgs():
         action="store_false",
         dest="clean_state",
         help="Keep the current task state. If the task is already completed, its current output will \
-             be taken without runnin it again",
+             be taken without running it again.",
     )
+    parser.add_argument(
+        "--metric_definitions",
+        "--md",
+        nargs=2,
+        metavar=("name", "regexp"),
+        action="append",
+        help="Name and regexp for a metric definition, a few can be given. \
+            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
+    )
+    parser.add_argument(
+        "--enable_sagemaker_metrics",
+        "-m",
+        default=False,
+        action="store_true",
+        help="Enables SageMaker Metrics Time Series. \
+            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
+    )
+    parser.add_argument(
+        "--tags",
+        nargs=2,
+        metavar=("key", "value"),
+        action="append",
+        help="Tags to be attached to the jobs executed for this task.",
+    )
+
     parser.add_argument(
         "--output_path",
         "-o",
@@ -292,7 +319,7 @@ def parseInputsAndAllowAccess(args, sm_project):
     if args.input_task:
         for (input_name, task_name, ttype, distribution) in args.input_task:
             inputs[input_name] = sm_project.getInputConfig(
-                task_name, **{ttype: True}, distribution=distribution
+                task_name, ttype, distribution=distribution
             )
     if args.input_s3:
         for (input_name, s3_uri, distribution) in args.input_s3:
@@ -334,7 +361,7 @@ def main():
             args,
             {
                 "source_dir": "source_dir",
-                "entry_point": "entryPoint",
+                "entry_point": "entry_point",
                 "dependencies": "dependencies",
             },
         )
@@ -348,7 +375,7 @@ def main():
                 "volume_size": "volume_size",
                 "use_spot": "use_spot_instances",
                 "max_run": "max_run",
-                "max_wait": "maxWait",
+                "max_wait": "max_wait",
             },
         )
     )
@@ -367,7 +394,6 @@ def main():
         )
     )
 
-    sm_project.createIAMRole()
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
@@ -376,12 +402,18 @@ def main():
         args,
         {
             "clean_state": "clean_state",
+            "enable_sagemaker_metrics": "enable_sagemaker_metrics",
         },
     )
 
     input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
-    tags = list()
+    tags = {} if args.tags is None else {k: v for (k, v) in args.tags}
+    metric_definitions = (
+        {}
+        if args.metric_definitions is None
+        else {k: v for (k, v) in args.metric_definitions}
+    )
 
     sm_project.runTask(
         args.task_name,
@@ -391,11 +423,12 @@ def main():
         distribution=distribution,
         additional_inputs=inputs,
         tags=tags,
+        metric_definitions=metric_definitions,
         **running_params,
     )
 
     if args.output_path:
-        sm_project.downloadResults(args.task_name, args.output_path, source=False)
+        sm_project.downloadResults(args.task_name, args.output_path)
 
 
 if __name__ == "__main__":

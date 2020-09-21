@@ -19,7 +19,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project = SageMakerProject(prefix + project_name + postfix)
     # define the code parameters
     sm_project.setDefaultCodeParams(
-        source_dir=None, entryPoint=__file__, dependencies=[]
+        source_dir=None, entry_point=__file__, dependencies=[]
     )
     # define the instance parameters
     sm_project.setDefaultInstanceParams(instance_count=2)
@@ -33,13 +33,11 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
-    # ceate the IAM role
-    sm_project.createIAMRole()
 
     # *** Task 1 - process input data
     task1_name = "task1"
     # set the input data
-    input_data_path = file_path.parent / "data"
+    input_data_path = file_path / "data"
     # run the task
     sm_project.runTask(
         task1_name,
@@ -51,7 +49,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     )
     # download the results
     if not output_path:
-        output_path = file_path.parent / "output"
+        output_path = file_path / "output"
     shutil.rmtree(output_path, ignore_errors=True)
     sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 
@@ -59,9 +57,9 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     task2_name = "task2"
     # set the input
     additional_inputs = {
-        "task2_data": sm_project.getInputConfig(task1_name, model=True),
+        "task2_data": sm_project.getInputConfig(task1_name, "model"),
         "task2_data_dist": sm_project.getInputConfig(
-            task1_name, model=True, distribution="ShardedByS3Key"
+            task1_name, "model", distribution="ShardedByS3Key"
         ),
     }
     # run the task
@@ -98,9 +96,12 @@ def worker():
         open(f"{state_dir}/state_{args.current_host}", "wt").write("state")
         # write to the model output directory
         for file in Path(args.input_data).rglob("*"):
-            relp = file.relative_to(args.input_data)
-            path = Path(args.model_dir) / (str(relp) + "_proc_by_" + args.current_host)
-            path.write_text(file.read_text() + " processed by " + args.current_host)
+            if file.is_file():
+                relp = file.relative_to(args.input_data)
+                path = Path(args.model_dir) / (
+                    str(relp) + "_proc_by_" + args.current_host
+                )
+                path.write_text(file.read_text() + " processed by " + args.current_host)
         open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
     elif int(args.hps["task"]) == 2:
         logger.info(f"Input task2_data: {list(Path(args.input_task2_data).rglob('*'))}")

@@ -1,13 +1,13 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress, currently only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are supported...**
+**Note: this (initial) work is still in progress. Only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported (but these images can be used to distribute any python code, if no special additional needs are set).**
 
 ## Requirements
 
 1. Python 3.6+
 2. AWS account credentials
-3. Configuration of AWS credentials for boto3, as explained on [boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).
+3. Configuration of AWS credentials for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -35,26 +35,36 @@ The output, including logs is saved to `./output/example1`. The relevant part fr
 ...
 ```
 
-And now to a real advanced and fully featured version, yet simple to implement:
-TBD
-```python
-TBD
-```
-
 ## More examples (below)
-Command line based examples:
+CLI based examples:
+- [A fully featured advanced example](#A-fully-featured-advanced-example)
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
 - [Providing input data](#Providing-input-data)
 - [Chaining tasks](#Chaining-tasks)
-- [Defining code dependencies](#Defining-code-dependencies)
 - [Configuring the docker image](#Configuring-the-docker-image)
+- [Defining code dependencies](#Defining-code-dependencies)
 
-Code only:
+API only example:
 - [Single file example](#Single-file-example)
 
+# Background
+*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+
+The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
+* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
+* The **worker** is basically the code you're trying to distribute, with possible minimal code changes that should use a small `task_tollkit` library which is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
+
+The **runner** is used to configure the **tasks** and **projects**: 
+- A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
+- A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
+    - State is maintained between consecutive execution of the same **task**
+    - Task can be markd as completed, to avoid re-running it next time (unlesss eforced otherwise)
+- A **prjoect** is a series of related **tasks**, with possible depencencies
+    - The output of one task can be consumed by a consequetive task
+
 # Main features
-1. Simpler - Except for holding and AWS account credentials, no assumptions, AWS pre-configuration nor AWS knowledge is assumed (well, almost :). Behind the scenes you get:
+1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
     - Jobs IAM role creation, including policies for accesing needed S3 buckets
     - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
@@ -76,24 +86,113 @@ Code only:
 ## High level flow diagram
 ![High level flow diagram](docs/high_level_flow.svg?raw=true "High level flow")
 
+# Data maintainance on S3
+All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
+The files and directories structure is as follows:
+```
+[Bucket name]/[Project name]/[Task name]
+|-- state
+|-- input
+|-- [Job name]
+|   |-- output
+|   |   |-- model.tar.gz
+|   |   `-- output.tar.gz
+|   `-- source/sourcedir.tar.gz
+|-- [Job name 2]
+|        ...
+```
+- state - the task state, shared between all jobs, i.e. task executions
+- input - the task input, shared as well
+- [Job name] - a per job specific folder
+    - model.tar.gz - model output data, merged from *all instances*
+    - output.tar.gz - the *main instance* output data (ohter output are ignored)
+    - sourcedir.tar.gz - source code and dependencies
+- [Job name 2] - another execution of the same task
 
-# Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+# A fully featured advanced example
+And now to a real advanced and fully featured version, yet simple to implement.
+In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](./examples/readme_examples/example6):
+```
+.
+|-- Dockerfile
+|-- code
+|   |-- internal_dependency
+|   |   `-- lib2.py
+|   |-- requirements.txt
+|   `-- worker6.py
+|-- data
+|   |-- sample_data1.txt
+|   `-- sample_data2.txt
+`-- external_dependency
+    `-- lib1.py
+```
 
-The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
-* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized using code
-* The **worker** is basically your code, but a small `task_tollkit` library is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
+- Dockerfile - the dockerfile specifying how to extend the pre-built image
+    ```bash
+    # __BASE_IMAGE__ is automatically replaced with the correct base image
+    FROM __BASE_IMAGE__ 
+    RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3
+    ```
+- code - the source code folder
+    - internal_dependency - a dependency that is part of the source code folder
+    - requirements.txt - pip requirements file lists needed packages to be installed before running the worker
+        ```bash
+        transformers==3.0.2
+        ```
+    - worker6.py - the worker code
+- data - input data files
+- external_dependency - additional code dependency
 
-The **runner** is used to configure **tasks** and **projects**: 
-- A **task** is a logical step that runs on define input and provide output. It's defined by providing a local code path, entrypoint, and list of additional local dependencies
-- A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
-    - State is maintained between consecutive execution of the same **task**
-- A *prjoect* is a series of related **tasks**, with possible depencencies
+The code is then launced a few time by [run.sh](./examples/readme_examples/run.sh), to demonstrate different features:
+```bash
 
-# S3
-TBD
+# Example 6_1 - a complete example part 1. 
+#   - Uses local data folder as input, that is distributed among instances (--i, ShardedByS3Key)
+#   - Uses a public s3 bucket as an additional input (--iis)
+#   - Builds a custom docker image (--df, --repo_name, --aws_repo)
+#   - Hyperparameter task_type
+#   - 2 instance (--ic)
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+    -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --ic 2 --task_type 1 -o $1/example6_1 ${@:4}
 
-# Examples
+# Example 6_2 - a complete example part 2.
+#   - Uses outputs from part 1 (--iit)
+#   - Uses additional local code dependencies (-d)
+#   - Uses the tensorflow framework as pre-built image (-f)
+#   - Tags the jobs (--tags)
+#   - Defines sagemaker metrics (-m, --md)
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
+    -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
+    -f tensorflow -m --md "Score" "Score=(.*?);" --tags "MyTag" "MyValue" \
+    --ic 2 --task_type 2 -o $1/example6_2 ${@:4} &
+
+# Running task6_1 again
+#   --ks (keep state) is used to keep the current state and demonstrate that existing output is used, without running the task again
+ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+    -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --ic 2 --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_2_stdout --ks &
+
+
+wait # wait for all processes
+```
+Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
+
+# More examples
+CLI based examples:
+- [A fully featured advanced example](#A-fully-featured-advanced-example)
+- [Passing command line arguments](#Passing-command-line-arguments)
+- [Task state and output](#Task-state-and-output)
+- [Providing input data](#Providing-input-data)
+- [Chaining tasks](#Chaining-tasks)
+- [Configuring the docker image](#Configuring-the-docker-image)
+- [Defining code dependencies](#Defining-code-dependencies)
+
+API only example:
+- [Single file example](#Single-file-example)
+
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
 To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
@@ -247,21 +346,35 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 ```
 
 ## Configuring the docker image
-TBD
+The image used to run a task can either be selected from a [pre-built ones](https://github.com/aws/deep-learning-containers/blob/master/available_images.md) 
+or extended with additional Dockerfile commands.
+The `framework`, `framework_version` and `python_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path`, it used along with `aws_repo`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
+The base image should be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image (according to the provided parameters above) before building it.
+The API parameter for the Dockerfile path is named `docker_file_path_or_content` and allows to provide the content of the Dockerfile, e.g. 
+```python
+dockerFileContent = """
+# __BASE_IMAGE__ is automatically replaced with the correct base image
+FROM __BASE_IMAGE__
+RUN pip3 install pandas==1.1 scikit-learn==0.21.3
+"""
+```
+Sample usages:
+1. [CLI Example 6_1](./examples/readme_examples/example6)- a CLI example launched by [run.sh](./examples/readme_examples/run.sh)
+2. [single file example](./examples/single_file/example.py) - API with Dockerfile content
+2. [single task example](./examples/single_task/example.py) - API with Dockerfile path
 
 ## Defining code dependencies
-TBD
+Additional local code dependencies can be specified with the `dependencies` CLI/API parameters. These dependencies are packed along with
+the source code, and are extracted on the root code folder in run time.
+
+Sample usages:
+1. [CLI Example 6_2](./examples/readme_examples/example6)- a CLI example launched by [run.sh](./examples/readme_examples/run.sh)
+2. [single task example](./examples/single_task/example.py) - API
 
 ---
 
-*Simple Sagemaker* is a lightweight wrapper around AWS Sage Maker machine learning python wrapper around AWS SageMaker, to easily empower your data science projects
-
-The idea is simple - 
-
-You define a series of **tasks** within a **project**, provide the code, define how the input and outputs flows through the **tasks**, set the running instance(s) parameters, and let simple-sagemaker do the rest
-
 ## Single file example
-A [single file example](./examples/single_file/code/example.py) can be found in the [examples directory](./examples).
+A [single file example](./examples/single_file/example.py) can be found in the [examples directory](./examples).
 First, define the **runner**:
 ```python
 dockerFileContent = """
@@ -277,7 +390,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 
     sm_project = SageMakerProject(project_name=project_name)
     # define the code parameters
-    sm_project.setDefaultCodeParams(source_dir=None, entryPoint=__file__, dependencies=[])
+    sm_project.setDefaultCodeParams(source_dir=None, entry_point=__file__, dependencies=[])
     # define the instance parameters
     sm_project.setDefaultInstanceParams(instance_count=2)
     # docker image
@@ -290,8 +403,6 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
-    # ceate the IAM role
-    sm_project.createIAMRole()
 
     # *** Task 1 - process input data
     task1_name = "task1"
@@ -318,9 +429,9 @@ An additional **task** that depends on the previous one can now be scheduled as 
     task2_name = "task2"
     # set the input
     additional_inputs = {
-        "task2_data": sm_project.getInputConfig(task1_name, model=True),
+        "task2_data": sm_project.getInputConfig(task1_name, "model"),
         "task2_data_dist": sm_project.getInputConfig(
-            task1_name, model=True, distribution="ShardedByS3Key"
+            task1_name, "model", distribution="ShardedByS3Key"
         ),
     }
     # run the task

@@ -25,9 +25,9 @@ def setDefaultParams(sm_project):
 
     # job code path, entrypoint and params
     source_dir = os.path.join(file_path, "code")
-    entryPoint = "algo.py"
+    entry_point = "algo.py"
     dependencies = [os.path.join(file_path, "external_dependency")]
-    sm_project.setDefaultCodeParams(source_dir, entryPoint, dependencies)
+    sm_project.setDefaultCodeParams(source_dir, entry_point, dependencies)
 
     # instances type an count
     instance_type = "ml.m5.large"
@@ -37,16 +37,16 @@ def setDefaultParams(sm_project):
     )
     use_spot_instances = True  # False
     max_run = 24 * 60 * 60
-    maxWait = None
+    max_wait = None
     if use_spot_instances:
-        maxWait = max_run  # should be >= max_run
+        max_wait = max_run  # should be >= max_run
     sm_project.setDefaultInstanceParams(
         instance_type,
         training_instance_count,
         volume_size,
         use_spot_instances,
         max_run,
-        maxWait,
+        max_wait,
     )
 
 
@@ -80,7 +80,6 @@ def runner(
     image_uri = buildImage(
         sm_project, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
     )
-    sm_project.createIAMRole()
 
     # task name
     task_name = (

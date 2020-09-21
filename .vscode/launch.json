@@ -33,6 +33,9 @@
                 "-o", "${workspaceFolder}/output",
                 "--no_spot",
                 "-f", "tensorflow",
+                "-m",
+                "--md", "Score", "Score=(.*?);",
+                "--tags", "MyTag", "MyValu", 
                 //"--iis", "bucket", "s3://awsglue-datasets/examples/us-legislators/all/persons.json"
                 //"--iit", "bucket", "task3", "model"
                 //"--cs", 

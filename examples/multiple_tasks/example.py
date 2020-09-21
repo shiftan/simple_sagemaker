@@ -26,9 +26,9 @@ def setDefaultParams(sm_project):
 
     # job code path, entrypoint and params
     source_dir = os.path.join(file_path, "code")
-    entryPoint = "algo_multi.py"
+    entry_point = "algo_multi.py"
     dependencies = []
-    sm_project.setDefaultCodeParams(source_dir, entryPoint, dependencies)
+    sm_project.setDefaultCodeParams(source_dir, entry_point, dependencies)
 
     # instances type an count
     instance_type = "ml.m5.large"
@@ -38,16 +38,16 @@ def setDefaultParams(sm_project):
     )
     use_spot_instances = True  # False
     max_run = 24 * 60 * 60
-    maxWait = None
+    max_wait = None
     if use_spot_instances:
-        maxWait = max_run  # should be >= max_run
+        max_wait = max_run  # should be >= max_run
     sm_project.setDefaultInstanceParams(
         instance_type,
         training_instance_count,
         volume_size,
         use_spot_instances,
         max_run,
-        maxWait,
+        max_wait,
     )
 
 
@@ -83,7 +83,6 @@ def runner(
     image_uri = buildImage(
         sm_project, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
     )
-    sm_project.createIAMRole()
 
     # task name
     task_name = (
@@ -119,12 +118,12 @@ def runner(
     task_name2 = "Task2"
     hyperparameters = {"stage": 2}
     additional_inputs = dict()
-    additional_inputs["task1_state1"] = sm_project.getInputConfig(task_name, state=True)
+    additional_inputs["task1_state1"] = sm_project.getInputConfig(task_name, "state")
     additional_inputs["task1_state2"] = sm_project.getInputConfig(
-        task_name, distribution="ShardedByS3Key", state=True
+        task_name, "state", distribution="ShardedByS3Key"
     )
     additional_inputs["task1_state3"] = sm_project.getInputConfig(
-        task_name, distribution="ShardedByS3Key", output=True
+        task_name, "output", distribution="ShardedByS3Key"
     )
     model_uri = sm_project.tasks[task_name].getOutputTargetUri(model=True)
     sm_project.runTask(
