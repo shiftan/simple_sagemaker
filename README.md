@@ -331,7 +331,7 @@ The output of a completed **task** on the same **project** can be used as an inp
 - [task name] - the name of the **task** whose output is used as input 
 - [output type] - the **task** output type, one of "model", "output", "state"
 
-Using the output of *task3* and the same `worker4.py` code, we can now run:
+Using the model output of *task3* and the same `worker4.py` code, we can now run:
 ```bash
 ssm -p simple-sagemaker-example-cli -t task5 -e worker4.py --iit bucket task3 model -o ./output/example5
 ```
