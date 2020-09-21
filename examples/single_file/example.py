@@ -102,7 +102,9 @@ def worker():
                     str(relp) + "_proc_by_" + args.current_host
                 )
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(file.read_text() + " processed by " + args.current_host)
+                path.write_bytes(
+                    file.write_bytes() + b" processed by " + args.current_host
+                )
         open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
     elif int(args.hps["task"]) == 2:
         logger.info(f"Input task2_data: {list(Path(args.input_task2_data).rglob('*'))}")
