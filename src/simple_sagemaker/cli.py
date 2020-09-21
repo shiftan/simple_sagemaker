@@ -264,14 +264,16 @@ def parseArgs():
         nargs=2,
         metavar=("name", "regexp"),
         action="append",
-        help="Enables SageMaker Metrics Time Series.",
+        help="Name and regexp for a metric definition, a few can be given. \
+            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
     parser.add_argument(
         "--enable_sagemaker_metrics",
         "-m",
         default=False,
         action="store_true",
-        help="Enables SageMaker Metrics Time Series.",
+        help="Enables SageMaker Metrics Time Series. \
+            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
     parser.add_argument(
         "--tags",

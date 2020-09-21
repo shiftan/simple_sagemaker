@@ -105,7 +105,7 @@ class SageMakerProject:
         :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content
         :type docker_file_path_or_content: str
         :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.,
-            defaults to "ptrorch"
+            defaults to "pyrorch"
             See https://github.com/aws/deep-learning-containers/blob/master/available_images.md
         :type framework: str
         :param version: The framework version
@@ -249,6 +249,8 @@ class SageMakerProject:
         clean_state=False,
         force_running=False,
         tags=dict(),
+        metric_definitions=dict(),
+        enable_sagemaker_metrics=False,
         **kwargs,
     ):
         """Run a new task for this project.
@@ -271,6 +273,10 @@ class SageMakerProject:
         :type force_running: bool, optional
         :param force_running: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
         :type force_running: dict, optional
+        :param metric_definitions: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
+        :type metric_definitions: dict, optional
+        :param enable_sagemaker_metrics: Enables SageMaker Metrics Time Series, defaults
+        :type enable_sagemaker_metrics: nool, optional
 
         :Keyword Arguments:
             Paramaters to overwrite the default code or instance params.
@@ -313,6 +319,8 @@ class SageMakerProject:
                 role_name=self.role_name,
                 hyperparameters=hyperparameters,
                 tags=tags,
+                metric_definitions=metric_definitions,
+                enable_sagemaker_metrics=enable_sagemaker_metrics,
                 **args,
             )
 
