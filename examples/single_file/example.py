@@ -103,7 +103,9 @@ def worker():
                 )
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(
-                    file.read_bytes() + b" processed by " + args.current_host
+                    file.read_bytes()
+                    + b" processed by "
+                    + args.current_host.encode("utf8")
                 )
         open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
     elif int(args.hps["task"]) == 2:
