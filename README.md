@@ -90,14 +90,14 @@ The **runner** is used to configure the **tasks** and **projects**:
 All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
 The files and directories structure is as follows:
 - [Bucket name]/[Project name]
-        - [Task name]
-            - state
-            - input
-            - [Job name]
-                - output
-                    - model.tar.gz - model output data, merged from *all instances*
-                    - output.tar.gz - the *main instance* output data (ohter instance output is skipped)
-                - source/sourcedir.tar.gz - source code and dependencies
+    - [Task name]
+        - state
+        - input
+        - [Job name]
+            - output
+                - model.tar.gz - model output data, merged from *all instances*
+                - output.tar.gz - the *main instance* output data (ohter instance output is skipped)
+            - source/sourcedir.tar.gz - source code and dependencies
 
 # A fully featured advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
