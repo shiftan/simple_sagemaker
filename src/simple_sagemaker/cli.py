@@ -199,8 +199,9 @@ def parseArgs():
     parser.add_argument(
         "--framework",
         "-f",
-        help="The framework to use",
+        help="The framework to use, see See https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
         choices=["pytorch", "tensorflow"],
+        default="pytorch",
     )
     parser.add_argument(
         "--framework_version",
