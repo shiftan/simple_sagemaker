@@ -98,7 +98,9 @@ def worker():
         for file in Path(args.input_data).rglob("*"):
             if file.is_file():
                 relp = file.relative_to(args.input_data)
-                path = Path(args.model_dir) / (str(relp) + "_proc_by_" + args.current_host)
+                path = Path(args.model_dir) / (
+                    str(relp) + "_proc_by_" + args.current_host
+                )
                 path.write_text(file.read_text() + " processed by " + args.current_host)
         open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
     elif int(args.hps["task"]) == 2:
