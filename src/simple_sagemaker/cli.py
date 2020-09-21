@@ -362,8 +362,13 @@ def parseHyperparams(rest):
 
 
 def main():
-    format='%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s'
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S", format=format)
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format=format,
+    )
     logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
 
