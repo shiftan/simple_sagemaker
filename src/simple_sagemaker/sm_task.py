@@ -115,7 +115,7 @@ class SageMakerTask:
         self,
         framework,
         source_dir,
-        entryPoint,
+        entry_point,
         dependencies,
         hyperparameters,
         instance_type,
@@ -124,7 +124,7 @@ class SageMakerTask:
         additional_inputs=dict(),
         model_uri=None,
         use_spot_instances=False,
-        maxWait=None,
+        max_wait=None,
         volume_size=30,
         max_run=24 * 60 * 60,
         tags=[],
@@ -136,7 +136,7 @@ class SageMakerTask:
 
         Arguments:
             source_dir - local/s3
-            entryPoint - entry point
+            entry_point - entry point
             dependencies - additional local dependencies (directories) to be copied to the code path
             hyperparameters -
             instance_type -
@@ -147,7 +147,7 @@ class SageMakerTask:
         Returns estimator object
         """
         logger.info(
-            f"Running a training job source_dir={source_dir} entryPoint={entryPoint} hyperparameters={hyperparameters}..."
+            f"Running a training job source_dir={source_dir} entry_point={entry_point} hyperparameters={hyperparameters}..."
         )
         job_name = self._getJobName()
 
@@ -158,7 +158,7 @@ class SageMakerTask:
         tags.append({"Key": "SimpleSagemakerVersion", "Value": VERSION})
 
         if not use_spot_instances:
-            maxWait = 0
+            max_wait = 0
 
         classes = {
             "pytorch": PyTorch,
@@ -167,7 +167,7 @@ class SageMakerTask:
         estimator_class = classes[framework]
 
         estimator = estimator_class(
-            entry_point=entryPoint,
+            entry_point=entry_point,
             source_dir=source_dir,
             hyperparameters=hyperparameters,
             image_uri=self.image_uri,
@@ -185,7 +185,7 @@ class SageMakerTask:
             max_run=max_run,
             model_uri=model_uri,
             use_spot_instances=use_spot_instances,
-            max_wait=maxWait,
+            max_wait=max_wait,
             tags=tags,
             **additionalEstimatorArgs,
         )
@@ -264,6 +264,9 @@ class SageMakerTask:
                     os.remove(tarFileName)
 
     def getOutputTargetUri(self, model=False, output=False, state=False, source=False):
+        assert (
+            model + output + state + source == 1
+        ), "Onlt one output type flag should be set"
         uri = None
         if model:
             uri = sagemaker.s3.s3_path_join(
@@ -281,15 +284,13 @@ class SageMakerTask:
             )
         return uri
 
-    def getInputConfig(
-        self, distribution="FullyReplicated", model=False, output=False, state=False
-    ):
-        uri = self.getOutputTargetUri(model=model, output=output, state=state)
+    def getInputConfig(self, output_type, distribution="FullyReplicated"):
+        uri = self.getOutputTargetUri(**{output_type: True})
         return TrainingInput(uri, distribution=distribution)
 
     def downloadResults(
         self,
-        outputBase,
+        output_base,
         logs=True,
         state=True,
         model=True,
@@ -298,13 +299,13 @@ class SageMakerTask:
         extractTars=True,
         extra_args=None,
     ):
-        logger.info(f"Downloading results to {outputBase}")
-        os.makedirs(outputBase, exist_ok=True)
+        logger.info(f"Downloading results to {output_base}")
+        os.makedirs(output_base, exist_ok=True)
 
         if logs:
             # get and save the logs
             logs = self.getLogs()
-            logsPath = os.path.join(outputBase, "logs")
+            logsPath = os.path.join(output_base, "logs")
             os.makedirs(logsPath, exist_ok=True)
             for channel_name in logs.keys():
                 ff = open(os.path.join(logsPath, f"logs{channel_name}"), "wt")
@@ -319,7 +320,7 @@ class SageMakerTask:
             [state, model, output, source], ["state", "model", "output", "source"]
         ):
             if shouldDownload:
-                output_path = os.path.join(outputBase, argName)
+                output_path = os.path.join(output_base, argName)
                 uri = self.getOutputTargetUri(**{argName: True})
                 self._downloadData(output_path, uri, extra_args)
                 if extractTars:

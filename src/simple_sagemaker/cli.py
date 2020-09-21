@@ -131,7 +131,8 @@ def parseArgs():
         "-d",
         nargs="+",
         type=lambda x: fileValidation(parser, x),
-        help="""aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies 
+        aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
         Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     # instance params
@@ -209,7 +210,7 @@ def parseArgs():
     parser.add_argument(
         "--python_version",
         "--pv",
-        help="The python framework version",
+        help="The python version",
     )
     # run params
     parser.add_argument(
@@ -255,7 +256,7 @@ def parseArgs():
         action="store_false",
         dest="clean_state",
         help="Keep the current task state. If the task is already completed, its current output will \
-             be taken without runnin it again",
+             be taken without running it again",
     )
     parser.add_argument(
         "--output_path",
@@ -292,7 +293,7 @@ def parseInputsAndAllowAccess(args, sm_project):
     if args.input_task:
         for (input_name, task_name, ttype, distribution) in args.input_task:
             inputs[input_name] = sm_project.getInputConfig(
-                task_name, **{ttype: True}, distribution=distribution
+                task_name, ttype, distribution=distribution
             )
     if args.input_s3:
         for (input_name, s3_uri, distribution) in args.input_s3:
@@ -334,7 +335,7 @@ def main():
             args,
             {
                 "source_dir": "source_dir",
-                "entry_point": "entryPoint",
+                "entry_point": "entry_point",
                 "dependencies": "dependencies",
             },
         )
@@ -348,7 +349,7 @@ def main():
                 "volume_size": "volume_size",
                 "use_spot": "use_spot_instances",
                 "max_run": "max_run",
-                "max_wait": "maxWait",
+                "max_wait": "max_wait",
             },
         )
     )
@@ -367,7 +368,6 @@ def main():
         )
     )
 
-    sm_project.createIAMRole()
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )

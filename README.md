@@ -1,7 +1,7 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress, currently only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are supported...**
+**Note: this (initial) work is still in progress. Only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported (these images can be used to distribute and python code).**
 
 ## Requirements
 
@@ -88,7 +88,7 @@ The **runner** is used to configure **tasks** and **projects**:
 - A **task** is a logical step that runs on define input and provide output. It's defined by providing a local code path, entrypoint, and list of additional local dependencies
 - A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
     - State is maintained between consecutive execution of the same **task**
-- A *prjoect* is a series of related **tasks**, with possible depencencies
+- A **prjoect** is a series of related **tasks**, with possible depencencies
 
 # S3
 TBD
@@ -271,7 +271,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 
     sm_project = SageMakerProject(project_name=project_name)
     # define the code parameters
-    sm_project.setDefaultCodeParams(source_dir=None, entryPoint=__file__, dependencies=[])
+    sm_project.setDefaultCodeParams(source_dir=None, entry_point=__file__, dependencies=[])
     # define the instance parameters
     sm_project.setDefaultInstanceParams(instance_count=2)
     # docker image
@@ -284,8 +284,6 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
-    # ceate the IAM role
-    sm_project.createIAMRole()
 
     # *** Task 1 - process input data
     task1_name = "task1"
@@ -312,9 +310,9 @@ An additional **task** that depends on the previous one can now be scheduled as 
     task2_name = "task2"
     # set the input
     additional_inputs = {
-        "task2_data": sm_project.getInputConfig(task1_name, model=True),
+        "task2_data": sm_project.getInputConfig(task1_name, "model"),
         "task2_data_dist": sm_project.getInputConfig(
-            task1_name, model=True, distribution="ShardedByS3Key"
+            task1_name, "model", distribution="ShardedByS3Key"
         ),
     }
     # run the task

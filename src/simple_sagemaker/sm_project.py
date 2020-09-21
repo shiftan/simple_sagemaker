@@ -12,6 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 class SageMakerProject:
+    f"""This class manages a project, which is a series of related tasks, each in charge of a
+    logical step in the distributed processing work.
+
+    :param project_name: A name for the project
+    :type project_name: str
+    :param boto3_session: An existing boto3 session to be used. A new one is created if not given
+    :type boto3_session: str, optional
+    :param role_name: The Amazon SageMaker training jobs and APIs that create Amazon SageMaker endpoints
+        use this role to access training data and model artifacts. After the endpoint is created,
+        the inference code might use the IAM role, if it needs to access an AWS resource. Defaults to {constants.DEFAULT_IAM_ROLE}
+    :type role_name: str, optional
+    :param bucket_name: A bucket name to be used. The default sagemaker bucket is used if not specified
+    :type bucket_name: str, optional
+    :param smSession:An existing sage maker session to be used. A new one is created if not given
+    :type smSession: str, optional
+    """
     ImageParams = collections.namedtuple(
         "ImageParams",
         [
@@ -25,7 +41,7 @@ class SageMakerProject:
         ],
     )
     CodeParams = collections.namedtuple(
-        "CodeParams", ["source_dir", "entryPoint", "dependencies"]
+        "CodeParams", ["source_dir", "entry_point", "dependencies"]
     )
     InstanceParams = collections.namedtuple(
         "InstanceParams",
@@ -35,7 +51,7 @@ class SageMakerProject:
             "volume_size",
             "use_spot_instances",
             "max_run",
-            "maxWait",
+            "max_wait",
         ],
     )
     # IOParams = collections.namedtuple("IOParams", ["input_data_path", "distribution", "model_uri"])
@@ -48,8 +64,10 @@ class SageMakerProject:
         bucket_name=None,
         smSession=None,
     ):
+        """Constructor"""
         self.project_name = project_name
         self.role_name = role_name
+        self.role_created = False
         self.tasks = {}
 
         if boto3_session is None:
@@ -75,6 +93,24 @@ class SageMakerProject:
         version=None,
         py_version=None,
     ):
+        """Set the default image params
+
+        :param aws_repo_name: Name of ECS repository
+        :type aws_repo_name: str
+        :param repo_name: Name of local repository
+        :type repo_name: str
+        :param img_tag: Tag for both the local and ECS images
+        :type img_tag: str
+        :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content
+        :type docker_file_path_or_content: str
+        :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported., defaults to "ptrorch"
+            See https://github.com/aws/deep-learning-containers/blob/master/available_images.md
+        :type framework: str
+        :param version: The framework version
+        :type version: str
+        :param py_version: The python version
+        :type py_version: str
+        """
         self.defaultImageParams = SageMakerProject.ImageParams(
             aws_repo_name,
             repo_name,
@@ -86,10 +122,24 @@ class SageMakerProject:
         )
 
     def setDefaultCodeParams(
-        self, source_dir=None, entryPoint=None, dependencies=list()
+        self, source_dir=None, entry_point=None, dependencies=list()
     ):
+        """Set the default code params
+
+        :param source_dir: Path (absolute, relative or an S3 URI) to a directory with any other source
+            code dependencies aside from the entry point file. If source_dir is an S3 URI,
+            it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker
+        :type source_dir: str, optional
+        :param entry_point: Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+            If source_dir is specified, then entry_point must point to a file located at the root of source_dir.
+        :type entry_point: str, optional
+        :param dependencies: Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
+            aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+            Structure within this directory are preserved when running on Amazon SageMaker.
+        :type dependencies: list of strings, optional
+        """
         self.defaultCodeParams = SageMakerProject.CodeParams(
-            source_dir, entryPoint, dependencies
+            source_dir, entry_point, dependencies
         )
 
     def setDefaultInstanceParams(
@@ -99,15 +149,36 @@ class SageMakerProject:
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         use_spot_instances=constants.DEFAULT_USE_SPOT,
         max_run=constants.DEFAULT_MAX_RUN,
-        maxWait=constants.DEFAULT_MAX_WAIT,
+        max_wait=constants.DEFAULT_MAX_WAIT,
     ):
+        f"""Set the default instance params
+
+        :param instance_type: Type of EC2 instance to use, defaults to {constants.DEFAULT_INSTANCE_TYPE}
+        :type instance_type: str, optional
+        :param instance_count: Number of EC2 instances to use, defaults to {constants.DEFAULT_INSTANCE_COUNT}
+        :type instance_count: int, optional
+        :param volume_size: Size in GB of the EBS volume to use for storing input data.
+            Must be large enough to store input data.,defaults to {constants.DEFAULT_VOLUME_SIZE}.
+        :type volume_size: int, optional
+        :param use_spot_instances:Specifies whether to use SageMaker Managed Spot instances.
+            If enabled then the max_wait arg should also be set.,defaults to {constants.DEFAULT_USE_SPOT}.
+        :type use_spot_instances: bool, optional
+        :param max_run: Timeout in seconds for running.
+            After this amount of time Amazon SageMaker terminates the job regardless of its current status.,
+            defaults to {constants.DEFAULT_MAX_RUN}
+        :type max_run: int, optional
+        :param max_wait: Timeout in seconds waiting for spot instances.
+            After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.,
+            defaults to {constants.DEFAULT_MAX_WAIT}
+        :type max_wait: int, optional
+        """
         self.defaultInstanceParams = SageMakerProject.InstanceParams(
             instance_type,
             instance_count,
             volume_size,
             use_spot_instances,
             max_run,
-            maxWait,
+            max_wait,
         )
 
     def createBucket(self):
@@ -122,11 +193,22 @@ class SageMakerProject:
             client.create_bucket(Bucket=self.bucket_name)
 
     def createIAMRole(self):
+        """Create the IAM role"""
+        if self.role_created:
+            return
         iam_utils.createSageMakerIAMRole(self.boto3_session, self.role_name)
+        self.role_created = True
 
     def allowAccessToS3Bucket(
         self, bucket_name, policy_name=constants.DEFAULT_IAM_BUCKET_POLICY
     ):
+        f"""Make sure the used IAM rule is allowed to access the given bucket. Needed e.g. for using public buckets.
+
+        :param bucket_name: The name of the bucket
+        :type bucket_name: str
+        :param policy_name: The polict to be allowed access to `bucket_name`, defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
+        :type policy_name: str
+        """
         iam_utils.allowAccessToS3Bucket(
             self.boto3_session, self.role_name, policy_name, bucket_name
         )
@@ -136,6 +218,18 @@ class SageMakerProject:
         self.tasks[task_name] = smTask
 
     def buildOrGetImage(self, instance_type, **kwargs):
+        f"""Get the image URI, according to the image params. If a custom image is used, i.e. when `docker_file_path_or_content` was
+        given, it's firsdt built and pushed to ECS.
+
+        :param instance_type: The EC2 instance type that is going to run that image
+        :type instance_type: str
+
+        :Keyword Arguments:
+            Paramaters to overwrite the default image params.
+
+        return: the image URI
+        rtype: str
+        """
         args = self.defaultImageParams._replace(**kwargs)
         dockerSync = ECRSync(self.boto3_session)
         image_uri = dockerSync.buildAndPushDockerImage(
@@ -150,10 +244,37 @@ class SageMakerProject:
         hyperparameters,
         input_data_path=None,
         clean_state=False,
-        forceRunning=False,
+        force_running=False,
         tags=[],
         **kwargs,
     ):
+        f"""Run a new task for this project.
+
+        :param task_name: Name for the task
+        :type task_name: str
+        :param image_uri: The URI of the image to be used for that task, usually the output of :func:`buildOrGetImage`
+        :type image_uri: str
+        :param hyperparameters: Hyperparameters for this tasks
+        :type hyperparameters: dict
+        :param input_data_path: Local/s3 path for the input data.
+            If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.
+        :type input_data_path: str, optional
+        :param clean_state: Whether to clear the task state before running it. If the task was already completed,
+            it will be running again if set, otherwise its current output will be taken without running it again., defaults to False
+        :type clean_state: bool, optional
+        :param force_running: Whether to forec running the task even if it was already completed (but without clearing the current state),
+            defaults to False
+        :type force_running: bool, optional
+        :param force_running: Tags to be attached to the jobs executed for this task, e.g. [{"Key": "TagName", "Value":"TagValue"}].
+        :type force_running: list of dictionaries, optional
+
+        :Keyword Arguments:
+            Paramaters to overwrite the default code or instance params.
+
+        return: the image URI
+        rtype: str
+        """
+        self.createIAMRole()
         assert task_name not in self.tasks, f"{task_name} already exists!"
         smTask = SageMakerTask(
             self.boto3_session,
@@ -183,7 +304,7 @@ class SageMakerProject:
         if clean_state:
             smTask.clean_state()
 
-        job_name = None if forceRunning else self.getCompletionJobName(task_name)
+        job_name = None if force_running else self._getCompletionJobName(task_name)
         if job_name:
             logger.info(f"Task {task_name} is already completed by {job_name}")
             smTask.bindToJob(job_name)
@@ -200,6 +321,7 @@ class SageMakerProject:
         return smTask, job_name
 
     def cleanFolder(self):
+        """Clean the project folder on the S3 bucket"""
         s3c = self.boto3_session.client("s3")
         for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
             s3c.delete_object(Bucket=self.bucket_name, Key=file)
@@ -207,11 +329,19 @@ class SageMakerProject:
     def getInputConfig(
         self,
         task_name,
+        output_type,
         distribution="FullyReplicated",
-        model=False,
-        output=False,
-        state=False,
     ):
+        """Get the class:`sagemaker.inputs.TrainingInput` configuation for an output of a task from this
+        project to be used as an input for another task.
+
+        :param task_name: The name of the task whose output is needed
+        :type task_name: str
+        :param output_type: The type of output, one of "state", "model" or "output"
+        :type task_name: str
+        :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
+        :type task_name: str
+        """
         if task_name in self.tasks:
             smTask = self.tasks[task_name]
         else:
@@ -223,25 +353,42 @@ class SageMakerProject:
                 self.bucket_name,
                 smSession=self.smSession,
             )
-            job_name = self.getCompletionJobName(task_name)
+            job_name = self._getCompletionJobName(task_name)
             assert job_name, f"Task {task_name} isn't completed!"
             smTask.bindToJob(job_name)
 
-        return smTask.getInputConfig(distribution, model, output, state)
+        return smTask.getInputConfig(output_type, distribution)
 
     def downloadResults(
         self,
         task_name,
-        outputBase,
+        output_base,
         logs=True,
         state=True,
         model=True,
         output=True,
-        source=True,
+        source=False,
     ):
+        """Download the result of a task to a local directory
+
+        :param task_name: The name of the task whose output is needed
+        :type task_name: str
+        :param output_base: the output directory path
+        :type output_base: str
+        :param logs: Whether logs should be downloaded, defaults to True
+        :type logs: str, optional
+        :param state: Whether state should be downloaded, defaults to True
+        :type state: str, optional
+        :param model: Whether model should be downloaded, defaults to True
+        :type model: str, optional
+        :param output: Whether output should be downloaded, defaults to True
+        :type output: str, optional
+        :param source: Whether source should be downloaded, defaults to False
+        :type task_name: str, optional
+        """
         smTask = self.tasks[task_name]
         return smTask.downloadResults(
-            outputBase,
+            output_base,
             logs=logs,
             state=state,
             model=model,
@@ -259,7 +406,7 @@ class SageMakerProject:
             for commonPreifx in result["CommonPrefixes"]
         ]
 
-    def getCompletionStatus(self, task_name):
+    def _getCompletionStatus(self, task_name):
         taskS3Uri = SageMakerTask.getStateS3Uri(
             self.bucket_name, self.project_name, task_name
         )
@@ -276,8 +423,8 @@ class SageMakerProject:
                 logger.warning(f"Couldn't get completion status for {subdir}")
         return results
 
-    def getCompletionJobName(self, task_name):
-        completionResults = self.getCompletionStatus(task_name)
+    def _getCompletionJobName(self, task_name):
+        completionResults = self._getCompletionStatus(task_name)
         values = list(set(completionResults.values()))
         if len(values) == 1 and values[0] is not None:
             return values[0]

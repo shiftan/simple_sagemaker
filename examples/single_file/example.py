@@ -19,7 +19,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project = SageMakerProject(prefix + project_name + postfix)
     # define the code parameters
     sm_project.setDefaultCodeParams(
-        source_dir=None, entryPoint=__file__, dependencies=[]
+        source_dir=None, entry_point=__file__, dependencies=[]
     )
     # define the instance parameters
     sm_project.setDefaultInstanceParams(instance_count=2)
@@ -33,8 +33,6 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     image_uri = sm_project.buildOrGetImage(
         instance_type=sm_project.defaultInstanceParams.instance_type
     )
-    # ceate the IAM role
-    sm_project.createIAMRole()
 
     # *** Task 1 - process input data
     task1_name = "task1"
@@ -59,9 +57,9 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     task2_name = "task2"
     # set the input
     additional_inputs = {
-        "task2_data": sm_project.getInputConfig(task1_name, model=True),
+        "task2_data": sm_project.getInputConfig(task1_name, "model"),
         "task2_data_dist": sm_project.getInputConfig(
-            task1_name, model=True, distribution="ShardedByS3Key"
+            task1_name, "model", distribution="ShardedByS3Key"
         ),
     }
     # run the task
