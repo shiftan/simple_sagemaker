@@ -102,7 +102,7 @@ The files and directories structure is as follows:
 - input - the task input, shared as well
 - [Job name] - a per job specific folder
     - model.tar.gz - model output data, merged from *all instances*
-    - output.tar.gz - the *main instance* output data (ohter output are ignored)
+    - output.tar.gz - the *main instance* output data (other outputs are ignored)
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
 
