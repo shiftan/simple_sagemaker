@@ -37,7 +37,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     # *** Task 1 - process input data
     task1_name = "task1"
     # set the input data
-    input_data_path = file_path.parent / "data"
+    input_data_path = file_path / "data"
     # run the task
     sm_project.runTask(
         task1_name,
@@ -49,7 +49,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     )
     # download the results
     if not output_path:
-        output_path = file_path.parent / "output"
+        output_path = file_path / "output"
     shutil.rmtree(output_path, ignore_errors=True)
     sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 
