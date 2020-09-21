@@ -428,7 +428,7 @@ def main():
     )
 
     if args.output_path:
-        sm_project.downloadResults(args.task_name, args.output_path, source=False)
+        sm_project.downloadResults(args.task_name, args.output_path)
 
 
 if __name__ == "__main__":
