@@ -580,3 +580,8 @@ tox -e report
 6. Create a pull request to the master branch
     - Every master push is fully tested
 7. If the tests succeed, the new version is publihed to [PyPi](https://pypi.org/project/simple-sagemaker/)
+
+
+# Open issue
+1. S3_sync doesn't delete remote files if deleted locally + optimization
+2. Handling spot instance termination / signals
