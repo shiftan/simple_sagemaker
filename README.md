@@ -6,8 +6,7 @@ A **simpler** and **cheaper** way to distribute python (training) code on machin
 ## Requirements
 
 1. Python 3.6+
-2. AWS account credentials
-3. Configuration of AWS credentials for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
+2. AWS account credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -15,16 +14,14 @@ To install *Simple Sagemaker*
 pip install simple-sagemaker
 ```
 
-Then, here's a very simple example.
-Assuming one would like to run the following `worker1.py` on the cloud:
-
+Then, to run the following `worker1.py` on the cloud on a *ml.p3.2xlarge* *spot* instance
 ```python
 import torch
 
 for i in range(torch.cuda.device_count()):
     print(f"-***- Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
-It's as easy as running the following command to get it running on a *ml.p3.2xlarge* *spot* instance:
+Just run the below command:
 ```bash
 ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge
 ```
