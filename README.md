@@ -170,7 +170,19 @@ wait # wait for all processes
 ```
 Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
 
-# Examples
+# More examples
+CLI based examples:
+- [A fully featured advanced example](#A-fully-featured-advanced-example)
+- [Passing command line arguments](#Passing-command-line-arguments)
+- [Task state and output](#Task-state-and-output)
+- [Providing input data](#Providing-input-data)
+- [Chaining tasks](#Chaining-tasks)
+- [Configuring the docker image](#Configuring-the-docker-image)
+- [Defining code dependencies](#Defining-code-dependencies)
+
+API only example:
+- [Single file example](#Single-file-example)
+
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
 To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
