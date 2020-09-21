@@ -25,7 +25,8 @@ Just run the below command:
 ```bash
 ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
-The output, including logs is saved to `./output/example1`. The relevant part from the log files (`./output/example1/logs/logs0` and `./output/example1/logs/logs1`) is:
+The output logs are saved to `./output/example1/logs`. 
+The relevant part from the log files (`./output/example1/logs/logs0` and `./output/example1/logs/logs1`) is:
 ```
 ...
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
@@ -160,6 +161,7 @@ ssm -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e work
 #   - Uses the tensorflow framework as pre-built image (-f)
 #   - Tags the jobs (--tag)
 #   - Defines sagemaker metrics (-m, --md)
+#   - Use an on-demand instance (--no_spot)
 ssm -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
     -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
