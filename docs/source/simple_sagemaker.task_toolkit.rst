@@ -7,7 +7,7 @@ Submodules
 simple\_sagemaker.task\_toolkit.algo\_lib module
 ------------------------------------------------
 
-.. automodule:: simple_sagemaker.task_toolkit.task_lib
+.. automodule:: simple_sagemaker.worker_toolkit.worker_lib
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ simple\_sagemaker.task\_toolkit.algo\_lib module
 Module contents
 ---------------
 
-.. automodule:: simple_sagemaker.task_toolkit
+.. automodule:: simple_sagemaker.worker_toolkit
    :members:
    :undoc-members:
    :show-inheritance:

@@ -65,7 +65,7 @@ class SageMakerTask:
         self.inputS3Uri = None
 
         self.internalDependencies = [
-            os.path.abspath(os.path.join(os.path.split(__file__)[0], "task_toolkit"))
+            os.path.abspath(os.path.join(os.path.split(__file__)[0], "worker_toolkit"))
         ]
 
     @staticmethod

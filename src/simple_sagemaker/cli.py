@@ -245,6 +245,12 @@ def parseArgs():
         tuple=TaskInputTuple,
     )
     parser.add_argument(
+        "--force_running",
+        default=False,
+        action="store_true",
+        help="Force running the task even if it's already completed.",
+    )
+    parser.add_argument(
         "--clean_state",
         "--cs",
         default=False,
@@ -356,7 +362,13 @@ def parseHyperparams(rest):
 
 
 def main():
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format=format,
+    )
     logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
 
@@ -421,6 +433,7 @@ def main():
         {
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
+            "force_running": "force_running",
         },
     )
 

@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   simple_sagemaker.task_toolkit
+   simple_sagemaker.worker_toolkit
 
 Submodules
 ----------
