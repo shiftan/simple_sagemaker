@@ -101,6 +101,7 @@ def worker():
                 path = Path(args.model_dir) / (
                     str(relp) + "_proc_by_" + args.current_host
                 )
+                path.parent.mkdir( parents=True, exist_ok=True)
                 path.write_text(file.read_text() + " processed by " + args.current_host)
         open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
     elif int(args.hps["task"]) == 2:
