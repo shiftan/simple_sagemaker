@@ -127,8 +127,10 @@ class SageMakerTask:
         max_wait=None,
         volume_size=30,
         max_run=24 * 60 * 60,
-        tags=[],
+        tags=dict(),
         distribution="FullyReplicated",
+        metric_definitions=dict(), 
+        enable_sagemaker_metrics=False,
         **additionalEstimatorArgs,
     ):
         """
@@ -154,8 +156,11 @@ class SageMakerTask:
         # append the internal dependencies
         dependencies.extend(self.internalDependencies)
 
-        tags.append({"Key": "SimpleSagemakerTask", "Value": self.task_name})
-        tags.append({"Key": "SimpleSagemakerVersion", "Value": VERSION})
+        tags["SimpleSagemakerTask"] = self.task_name
+        tags["SimpleSagemakerVersion"] = VERSION
+        tags = [{"Key": k, "Value": v} for k, v in tags.items()]
+
+        metric_definitions = [{"Name": k, "Regex": v} for k, v in metric_definitions.items()]
 
         if not use_spot_instances:
             max_wait = 0
@@ -187,6 +192,8 @@ class SageMakerTask:
             use_spot_instances=use_spot_instances,
             max_wait=max_wait,
             tags=tags,
+            metric_definitions=metric_definitions,
+            enable_sagemaker_metrics=enable_sagemaker_metrics,
             **additionalEstimatorArgs,
         )
         inputs = dict()

@@ -256,8 +256,31 @@ def parseArgs():
         action="store_false",
         dest="clean_state",
         help="Keep the current task state. If the task is already completed, its current output will \
-             be taken without running it again",
+             be taken without running it again.",
     )
+    parser.add_argument(
+        "--metric_definitions",
+        "--md",
+        nargs = 2,
+        metavar=("name", "regexp"),
+        action='append',
+        help="Enables SageMaker Metrics Time Series.",
+    )
+    parser.add_argument(
+        "--enable_sagemaker_metrics",
+        "-m",
+        default=False,
+        action="store_true",
+        help="Enables SageMaker Metrics Time Series.",
+    )
+    parser.add_argument(
+        "--tags",
+        nargs = 2,
+        metavar=("key", "value"),
+        action='append',
+        help="Tags to be attached to the jobs executed for this task.",
+    )
+
     parser.add_argument(
         "--output_path",
         "-o",
@@ -376,12 +399,14 @@ def main():
         args,
         {
             "clean_state": "clean_state",
+            "enable_sagemaker_metrics": "enable_sagemaker_metrics",
         },
     )
 
     input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
-    tags = list()
+    tags = {} if args.tags is None else {k:v for (k,v) in args.tags}
+    metric_definitions = {} if args.metric_definitions is None else {k:v for (k,v) in args.metric_definitions}
 
     sm_project.runTask(
         args.task_name,
@@ -391,6 +416,7 @@ def main():
         distribution=distribution,
         additional_inputs=inputs,
         tags=tags,
+        metric_definitions=metric_definitions,
         **running_params,
     )
 

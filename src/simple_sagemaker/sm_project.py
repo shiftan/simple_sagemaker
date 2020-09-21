@@ -248,7 +248,7 @@ class SageMakerProject:
         input_data_path=None,
         clean_state=False,
         force_running=False,
-        tags=[],
+        tags=dict(),
         **kwargs,
     ):
         """Run a new task for this project.
@@ -270,8 +270,8 @@ class SageMakerProject:
             clearing the current state), defaults to False
         :type force_running: bool, optional
         :param force_running: Tags to be attached to the jobs executed for this task, e.g.
-            [{"Key": "TagName", "Value":"TagValue"}].
-        :type force_running: list of dictionaries, optional
+            {"TagName": "TagValue"}.
+        :type force_running: dict, optional
 
         :Keyword Arguments:
             Paramaters to overwrite the default code or instance params.
@@ -296,15 +296,10 @@ class SageMakerProject:
 
         args.update(kwargs)
 
-        tags.append({"Key": "SimpleSagemakerProject", "Value": self.project_name})
+        tags["SimpleSagemakerProject"] = self.project_name
         import inspect
 
-        tags.append(
-            {
-                "Key": "SimpleSagemakerCallingModule",
-                "Value": inspect.stack()[1].filename,
-            }
-        )
+        tags["SimpleSagemakerCallingModule"] = inspect.stack()[1].filename
 
         if clean_state:
             smTask.clean_state()
