@@ -269,8 +269,7 @@ class SageMakerProject:
         :param force_running: Whether to forec running the task even if it was already completed (but without
             clearing the current state), defaults to False
         :type force_running: bool, optional
-        :param force_running: Tags to be attached to the jobs executed for this task, e.g.
-            {"TagName": "TagValue"}.
+        :param force_running: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
         :type force_running: dict, optional
 
         :Keyword Arguments:

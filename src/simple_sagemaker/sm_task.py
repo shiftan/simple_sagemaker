@@ -129,7 +129,7 @@ class SageMakerTask:
         max_run=24 * 60 * 60,
         tags=dict(),
         distribution="FullyReplicated",
-        metric_definitions=dict(), 
+        metric_definitions=dict(),
         enable_sagemaker_metrics=False,
         **additionalEstimatorArgs,
     ):
@@ -160,7 +160,9 @@ class SageMakerTask:
         tags["SimpleSagemakerVersion"] = VERSION
         tags = [{"Key": k, "Value": v} for k, v in tags.items()]
 
-        metric_definitions = [{"Name": k, "Regex": v} for k, v in metric_definitions.items()]
+        metric_definitions = [
+            {"Name": k, "Regex": v} for k, v in metric_definitions.items()
+        ]
 
         if not use_spot_instances:
             max_wait = 0

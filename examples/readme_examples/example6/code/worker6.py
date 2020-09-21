@@ -44,6 +44,7 @@ def worker1(args, state_dir):
 def worker2(args, state_dir):
     # importing an external dependency
     from external_dependency import lib1  # noqa: F401
+
     logger.info("Score: 10;")
     logger.info("Score: 20;")
 

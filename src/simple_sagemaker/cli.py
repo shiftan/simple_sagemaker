@@ -261,9 +261,9 @@ def parseArgs():
     parser.add_argument(
         "--metric_definitions",
         "--md",
-        nargs = 2,
+        nargs=2,
         metavar=("name", "regexp"),
-        action='append',
+        action="append",
         help="Enables SageMaker Metrics Time Series.",
     )
     parser.add_argument(
@@ -275,9 +275,9 @@ def parseArgs():
     )
     parser.add_argument(
         "--tags",
-        nargs = 2,
+        nargs=2,
         metavar=("key", "value"),
-        action='append',
+        action="append",
         help="Tags to be attached to the jobs executed for this task.",
     )
 
@@ -405,8 +405,12 @@ def main():
 
     input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
-    tags = {} if args.tags is None else {k:v for (k,v) in args.tags}
-    metric_definitions = {} if args.metric_definitions is None else {k:v for (k,v) in args.metric_definitions}
+    tags = {} if args.tags is None else {k: v for (k, v) in args.tags}
+    metric_definitions = (
+        {}
+        if args.metric_definitions is None
+        else {k: v for (k, v) in args.metric_definitions}
+    )
 
     sm_project.runTask(
         args.task_name,
