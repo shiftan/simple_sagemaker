@@ -19,7 +19,7 @@ def _bind(instance, func, as_name):
 
 
 def setDebugLevel():
-    """Set the debug level to match the 
+    """Set the debug level to match the
 
     return: the parsed environment
     """
@@ -36,7 +36,9 @@ def parseArgs():
     # Sagemaker training env vars - see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
 
     parser = argparse.ArgumentParser()
-    _bind(parser, _add_argument_default_env_or_other, "add_argument_default_env_or_other")
+    _bind(
+        parser, _add_argument_default_env_or_other, "add_argument_default_env_or_other"
+    )
 
     # Data and model paths
     parser.add_argument_default_env_or_other(
@@ -139,7 +141,10 @@ def _getInstanceStatePath(args):
         path.mkdir(parents=True, exist_ok=True)
     return str(path)
 
+
 _otherInstanceStateDeleted = False
+
+
 def _deleteOtherInstancesState(args):
     if _otherInstanceStateDeleted:
         return
@@ -166,12 +171,12 @@ def initMultiWorkersState(args):
 
 
 def markCompleted(args):
-    """Mark the task as completed. 
-    Once a task is marked as completed it won't run again, and the current output will be used instead, 
-    unlesss eforced otherwise. In addition, the output of a completed task can be used as input of 
+    """Mark the task as completed.
+    Once a task is marked as completed it won't run again, and the current output will be used instead,
+    unlesss eforced otherwise. In addition, the output of a completed task can be used as input of
     other **tasks** in the same project.
 
-    
+
     :param args: The parsed arguments, as returned by :func:`parseArgs`
     """
     logger.info(f"Marking instance {args.current_host} completion")
