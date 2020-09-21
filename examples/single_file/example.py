@@ -77,15 +77,15 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 
 
 def worker():
-    from task_toolkit import task_lib
+    from worker_toolkit import worker_lib
 
-    task_lib.setDebugLevel()
+    worker_lib.setDebugLevel()
 
     logger.info("Starting worker...")
     # parse the arguments
-    args = task_lib.parseArgs()
+    args = worker_lib.parseArgs()
 
-    state_dir = task_lib.initMultiWorkersState(args)
+    state_dir = worker_lib.initMultiWorkersState(args)
 
     logger.info(f"Hyperparams: {args.hps}")
     logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
@@ -110,7 +110,7 @@ def worker():
         )
 
     # mark the task as completed
-    task_lib.markCompleted(args)
+    worker_lib.markCompleted(args)
     logger.info("finished!")
 
 

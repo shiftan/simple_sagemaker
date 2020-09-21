@@ -130,8 +130,8 @@ Invoking script with the following command:
 
 
 INFO:__main__:Starting algo...
-INFO:task_toolkit.task_lib:Args: Namespace(batch_size=64, channel_names=['data'], current_host='algo-2', epochs=50, hosts=['algo-1', 'algo-2'], hps={'arg1': 5, 'arg2': 'hello'}, input_config_dir='/opt/ml/input/config', input_data='/opt/ml/input/data/data', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='', job_name='Task1-2020-09-13-13-18-08-bZTlsaqt', learning_rate=0.05, model_dir='/opt/ml/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
-INFO:task_toolkit.task_lib:Unmatched: ['--arg1', '5', '--arg2', 'hello']
+INFO:worker_toolkit.worker_lib:Args: Namespace(batch_size=64, channel_names=['data'], current_host='algo-2', epochs=50, hosts=['algo-1', 'algo-2'], hps={'arg1': 5, 'arg2': 'hello'}, input_config_dir='/opt/ml/input/config', input_data='/opt/ml/input/data/data', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='', job_name='Task1-2020-09-13-13-18-08-bZTlsaqt', learning_rate=0.05, model_dir='/opt/ml/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
+INFO:worker_toolkit.worker_lib:Unmatched: ['--arg1', '5', '--arg2', 'hello']
 -- External Lib1 imported!
 -- Internal Lib2 imported!
 INFO:__main__:Argv: ['algo.py', '--arg1', '5', '--arg2', 'hello']
@@ -155,7 +155,7 @@ drwxr-xr-x 6 root root 4096 Sep 13 13:22 ..
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 external_dependency
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 internal_dependency
 -rw-r--r-- 1 1001  116   20 Sep 13 13:15 requirements.txt
-drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 task_toolkit
+drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 worker_toolkit
 
 /opt/ml/code/external_dependency:
 total 12
@@ -169,20 +169,20 @@ drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 .
 drwxr-xr-x 5 root root 4096 Sep 13 13:22 ..
 -rw-r--r-- 1 1001  116   36 Sep 13 13:15 lib2.py
 
-/opt/ml/code/task_toolkit:
+/opt/ml/code/worker_toolkit:
 total 20
 drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 .
 drwxr-xr-x 5 root root 4096 Sep 13 13:22 ..
 -rw-r--r-- 1 1001  116    0 Sep 13 13:16 __init__.py
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:16 __pycache__
--rw-r--r-- 1 1001  116 5227 Sep 13 13:16 task_lib.py
+-rw-r--r-- 1 1001  116 5227 Sep 13 13:16 worker_lib.py
 
-/opt/ml/code/task_toolkit/__pycache__:
+/opt/ml/code/worker_toolkit/__pycache__:
 total 20
 drwxr-xr-x 2 1001 116 4096 Sep 13 13:16 .
 drwxr-xr-x 3 1001 116 4096 Sep 13 13:16 ..
 -rw-r--r-- 1 1001 116  216 Sep 13 13:16 __init__.cpython-37.pyc
--rw-r--r-- 1 1001 116 4144 Sep 13 13:16 task_lib.cpython-37.pyc
+-rw-r--r-- 1 1001 116 4144 Sep 13 13:16 worker_lib.cpython-37.pyc
 
 /opt/ml/input:
 total 16
@@ -267,9 +267,9 @@ drwxr-xr-x  2 root root 4096 Sep 13 13:20 .
 drwxr-xr-x 23 root root 4096 Sep 13 13:22 ..
 
 INFO:__main__:*** END file listing /state
-INFO:task_toolkit.task_lib:Deleting other instances' state
-INFO:task_toolkit.task_lib:Creating instance specific state dir
-INFO:task_toolkit.task_lib:Marking instance algo-2 completion
+INFO:worker_toolkit.worker_lib:Deleting other instances' state
+INFO:worker_toolkit.worker_lib:Creating instance specific state dir
+INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:__main__:finished!
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:/opt/ml:
@@ -289,7 +289,7 @@ drwxr-xr-x 6 root root 4096 Sep 13 13:22 ..
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 external_dependency
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 internal_dependency
 -rw-r--r-- 1 1001  116   20 Sep 13 13:15 requirements.txt
-drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 task_toolkit
+drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 worker_toolkit
 
 /opt/ml/code/external_dependency:
 total 12
@@ -303,20 +303,20 @@ drwxr-xr-x 2 1001  116 4096 Sep 13 13:15 .
 drwxr-xr-x 5 root root 4096 Sep 13 13:22 ..
 -rw-r--r-- 1 1001  116   36 Sep 13 13:15 lib2.py
 
-/opt/ml/code/task_toolkit:
+/opt/ml/code/worker_toolkit:
 total 20
 drwxr-xr-x 3 1001  116 4096 Sep 13 13:16 .
 drwxr-xr-x 5 root root 4096 Sep 13 13:22 ..
 -rw-r--r-- 1 1001  116    0 Sep 13 13:16 __init__.py
 drwxr-xr-x 2 1001  116 4096 Sep 13 13:16 __pycache__
--rw-r--r-- 1 1001  116 5227 Sep 13 13:16 task_lib.py
+-rw-r--r-- 1 1001  116 5227 Sep 13 13:16 worker_lib.py
 
-/opt/ml/code/task_toolkit/__pycache__:
+/opt/ml/code/worker_toolkit/__pycache__:
 total 20
 drwxr-xr-x 2 1001 116 4096 Sep 13 13:16 .
 drwxr-xr-x 3 1001 116 4096 Sep 13 13:16 ..
 -rw-r--r-- 1 1001 116  216 Sep 13 13:16 __init__.cpython-37.pyc
--rw-r--r-- 1 1001 116 4144 Sep 13 13:16 task_lib.cpython-37.pyc
+-rw-r--r-- 1 1001 116 4144 Sep 13 13:16 worker_lib.cpython-37.pyc
 
 /opt/ml/input:
 total 16
