@@ -274,7 +274,8 @@ class SageMakerProject:
         :type force_running: bool, optional
         :param force_running: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
         :type force_running: dict, optional
-        :param metric_definitions: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
+        :param metric_definitions: Names and regexps for a SageMaker Metrics Time Series definitions, e.g. {"Score": "Score=(.*?);"}.
+            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html
         :type metric_definitions: dict, optional
         :param enable_sagemaker_metrics: Enables SageMaker Metrics Time Series, defaults
         :type enable_sagemaker_metrics: nool, optional

@@ -166,7 +166,8 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code
     --ic 2 --task_type 2 -o $1/example6_2 ${@:4} &
 
 # Running task6_1 again
-#   --ks (keep state) is used to keep the current state and demonstrate that existing output is used, without running the task again
+#   - A completed task isn't exsecuted again, but the current output is used instead. 
+#       --ks (keep state, the default) is used to keep the current state
 ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
@@ -175,6 +176,10 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code
 
 wait # wait for all processes
 ```
+The metrics graphs can be viewed on the AWS console:
+![High level flow diagram](docs/metric_example.jpg?raw=true "Metric Example")
+More information [here](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html).
+
 Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
 
 # More examples
