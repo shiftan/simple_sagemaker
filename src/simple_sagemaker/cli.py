@@ -290,6 +290,30 @@ def parseArgs():
         default=None,
         help="Local path to download the outputs to.",
     )
+    parser.add_argument(
+        "--download_state",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    parser.add_argument(
+        "--download_model",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    parser.add_argument(
+        "--download_output",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    parser.add_argument(
+        "--download_output",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
 
     args, rest = parser.parse_known_args()
     return args, rest
@@ -428,7 +452,14 @@ def main():
     )
 
     if args.output_path:
-        sm_project.downloadResults(args.task_name, args.output_path)
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
 
 
 if __name__ == "__main__":
