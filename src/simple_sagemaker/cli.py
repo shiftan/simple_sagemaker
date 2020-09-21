@@ -245,6 +245,12 @@ def parseArgs():
         tuple=TaskInputTuple,
     )
     parser.add_argument(
+        "--force_running",
+        default=False,
+        action="store_true",
+        help="Force running the task even if it's already completed.",
+    )
+    parser.add_argument(
         "--clean_state",
         "--cs",
         default=False,
@@ -421,6 +427,7 @@ def main():
         {
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
+            "force_running": "force_running",
         },
     )
 
