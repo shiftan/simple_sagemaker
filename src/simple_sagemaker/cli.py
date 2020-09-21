@@ -131,7 +131,7 @@ def parseArgs():
         "-d",
         nargs="+",
         type=lambda x: fileValidation(parser, x),
-        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies 
+        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
         aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
         Structure within this directory are preserved when running on Amazon SageMaker.""",
     )

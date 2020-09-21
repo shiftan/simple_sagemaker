@@ -21,7 +21,8 @@ class SageMakerProject:
     :type boto3_session: str, optional
     :param role_name: The Amazon SageMaker training jobs and APIs that create Amazon SageMaker endpoints
         use this role to access training data and model artifacts. After the endpoint is created,
-        the inference code might use the IAM role, if it needs to access an AWS resource. Defaults to {constants.DEFAULT_IAM_ROLE}
+        the inference code might use the IAM role, if it needs to access an AWS resource.,
+        defaults to {constants.DEFAULT_IAM_ROLE}
     :type role_name: str, optional
     :param bucket_name: A bucket name to be used. The default sagemaker bucket is used if not specified
     :type bucket_name: str, optional
@@ -103,7 +104,8 @@ class SageMakerProject:
         :type img_tag: str
         :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content
         :type docker_file_path_or_content: str
-        :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported., defaults to "ptrorch"
+        :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.,
+            defaults to "ptrorch"
             See https://github.com/aws/deep-learning-containers/blob/master/available_images.md
         :type framework: str
         :param version: The framework version
@@ -130,11 +132,12 @@ class SageMakerProject:
             code dependencies aside from the entry point file. If source_dir is an S3 URI,
             it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker
         :type source_dir: str, optional
-        :param entry_point: Path (absolute or relative) to the local Python source file which should be executed as the entry point.
-            If source_dir is specified, then entry_point must point to a file located at the root of source_dir.
+        :param entry_point: Path (absolute or relative) to the local Python source file which should be executed
+            as the entry point.  If source_dir is specified, then entry_point must point to a file located at the
+            root of source_dir.
         :type entry_point: str, optional
-        :param dependencies: Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
-            aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
+        :param dependencies: Path (absolute, relative or an S3 URI) to a directory with any other training source code
+            dependencies aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
             Structure within this directory are preserved when running on Amazon SageMaker.
         :type dependencies: list of strings, optional
         """
@@ -218,7 +221,7 @@ class SageMakerProject:
         self.tasks[task_name] = smTask
 
     def buildOrGetImage(self, instance_type, **kwargs):
-        f"""Get the image URI, according to the image params. If a custom image is used, i.e. when `docker_file_path_or_content` was
+        """Get the image URI, according to the image params. If a custom image is used, i.e. when `docker_file_path_or_content` was
         given, it's firsdt built and pushed to ECS.
 
         :param instance_type: The EC2 instance type that is going to run that image
@@ -260,12 +263,14 @@ class SageMakerProject:
             If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.
         :type input_data_path: str, optional
         :param clean_state: Whether to clear the task state before running it. If the task was already completed,
-            it will be running again if set, otherwise its current output will be taken without running it again., defaults to False
-        :type clean_state: bool, optional
-        :param force_running: Whether to forec running the task even if it was already completed (but without clearing the current state),
+            it will be running again if set, otherwise its current output will be taken without running it again.,
             defaults to False
+        :type clean_state: bool, optional
+        :param force_running: Whether to forec running the task even if it was already completed (but without
+            clearing the current state), defaults to False
         :type force_running: bool, optional
-        :param force_running: Tags to be attached to the jobs executed for this task, e.g. [{"Key": "TagName", "Value":"TagValue"}].
+        :param force_running: Tags to be attached to the jobs executed for this task, e.g.
+            [{"Key": "TagName", "Value":"TagValue"}].
         :type force_running: list of dictionaries, optional
 
         :Keyword Arguments:
