@@ -35,7 +35,71 @@ The output, including logs is saved to `./output/example1`. The relevant part fr
 ...
 ```
 
-### Advanced example
+## More examples (below)
+CLI based examples:
+- [A fully featured advanced example](#A-fully-featured-advanced-example)
+- [Passing command line arguments](#Passing-command-line-arguments)
+- [Task state and output](#Task-state-and-output)
+- [Providing input data](#Providing-input-data)
+- [Chaining tasks](#Chaining-tasks)
+- [Configuring the docker image](#Configuring-the-docker-image)
+- [Defining code dependencies](#Defining-code-dependencies)
+
+API only example:
+- [Single file example](#Single-file-example)
+
+# Background
+*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+
+The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
+* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
+* The **worker** is basically the code you're trying to distribute, with possible minimal code changes that should use a small `task_tollkit` library which is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
+
+The **runner** is used to configure the **tasks** and **projects**: 
+- A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
+- A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
+    - State is maintained between consecutive execution of the same **task**
+    - Task can be markd as completed, to avoid re-running it next time (unlesss eforced otherwise)
+- A **prjoect** is a series of related **tasks**, with possible depencencies
+    - The output of one task can be consumed by a consequetive task
+
+# Main features
+1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
+    - Jobs IAM role creation, including policies for accesing needed S3 buckets
+    - Building and uploading a customized docker image to AWS (ECS service)
+    - Synchronizing local source code / input data to a S3 bucket
+    - Downloading the results from S3
+    - ...
+2. Cheaper - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
+3. Abstraction of how data is maintianed on AWS (S3 service)
+    - No need to mess with S3 paths, the data is automatically
+    - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
+4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
+5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named ***ssm***) to control the execution (a.k.a implement the **runner**, see below)
+    - In most cases it's only about 2 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
+6. Easy customization of the docker image (based on a pre-built one)
+7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
+    - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
+    - (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
+
+
+## High level flow diagram
+![High level flow diagram](docs/high_level_flow.svg?raw=true "High level flow")
+
+# Data maintainance on S3
+All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
+The files and directories structure is as follows:
+- [Bucket name]/[Project name]
+        - [Task name]
+            - state
+            - input
+            - [Job name]
+                - output
+                    - model.tar.gz - model output data, merged from *all instances*
+                    - output.tar.gz - the *main instance* output data (ohter instance output is skipped)
+                - source/sourcedir.tar.gz - source code and dependencies
+
+# A fully featured advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
 In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](./examples/readme_examples/example6):
 ```
@@ -105,70 +169,6 @@ ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code
 wait # wait for all processes
 ```
 Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
-
-## More examples (below)
-Command line based examples:
-- [Passing command line arguments](#Passing-command-line-arguments)
-- [Task state and output](#Task-state-and-output)
-- [Providing input data](#Providing-input-data)
-- [Chaining tasks](#Chaining-tasks)
-- [Configuring the docker image](#Configuring-the-docker-image)
-- [Defining code dependencies](#Defining-code-dependencies)
-
-Code only:
-- [Single file example](#Single-file-example)
-
-# Main features
-1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
-    - Jobs IAM role creation, including policies for accesing needed S3 buckets
-    - Building and uploading a customized docker image to AWS (ECS service)
-    - Synchronizing local source code / input data to a S3 bucket
-    - Downloading the results from S3
-    - ...
-2. Cheaper - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
-3. Abstraction of how data is maintianed on AWS (S3 service)
-    - No need to mess with S3 paths, the data is automatically
-    - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
-4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
-5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named ***ssm***) to control the execution (a.k.a implement the **runner**, see below)
-    - In most cases it's only about 2 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
-6. Easy customization of the docker image (based on a pre-built one)
-7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
-    - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
-    - (Amazon SageMaker Python SDK @ Read the Docs)[https://sagemaker.readthedocs.io/en/stable/index.html]
-
-
-## High level flow diagram
-![High level flow diagram](docs/high_level_flow.svg?raw=true "High level flow")
-
-
-# Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
-
-The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
-* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the code you're trying to distribute, with possible minimal code changes that should use a small `task_tollkit` library which is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
-
-The **runner** is used to configure the **tasks** and **projects**: 
-- A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
-- A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
-    - State is maintained between consecutive execution of the same **task**
-    - Task can be markd as completed, to avoid re-running it next time (unlesss eforced otherwise)
-- A **prjoect** is a series of related **tasks**, with possible depencencies
-    - The output of one task can be consumed by a consequetive task
-
-# S3
-All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
-The files and directories structure is as follows:
-- [Bucket name]/[Project name]
-        - [Task name]
-            - state
-            - input
-            - [Job name]
-                - output
-                    - model.tar.gz - model output data, merged from *all instances*
-                    - output.tar.gz - the *main instance* output data (ohter instance output is skipped)
-                - source/sourcedir.tar.gz - source code and dependencies
 
 # Examples
 ## Passing command line arguments
