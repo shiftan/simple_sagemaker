@@ -300,19 +300,13 @@ def parseArgs():
         "--download_model",
         default=False,
         action="store_true",
-        help="Download the state once task is finished",
+        help="Download the model once task is finished",
     )
     parser.add_argument(
         "--download_output",
         default=False,
         action="store_true",
-        help="Download the state once task is finished",
-    )
-    parser.add_argument(
-        "--download_output",
-        default=False,
-        action="store_true",
-        help="Download the state once task is finished",
+        help="Download the output once task is finished",
     )
 
     args, rest = parser.parse_known_args()
