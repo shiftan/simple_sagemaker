@@ -189,7 +189,7 @@ def parseArgs():
     parser.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
     parser.add_argument("--repo_name", "--rn", help="Name of local repository.")
     parser.add_argument(
-        "--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+        "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
     )
     parser.add_argument(
         "--docker_file_path",
@@ -199,7 +199,7 @@ def parseArgs():
     parser.add_argument(
         "--framework",
         "-f",
-        help="The framework to use, see See https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
+        help="The framework to use, see https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
         choices=["pytorch", "tensorflow"],
         default="pytorch",
     )
@@ -220,8 +220,8 @@ def parseArgs():
         action=InputAction,
         help=help_for_input_type(
             InputTuple,
-            """Local/s3 path for the input data.
-        If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.""",
+            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task 
+            folder on the selected S3 bucket before launching the task.""",
         ),
         tuple=InputTuple,
     )
@@ -277,11 +277,11 @@ def parseArgs():
             See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
     parser.add_argument(
-        "--tags",
+        "--tag",
         nargs=2,
         metavar=("key", "value"),
         action="append",
-        help="Tags to be attached to the jobs executed for this task.",
+        help="Tag to be attached to the jobs executed for this task.",
     )
 
     parser.add_argument(
