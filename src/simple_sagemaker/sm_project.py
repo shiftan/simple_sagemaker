@@ -251,7 +251,7 @@ class SageMakerProject:
         tags=[],
         **kwargs,
     ):
-        f"""Run a new task for this project.
+        """Run a new task for this project.
 
         :param task_name: Name for the task
         :type task_name: str
