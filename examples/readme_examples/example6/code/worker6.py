@@ -8,7 +8,7 @@ import transformers  # noqa: F401
 
 # importing an internal dependency
 from internal_dependency import lib2  # noqa: F401
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +69,11 @@ def show_output(args, state_dir):
 
 def worker():
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
     # get the instance specific state path
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
     show_inputs(args, state_dir)
 
     if int(args.hps["task_type"]) == 1:
@@ -82,7 +82,7 @@ def worker():
         worker2(args, state_dir)
 
     # mark the task as completed
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
     show_output(args, state_dir)
 
     logger.info("finished!")

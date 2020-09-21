@@ -2,7 +2,7 @@ import logging
 import subprocess
 import sys
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def listDir(path):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
-    args = algo_lib.parseArgs()
+    task_lib.setDebugLevel()
+    args = task_lib.parseArgs()
     listDir(args.input_data)
     listDir(args.input_bucket)

@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +25,13 @@ def task2(args, state_dir):
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
 
     logger.info("Starting worker...")
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
 
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
 
     logger.info(f"Hyperparams: {args.hps}")
     logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
@@ -43,7 +43,7 @@ def main():
         task2(args, state_dir)
 
     # mark the task as completed
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
     logger.info("finished!")
 
 

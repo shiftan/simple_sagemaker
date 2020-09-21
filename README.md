@@ -199,11 +199,11 @@ API only example:
 
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
-To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
+To get access to all environment arguments, call `task_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
 ```python
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
-args = algo_lib.parseArgs()
+args = task_lib.parseArgs()
 print(args.hps["msg"])
 ```
 Running command:
@@ -223,7 +223,7 @@ Hello, world!
 ### State
 State is maintained between executions of the same **task**, i.e. between execution **jobs** that belongs to the same **task**.
 The local path is available in `args.state`. 
-When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the **task** as completed: `algo_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
+When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `task_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `task_lib` provides an additional important API to mark the **task** as completed: `task_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
 1. To skip it next time (unlesss eforced otherwise)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
@@ -237,9 +237,9 @@ A complete example can be seen in `worker3.py`:
 ```python
 import os
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
-args = algo_lib.parseArgs()
+args = task_lib.parseArgs()
 
 open(os.path.join(args.output_data_dir, "output_data_dir"), "wt").write(
     "output_data_dir file"
@@ -248,7 +248,7 @@ open(os.path.join(args.model_dir, "model_dir"), "wt").write("model_dir file")
 open(os.path.join(args.state, "state_dir"), "wt").write("state_dir file")
 
 # Mark the tasks as completed, to allow other tasks using its output, and to avoid re-running it (unless enforced)
-algo_lib.markCompleted(args)
+task_lib.markCompleted(args)
 ```
 Running command:
 ```bash
@@ -275,7 +275,7 @@ import logging
 import subprocess
 import sys
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -292,8 +292,8 @@ def listDir(path):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
-    args = algo_lib.parseArgs()
+    task_lib.setDebugLevel()
+    args = task_lib.parseArgs()
     listDir(args.input_data)
     listDir(args.input_bucket)
 ```
@@ -455,15 +455,15 @@ An additional **task** that depends on the previous one can now be scheduled as 
 Then, the worker code (note: the same function is used for the two different **tasks**, depending on the `task` hyperparameter):
 ```python
 def worker():
-    from task_toolkit import algo_lib
+    from task_toolkit import task_lib
 
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
 
     logger.info("Starting worker...")
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
 
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
 
     logger.info(f"Hyperparams: {args.hps}")
     logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
@@ -485,7 +485,7 @@ def worker():
         )
 
     # mark the task as completed
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
     logger.info("finished!")
 ```
 
@@ -516,8 +516,8 @@ Running the file, with a sibling directory named `data` with a sample file [as o
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
-INFO:task_toolkit.algo_lib:Marking instance algo-1 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-1 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
 
@@ -525,28 +525,28 @@ INFO:__main__:finished!
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:task_toolkit.algo_lib:Marking instance algo-2 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-2 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
 
 And the following for Task 2:
 ```
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 2, 'worker': 1}
-INFO:__main__:Input data files: [PosixPath('task_toolkit'), PosixPath('example.py'), PosixPath('task_toolkit/algo_lib.py'), PosixPath('task_toolkit/__pycache__'), PosixPath('task_toolkit/__init__.py'), PosixPath('task_toolkit/__pycache__/__init__.cpython-38.pyc'), PosixPath('task_toolkit/__pycache__/algo_lib.cpython-38.pyc')]
+INFO:__main__:Input data files: [PosixPath('task_toolkit'), PosixPath('example.py'), PosixPath('task_toolkit/task_lib.py'), PosixPath('task_toolkit/__pycache__'), PosixPath('task_toolkit/__init__.py'), PosixPath('task_toolkit/__pycache__/__init__.cpython-38.pyc'), PosixPath('task_toolkit/__pycache__/task_lib.cpython-38.pyc')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
 INFO:__main__:Input task2_data: [PosixPath('/opt/ml/input/data/task2_data/model.tar.gz')]
 INFO:__main__:Input task2_data_dist: [PosixPath('/opt/ml/input/data/task2_data_dist/model.tar.gz')]
-INFO:task_toolkit.algo_lib:Marking instance algo-1 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-1 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 ```
 
 ```
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:task_toolkit.algo_lib:Marking instance algo-2 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-2 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 
 ```

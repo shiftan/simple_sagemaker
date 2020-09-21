@@ -30,7 +30,7 @@ def getRelevantLogBlocks(content):
     consts2 = (
         constants.TEST_LOG_LINE_PREFIX,
         "INFO:__main__",
-        "INFO:task_toolkit.algo_lib:",
+        "INFO:task_toolkit.task_lib:",
     )
     consts2 = [re.escape(x) for x in consts2]
     pattern2 = "|".join(consts2)

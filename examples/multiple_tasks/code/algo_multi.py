@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +36,15 @@ def logAfter(args):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
     logger.info("Starting algo...")
 
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
     logBefore(args)
 
     output_data_dir = os.path.join(args.output_data_dir, args.current_host)
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
 
     # create some data in the state dir
     if args.hps["stage"] == 1:
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         shutil.copytree(input_dir, f"{output_data_dir}/{channel_name}_copy")
     shutil.copytree(args.state, f"{output_data_dir}/state_copy")
 
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
 
     logger.info("finished!")
     logAfter(args)
