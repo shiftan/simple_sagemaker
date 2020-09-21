@@ -1,3 +1,11 @@
 {
-    "python.pythonPath": "/home/user/miniconda3/bin/python"
+    "python.pythonPath": "/home/user/miniconda3/bin/python",
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/.tox/**": true,
+        "**/node_modules/*/**": true,
+        "**/__pycache__/**": true,
+        "**/runs/**": true,
+        "**/wandbd/run*": true,
+    }
 }

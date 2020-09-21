@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 from pathlib import Path
 
 # a library that was installed due to requirements.txt
@@ -46,6 +47,7 @@ def worker2(args, state_dir):
     from external_dependency import lib1  # noqa: F401
 
     logger.info("Score=10;")
+    time.sleep(2)  # sleep to be able to see the two scores
     logger.info("Score=20;")
 
 
