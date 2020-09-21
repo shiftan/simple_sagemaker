@@ -134,10 +134,10 @@ Invoking script with the following command:
 
 
 -- Internal Lib2 imported!
-INFO:task_toolkit.algo_lib:Args: Namespace(batch_size=64, channel_names=['task_6_1_model', 'task_6_1_state'], current_host='algo-2', epochs=50, hosts=['algo-1', 'algo-2'], hps={'model_dir': 's3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-21-08-10-52_py37/task6-2/task6-2-2020-09-21-08-18-16-IqPeuvsB/model', 'task_type': '2'}, input_config_dir='/opt/ml/input/config', input_data='', input_data_config='{"task_6_1_model":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task_6_1_state":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='', input_task_6_1_model='/opt/ml/input/data/task_6_1_model', input_task_6_1_state='/opt/ml/input/data/task_6_1_state', job_name='task6-2-2020-09-21-08-18-16-IqPeuvsB', learning_rate=0.05, model_dir='s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-21-08-10-52_py37/task6-2/task6-2-2020-09-21-08-18-16-IqPeuvsB/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
-INFO:task_toolkit.algo_lib:Unmatched: ['--task_type', '2']
-INFO:task_toolkit.algo_lib:Deleting other instances' state
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Args: Namespace(batch_size=64, channel_names=['task_6_1_model', 'task_6_1_state'], current_host='algo-2', epochs=50, hosts=['algo-1', 'algo-2'], hps={'model_dir': 's3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-21-08-10-52_py37/task6-2/task6-2-2020-09-21-08-18-16-IqPeuvsB/model', 'task_type': '2'}, input_config_dir='/opt/ml/input/config', input_data='', input_data_config='{"task_6_1_model":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task_6_1_state":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', input_model='', input_task_6_1_model='/opt/ml/input/data/task_6_1_model', input_task_6_1_state='/opt/ml/input/data/task_6_1_state', job_name='task6-2-2020-09-21-08-18-16-IqPeuvsB', learning_rate=0.05, model_dir='s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-09-21-08-10-52_py37/task6-2/task6-2-2020-09-21-08-18-16-IqPeuvsB/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
+INFO:task_toolkit.task_lib:Unmatched: ['--task_type', '2']
+INFO:task_toolkit.task_lib:Deleting other instances' state
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:input channel task_6_1_model is at /opt/ml/input/data/task_6_1_model
 INFO:__main__:input channel task_6_1_state is at /opt/ml/input/data/task_6_1_state
 INFO:__main__:*** START listing files in /opt/ml
@@ -149,7 +149,7 @@ INFO:__main__:[Dir ] /opt/ml/code/internal_dependency/lib2.py
 INFO:__main__:[Dir ] /opt/ml/code/requirements.txt
 INFO:__main__:[File] /opt/ml/code/task_toolkit
 INFO:__main__:[Dir ] /opt/ml/code/task_toolkit/__init__.py
-INFO:__main__:[Dir ] /opt/ml/code/task_toolkit/algo_lib.py
+INFO:__main__:[Dir ] /opt/ml/code/task_toolkit/task_lib.py
 INFO:__main__:[Dir ] /opt/ml/code/worker6.py
 INFO:__main__:[File] /opt/ml/errors
 INFO:__main__:[File] /opt/ml/input
@@ -188,7 +188,7 @@ INFO:__main__:*** END file listing /state
 -- External Lib1 imported!
 INFO:__main__:Score=10;
 INFO:__main__:Score=20;
-INFO:task_toolkit.algo_lib:Marking instance algo-2 completion
+INFO:task_toolkit.task_lib:Marking instance algo-2 completion
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:[File] /opt/ml/errors
 INFO:__main__:[File] /opt/ml/model

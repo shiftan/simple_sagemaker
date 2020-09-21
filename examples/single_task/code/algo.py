@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 import transformers
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +39,11 @@ def logAfter(args):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
     logger.info("Starting algo...")
 
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
 
     # importing internal and external dependencies
     from external_dependency import lib1  # noqa: F401
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     open(f"{modelDir}/model_dir", "wt").write("model_dir")
 
     # delete other instances state, write file in instance state folder.
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
     open(f"{state_dir}/state_{args.current_host}", "wt").write(
         f"state_{args.current_host}"
     )
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
 
     # just to show the final directory structue
     logger.info("finished!")

@@ -35,7 +35,7 @@
                 "-f", "tensorflow",
                 "-m",
                 "--md", "Score", "Score=(.*?);",
-                "--tags", "MyTag", "MyValu", 
+                "--tag", "MyTag", "MyValue", 
                 //"--iis", "bucket", "s3://awsglue-datasets/examples/us-legislators/all/persons.json"
                 //"--iit", "bucket", "task3", "model"
                 //"--cs", 

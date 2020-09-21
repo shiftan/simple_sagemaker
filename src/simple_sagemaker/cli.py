@@ -189,7 +189,7 @@ def parseArgs():
     parser.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
     parser.add_argument("--repo_name", "--rn", help="Name of local repository.")
     parser.add_argument(
-        "--image_tag", "--tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+        "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
     )
     parser.add_argument(
         "--docker_file_path",
@@ -199,7 +199,7 @@ def parseArgs():
     parser.add_argument(
         "--framework",
         "-f",
-        help="The framework to use, see See https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
+        help="The framework to use, see https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
         choices=["pytorch", "tensorflow"],
         default="pytorch",
     )
@@ -220,8 +220,8 @@ def parseArgs():
         action=InputAction,
         help=help_for_input_type(
             InputTuple,
-            """Local/s3 path for the input data.
-        If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.""",
+            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task
+            folder on the selected S3 bucket before launching the task.""",
         ),
         tuple=InputTuple,
     )
@@ -277,11 +277,11 @@ def parseArgs():
             See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
     parser.add_argument(
-        "--tags",
+        "--tag",
         nargs=2,
         metavar=("key", "value"),
         action="append",
-        help="Tags to be attached to the jobs executed for this task.",
+        help="Tag to be attached to the jobs executed for this task.",
     )
 
     parser.add_argument(
@@ -289,6 +289,24 @@ def parseArgs():
         "-o",
         default=None,
         help="Local path to download the outputs to.",
+    )
+    parser.add_argument(
+        "--download_state",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    parser.add_argument(
+        "--download_model",
+        default=False,
+        action="store_true",
+        help="Download the model once task is finished",
+    )
+    parser.add_argument(
+        "--download_output",
+        default=False,
+        action="store_true",
+        help="Download the output once task is finished",
     )
 
     args, rest = parser.parse_known_args()
@@ -408,7 +426,7 @@ def main():
 
     input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
-    tags = {} if args.tags is None else {k: v for (k, v) in args.tags}
+    tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
         {}
         if args.metric_definitions is None
@@ -428,7 +446,14 @@ def main():
     )
 
     if args.output_path:
-        sm_project.downloadResults(args.task_name, args.output_path)
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
 
 
 if __name__ == "__main__":

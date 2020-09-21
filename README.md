@@ -6,8 +6,7 @@ A **simpler** and **cheaper** way to distribute python (training) code on machin
 ## Requirements
 
 1. Python 3.6+
-2. AWS account credentials
-3. Configuration of AWS credentials for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
+2. AWS account credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -15,20 +14,19 @@ To install *Simple Sagemaker*
 pip install simple-sagemaker
 ```
 
-Then, here's a very simple example.
-Assuming one would like to run the following `worker1.py` on the cloud:
-
+Then, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
 ```python
 import torch
 
 for i in range(torch.cuda.device_count()):
     print(f"-***- Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
-It's as easy as running the following command to get it running on a *ml.p3.2xlarge* *spot* instance:
+Just run the below command:
 ```bash
-ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge
+ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
-The output, including logs is saved to `./output/example1`. The relevant part from the log file (`./output/example1/logs/logs0`) is:
+The output logs are saved to `./output/example1/logs`. 
+The relevant part from the log files (`./output/example1/logs/logs0` and `./output/example1/logs/logs1`) is:
 ```
 ...
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
@@ -105,7 +103,7 @@ The files and directories structure is as follows:
 - input - the task input, shared as well
 - [Job name] - a per job specific folder
     - model.tar.gz - model output data, merged from *all instances*
-    - output.tar.gz - the *main instance* output data (ohter output are ignored)
+    - output.tar.gz - the *main instance* output data (other outputs are ignored)
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
 
@@ -152,32 +150,40 @@ The code is then launced a few time by [run.sh](./examples/readme_examples/run.s
 #   - Builds a custom docker image (--df, --repo_name, --aws_repo)
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
-ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+#   - Use an on-demand instance (--no_spot)
+ssm -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
-    --ic 2 --task_type 1 -o $1/example6_1 ${@:4}
+    --ic 2 --task_type 1 -o $1/example6_1
 
 # Example 6_2 - a complete example part 2.
 #   - Uses outputs from part 1 (--iit)
 #   - Uses additional local code dependencies (-d)
 #   - Uses the tensorflow framework as pre-built image (-f)
-#   - Tags the jobs (--tags)
+#   - Tags the jobs (--tag)
 #   - Defines sagemaker metrics (-m, --md)
-ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
+ssm -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
-    -f tensorflow -m --md "Score" "Score=(.*?);" --tags "MyTag" "MyValue" \
-    --ic 2 --task_type 2 -o $1/example6_2 ${@:4} &
+    -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
+    --ic 2 --task_type 2 -o $1/example6_2 &
 
 # Running task6_1 again
-#   --ks (keep state) is used to keep the current state and demonstrate that existing output is used, without running the task again
-ssm -p ${2}simple-sagemaker-example-cli${3} -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+#   - A completed task isn't exsecuted again, but the current output is used instead. 
+#       --ks (keep state, the default) is used to keep the current state
+ssm -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
-    --ic 2 --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_2_stdout --ks &
+    --ic 2 --task_type 1 -o $1/example6_1 > $1/example6_1_2_stdout --ks &
 
 
 wait # wait for all processes
 ```
+The metrics graphs can be viewed on the AWS console:
+
+![High level flow diagram](docs/metric_example.jpg?raw=true "Metric Example")
+
+More information can be found [here](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html).
+
 Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
 
 # More examples
@@ -195,11 +201,11 @@ API only example:
 
 ## Passing command line arguments
 Any extra argument passed to the command line in assumed to be an hypermarameter. 
-To get access to all environment arguments, call `algo_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
+To get access to all environment arguments, call `task_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
 ```python
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
-args = algo_lib.parseArgs()
+args = task_lib.parseArgs()
 print(args.hps["msg"])
 ```
 Running command:
@@ -219,7 +225,7 @@ Hello, world!
 ### State
 State is maintained between executions of the same **task**, i.e. between execution **jobs** that belongs to the same **task**.
 The local path is available in `args.state`. 
-When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `algo_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `algo_lib` provides an additional important API to mark the **task** as completed: `algo_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
+When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `task_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `task_lib` provides an additional important API to mark the **task** as completed: `task_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
 1. To skip it next time (unlesss eforced otherwise)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
@@ -233,9 +239,9 @@ A complete example can be seen in `worker3.py`:
 ```python
 import os
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
-args = algo_lib.parseArgs()
+args = task_lib.parseArgs()
 
 open(os.path.join(args.output_data_dir, "output_data_dir"), "wt").write(
     "output_data_dir file"
@@ -244,7 +250,7 @@ open(os.path.join(args.model_dir, "model_dir"), "wt").write("model_dir file")
 open(os.path.join(args.state, "state_dir"), "wt").write("state_dir file")
 
 # Mark the tasks as completed, to allow other tasks using its output, and to avoid re-running it (unless enforced)
-algo_lib.markCompleted(args)
+task_lib.markCompleted(args)
 ```
 Running command:
 ```bash
@@ -271,7 +277,7 @@ import logging
 import subprocess
 import sys
 
-from task_toolkit import algo_lib
+from task_toolkit import task_lib
 
 logger = logging.getLogger(__name__)
 
@@ -288,8 +294,8 @@ def listDir(path):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    algo_lib.setDebugLevel()
-    args = algo_lib.parseArgs()
+    task_lib.setDebugLevel()
+    args = task_lib.parseArgs()
     listDir(args.input_data)
     listDir(args.input_bucket)
 ```
@@ -451,15 +457,15 @@ An additional **task** that depends on the previous one can now be scheduled as 
 Then, the worker code (note: the same function is used for the two different **tasks**, depending on the `task` hyperparameter):
 ```python
 def worker():
-    from task_toolkit import algo_lib
+    from task_toolkit import task_lib
 
-    algo_lib.setDebugLevel()
+    task_lib.setDebugLevel()
 
     logger.info("Starting worker...")
     # parse the arguments
-    args = algo_lib.parseArgs()
+    args = task_lib.parseArgs()
 
-    state_dir = algo_lib.initMultiWorkersState(args)
+    state_dir = task_lib.initMultiWorkersState(args)
 
     logger.info(f"Hyperparams: {args.hps}")
     logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
@@ -481,7 +487,7 @@ def worker():
         )
 
     # mark the task as completed
-    algo_lib.markCompleted(args)
+    task_lib.markCompleted(args)
     logger.info("finished!")
 ```
 
@@ -512,8 +518,8 @@ Running the file, with a sibling directory named `data` with a sample file [as o
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
-INFO:task_toolkit.algo_lib:Marking instance algo-1 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-1 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
 
@@ -521,28 +527,28 @@ INFO:__main__:finished!
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:task_toolkit.algo_lib:Marking instance algo-2 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-2 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
 
 And the following for Task 2:
 ```
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 2, 'worker': 1}
-INFO:__main__:Input data files: [PosixPath('task_toolkit'), PosixPath('example.py'), PosixPath('task_toolkit/algo_lib.py'), PosixPath('task_toolkit/__pycache__'), PosixPath('task_toolkit/__init__.py'), PosixPath('task_toolkit/__pycache__/__init__.cpython-38.pyc'), PosixPath('task_toolkit/__pycache__/algo_lib.cpython-38.pyc')]
+INFO:__main__:Input data files: [PosixPath('task_toolkit'), PosixPath('example.py'), PosixPath('task_toolkit/task_lib.py'), PosixPath('task_toolkit/__pycache__'), PosixPath('task_toolkit/__init__.py'), PosixPath('task_toolkit/__pycache__/__init__.cpython-38.pyc'), PosixPath('task_toolkit/__pycache__/task_lib.cpython-38.pyc')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
 INFO:__main__:Input task2_data: [PosixPath('/opt/ml/input/data/task2_data/model.tar.gz')]
 INFO:__main__:Input task2_data_dist: [PosixPath('/opt/ml/input/data/task2_data_dist/model.tar.gz')]
-INFO:task_toolkit.algo_lib:Marking instance algo-1 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-1 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 ```
 
 ```
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:task_toolkit.algo_lib:Marking instance algo-2 completion
-INFO:task_toolkit.algo_lib:Creating instance specific state dir
+INFO:task_toolkit.task_lib:Marking instance algo-2 completion
+INFO:task_toolkit.task_lib:Creating instance specific state dir
 INFO:__main__:finished!
 
 ```
@@ -576,3 +582,8 @@ tox -e report
 6. Create a pull request to the master branch
     - Every master push is fully tested
 7. If the tests succeed, the new version is publihed to [PyPi](https://pypi.org/project/simple-sagemaker/)
+
+
+# Open issue
+1. S3_sync doesn't delete remote files if deleted locally + optimization
+2. Handling spot instance termination / signals
