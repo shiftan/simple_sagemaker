@@ -107,6 +107,148 @@ The files and directories structure is as follows:
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
 
+# CLI
+```bash
+$ ssm -h
+
+usage: ssm [-h] --project_name PROJECT_NAME --task_name TASK_NAME
+           [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR] --entry_point
+           ENTRY_POINT [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
+           [--instance_type INSTANCE_TYPE] [--instance_count INSTANCE_COUNT]
+           [--volume_size VOLUME_SIZE] [--no_spot] [--use_spot]
+           [--max_wait MAX_WAIT] [--max_run MAX_RUN] [--aws_repo AWS_REPO]
+           [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
+           [--docker_file_path DOCKER_FILE_PATH]
+           [--framework {pytorch,tensorflow}]
+           [--framework_version FRAMEWORK_VERSION]
+           [--python_version PYTHON_VERSION]
+           [--input_path INPUT_PATH [INPUT_PATH ...]]
+           [--input_s3 INPUT_S3 [INPUT_S3 ...]]
+           [--input_task INPUT_TASK [INPUT_TASK ...]] [--force_running]
+           [--clean_state] [--keep_state] [--metric_definitions name regexp]
+           [--enable_sagemaker_metrics] [--tag key value]
+           [--output_path OUTPUT_PATH] [--download_state] [--download_model]
+           [--download_output]
+           ...
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --project_name PROJECT_NAME, -p PROJECT_NAME
+                        Project name. (default: None)
+  --task_name TASK_NAME, -t TASK_NAME
+                        Task name. (default: None)
+
+Code:
+  --source_dir SOURCE_DIR, -s SOURCE_DIR
+                        Path (absolute, relative or an S3 URI) to a directory
+                        with any other source code dependencies aside from the
+                        entry point file. If source_dir is an S3 URI, it must
+                        point to a tar.gz file. Structure within this
+                        directory are preserved when running on Amazon
+                        SageMaker. (default: None)
+  --entry_point ENTRY_POINT, -e ENTRY_POINT
+                        Path (absolute or relative) to the local Python source
+                        file which should be executed as the entry point. If
+                        source_dir is specified, then entry_point must point
+                        to a file located at the root of source_dir. (default:
+                        None)
+  --dependencies DEPENDENCIES [DEPENDENCIES ...], -d DEPENDENCIES [DEPENDENCIES ...]
+                        Path (absolute, relative or an S3 URI) to a directory
+                        with any other training source code dependencies aside
+                        from the entry point file. If source_dir is an S3 URI,
+                        it must point to a tar.gz file. Structure within this
+                        directory are preserved when running on Amazon
+                        SageMaker. (default: None)
+
+Instance:
+  --instance_type INSTANCE_TYPE, --it INSTANCE_TYPE
+                        Type of EC2 instance to use. (default: ml.m5.large)
+  --instance_count INSTANCE_COUNT, --ic INSTANCE_COUNT
+                        Number of EC2 instances to use. (default: 1)
+  --volume_size VOLUME_SIZE, -v VOLUME_SIZE
+                        Size in GB of the EBS volume to use for storing input
+                        data. Must be large enough to store input data.
+                        (default: 30)
+  --no_spot             Use on demand instances (default: True)
+  --use_spot            Specifies whether to use SageMaker Managed Spot
+                        instances. (default: True)
+  --max_wait MAX_WAIT   Timeout in minutes waiting for spot instances. After
+                        this amount of time Amazon SageMaker will stop waiting
+                        for Spot instances to become available. If 0 is
+                        specified and spot instances are used, its set to
+                        max_run (default: 0)
+  --max_run MAX_RUN     Timeout in minutes for running. After this amount of
+                        time Amazon SageMaker terminates the job regardless of
+                        its current status. (default: 1440)
+
+Image:
+  --aws_repo AWS_REPO, --ar AWS_REPO
+                        Name of ECS repository. (default: None)
+  --repo_name REPO_NAME, --rn REPO_NAME
+                        Name of local repository. (default: None)
+  --image_tag IMAGE_TAG
+                        Image tag. (default: latest)
+  --docker_file_path DOCKER_FILE_PATH, --df DOCKER_FILE_PATH
+                        Path to a directory containing the DockerFile
+                        (default: None)
+  --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
+                        The framework to use, see https://github.com/aws/deep-
+                        learning-containers/blob/master/available_images.md
+                        (default: pytorch)
+  --framework_version FRAMEWORK_VERSION, --fv FRAMEWORK_VERSION
+                        The framework version (default: None)
+  --python_version PYTHON_VERSION, --pv PYTHON_VERSION
+                        The python version (default: None)
+
+Running:
+  --force_running       Force running the task even if its already completed.
+                        (default: False)
+  --tag key value       Tag to be attached to the jobs executed for this task.
+                        (default: None)
+
+I/O:
+  --bucket_name BUCKET_NAME, -b BUCKET_NAME
+                        S3 bucket name (a default one is used if not given).
+                        (default: None)
+  --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
+                        Input: path [distribution] Local/s3 path for the input
+                        data. If a local path is given, it will be synced to
+                        the task folder on the selected S3 bucket before
+                        launching the task. (default: None)
+  --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
+                        S3Input: input_name, s3_uri [distribution] Additional
+                        S3 input sources (a few can be given). (default: None)
+  --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
+                        TaskInput: input_name, task_name, type [distribution]
+                        Use an output of a completed task in the same project
+                        as an input source (a few can be given). (default:
+                        None)
+  --clean_state, --cs   Clear the task state before running it. The task will
+                        be running again even if it was already completed
+                        before. (default: False)
+  --keep_state, --ks    Keep the current task state. If the task is already
+                        completed, its current output will be taken without
+                        running it again. (default: True)
+  --metric_definitions name regexp, --md name regexp
+                        Name and regexp for a metric definition, a few can be
+                        given. See https://docs.aws.amazon.com/sagemaker/lates
+                        t/dg/training-metrics.html. (default: None)
+  --enable_sagemaker_metrics, -m
+                        Enables SageMaker Metrics Time Series. See https://doc
+                        s.aws.amazon.com/sagemaker/latest/dg/training-
+                        metrics.html. (default: False)
+
+Download:
+  --output_path OUTPUT_PATH, -o OUTPUT_PATH
+                        Local path to download the outputs to. (default: None)
+  --download_state      Download the state once task is finished (default:
+                        False)
+  --download_model      Download the model once task is finished (default:
+                        False)
+  --download_output     Download the output once task is finished (default:
+                        False)
+```
+
 # A fully featured advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
 In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](./examples/readme_examples/example6):

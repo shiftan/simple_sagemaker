@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 
-import configargparse
 import sagemaker
 from sagemaker.inputs import TrainingInput
 
@@ -95,22 +94,30 @@ class TaskInputAction(InputActionBase):
 
 
 def parseArgs():
-    parser = configargparse.ArgParser(
-        config_file_parser_class=configargparse.DefaultConfigFileParser,
+    parser = argparse.ArgumentParser(
+        #config_file_parser_class=configargparse.DefaultConfigFileParser,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    code_group = parser.add_argument_group("Code")
+    instance_group = parser.add_argument_group("Instance")
+    image_group = parser.add_argument_group("Image")
+    running_params = parser.add_argument_group("Running")
+    output_params = parser.add_argument_group("Output")
+    IO_params = parser.add_argument_group("I/O")
+    download_params = parser.add_argument_group("Download")
 
     # general
-    parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
+    #parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
     parser.add_argument("--project_name", "-p", required=True, help="Project name.")
     parser.add_argument("--task_name", "-t", required=True, help="Task name.")
-    parser.add_argument(
+    IO_params.add_argument(
         "--bucket_name",
         "-b",
         help="S3 bucket name (a default one is used if not given).",
     )
+
     # coding params
-    parser.add_argument(
+    code_group.add_argument(
         "--source_dir",
         "-s",
         type=lambda x: fileValidation(parser, x),
@@ -118,7 +125,7 @@ def parseArgs():
         code dependencies aside from the entry point file. If source_dir is an S3 URI,
         it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
-    parser.add_argument(
+    code_group.add_argument(
         "--entry_point",
         "-e",
         required=True,
@@ -126,7 +133,7 @@ def parseArgs():
         help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
         If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
     )
-    parser.add_argument(
+    code_group.add_argument(
         "--dependencies",
         "-d",
         nargs="+",
@@ -136,20 +143,20 @@ def parseArgs():
         Structure within this directory are preserved when running on Amazon SageMaker.""",
     )
     # instance params
-    parser.add_argument(
+    instance_group.add_argument(
         "--instance_type",
         "--it",
         default=constants.DEFAULT_INSTANCE_TYPE,
         help="Type of EC2 instance to use.",
     )
-    parser.add_argument(
+    instance_group.add_argument(
         "--instance_count",
         "--ic",
         type=int,
         default=constants.DEFAULT_INSTANCE_COUNT,
         help="Number of EC2 instances to use.",
     )
-    parser.add_argument(
+    instance_group.add_argument(
         "--volume_size",
         "-v",
         type=int,
@@ -157,20 +164,20 @@ def parseArgs():
         help="""Size in GB of the EBS volume to use for storing input data.
         Must be large enough to store input data.""",
     )
-    parser.add_argument(
+    instance_group.add_argument(
         "--no_spot",
         dest="use_spot",
         action="store_false",
         help="Use on demand instances",
     )
-    parser.add_argument(
+    instance_group.add_argument(
         "--use_spot",
         dest="use_spot",
         action="store_true",
         help="""Specifies whether to use SageMaker Managed Spot instances.""",
     )
-    parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
-    parser.add_argument(
+    instance_group.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
+    instance_group.add_argument(
         "--max_wait",
         type=int,
         default=constants.DEFAULT_MAX_WAIT,
@@ -178,7 +185,7 @@ def parseArgs():
         After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.
         If 0 is specified and spot instances are used, it's set to max_run""",
     )
-    parser.add_argument(
+    instance_group.add_argument(
         "--max_run",
         type=int,
         default=constants.DEFAULT_MAX_RUN,
@@ -186,35 +193,35 @@ def parseArgs():
         After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
     )
     # image params
-    parser.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
-    parser.add_argument("--repo_name", "--rn", help="Name of local repository.")
-    parser.add_argument(
+    image_group.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
+    image_group.add_argument("--repo_name", "--rn", help="Name of local repository.")
+    image_group.add_argument(
         "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
     )
-    parser.add_argument(
+    image_group.add_argument(
         "--docker_file_path",
         "--df",
         help="Path to a directory containing the DockerFile",
     )
-    parser.add_argument(
+    image_group.add_argument(
         "--framework",
         "-f",
         help="The framework to use, see https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
         choices=["pytorch", "tensorflow"],
         default="pytorch",
     )
-    parser.add_argument(
+    image_group.add_argument(
         "--framework_version",
         "--fv",
         help="The framework version",
     )
-    parser.add_argument(
+    image_group.add_argument(
         "--python_version",
         "--pv",
         help="The python version",
     )
     # run params
-    parser.add_argument(
+    IO_params.add_argument(
         "--input_path",
         "-i",
         action=InputAction,
@@ -225,7 +232,7 @@ def parseArgs():
         ),
         tuple=InputTuple,
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
@@ -234,7 +241,7 @@ def parseArgs():
         ),
         tuple=S3InputTuple,
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--input_task",
         "--iit",
         action=TaskInputAction,
@@ -244,20 +251,20 @@ def parseArgs():
         ),
         tuple=TaskInputTuple,
     )
-    parser.add_argument(
+    running_params.add_argument(
         "--force_running",
         default=False,
         action="store_true",
         help="Force running the task even if it's already completed.",
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--clean_state",
         "--cs",
         default=False,
         action="store_true",
         help="Clear the task state before running it. The task will be running again even if it was already completed before.",
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--keep_state",
         "--ks",
         action="store_false",
@@ -265,7 +272,7 @@ def parseArgs():
         help="Keep the current task state. If the task is already completed, its current output will \
              be taken without running it again.",
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--metric_definitions",
         "--md",
         nargs=2,
@@ -274,7 +281,7 @@ def parseArgs():
         help="Name and regexp for a metric definition, a few can be given. \
             See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
-    parser.add_argument(
+    IO_params.add_argument(
         "--enable_sagemaker_metrics",
         "-m",
         default=False,
@@ -282,7 +289,7 @@ def parseArgs():
         help="Enables SageMaker Metrics Time Series. \
             See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
-    parser.add_argument(
+    running_params.add_argument(
         "--tag",
         nargs=2,
         metavar=("key", "value"),
@@ -290,25 +297,25 @@ def parseArgs():
         help="Tag to be attached to the jobs executed for this task.",
     )
 
-    parser.add_argument(
+    download_params.add_argument(
         "--output_path",
         "-o",
         default=None,
         help="Local path to download the outputs to.",
     )
-    parser.add_argument(
+    download_params.add_argument(
         "--download_state",
         default=False,
         action="store_true",
         help="Download the state once task is finished",
     )
-    parser.add_argument(
+    download_params.add_argument(
         "--download_model",
         default=False,
         action="store_true",
         help="Download the model once task is finished",
     )
-    parser.add_argument(
+    download_params.add_argument(
         "--download_output",
         default=False,
         action="store_true",

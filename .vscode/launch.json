@@ -39,7 +39,9 @@
                 //"--iis", "bucket", "s3://awsglue-datasets/examples/us-legislators/all/persons.json"
                 //"--iit", "bucket", "task3", "model"
                 //"--cs", 
-                "--ks"
+                "--ks",
+                "--aa", "bb",
+                "--cc", "dd",
             ]
         }
     ]
