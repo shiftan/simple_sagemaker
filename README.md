@@ -6,7 +6,7 @@ A **simpler** and **cheaper** way to distribute python (training) code on machin
 ## Requirements
 
 1. Python 3.6+
-2. AWS account credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
+2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -43,23 +43,23 @@ CLI based examples:
 - [Configuring the docker image](#Configuring-the-docker-image)
 - [Defining code dependencies](#Defining-code-dependencies)
 
-API only example:
+API based example:
 - [Single file example](#Single-file-example)
 
 # Background
 *Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
-The solutions is composed of two parts, one on each side: a **runner** on the client machine, and a **worker** which is the distributed code on AWS. 
+The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the code you're trying to distribute, with possible minimal code changes that should use a small `task_tollkit` library which is injected to it, for extracting the environment configuration, i.e. input/output/state paths and running parameters.
+* The **worker** is basically the code being distribute, with possible minimal code changes to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration, i.e. input/output/state paths, running parameters etc.
 
-The **runner** is used to configure the **tasks** and **projects**: 
+The **runner** is used to configure **tasks** and **projects**: 
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
 - A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
-    - State is maintained between consecutive execution of the same **task**
+    - State is maintained between consecutive execution of the same **task** (see more [below](#Task-state-and-output))
     - Task can be markd as completed, to avoid re-running it next time (unlesss eforced otherwise)
 - A **prjoect** is a series of related **tasks**, with possible depencencies
-    - The output of one task can be consumed by a consequetive task
+    - The output of a completed task can be consumed as input by a consequetive task
 
 # Main features
 1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
@@ -338,19 +338,19 @@ CLI based examples:
 - [Configuring the docker image](#Configuring-the-docker-image)
 - [Defining code dependencies](#Defining-code-dependencies)
 
-API only example:
+API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line in assumed to be an hypermarameter. 
-To get access to all environment arguments, call `worker_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
+Any extra argument passed to the command line in assumed to be an hypermarameter, and is accesible by the `hps` dictionary within the environmnet configuration.
+To get access to the configuration call `worker_lib.parseArgs()`. For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib
 
 args = worker_lib.parseArgs()
 print(args.hps["msg"])
 ```
-Running command:
+Runner CLI:
 ```bash
 ssm -p simple-sagemaker-example-cli -t task2 -e worker2.py --msg "Hello, world!" -o ./output/example2
 ```
@@ -365,17 +365,17 @@ Hello, world!
 ## Task state and output
 
 ### State
-State is maintained between executions of the same **task**, i.e. between execution **jobs** that belongs to the same **task**.
+State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
 The local path is available in `args.state`. 
-When running multiple instances, the data is merged into a single directory, so in order to avoid collisions, `worker_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `worker_lib` provides an additional important API to mark the **task** as completed: `worker_lib.markCompleted(args)`. If all instances of the **job** mark it as completed, the **task** is assumed to be completed by that **job**, which allows:
-1. To skip it next time (unlesss eforced otherwise)
+When running multiple instances, the state data is merged into a single directory (post execution), so in order to avoid collisions, `worker_lib.initMultiWorkersState(args)` initializes a per instance sub directory. On top of that, `worker_lib` provides an additional important API to mark the **task** as completed: `worker_lib.markCompleted(args)`. If all instances of the **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
+1. To skip it next time (unlesss eforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ### Output
-There're 3 main output mechanisms:
+On to of the state, there're 3 main other output mechanisms:
 1. Logs - any output writen to standard output
-2. Output data - args.output_data_dir is compressed into a tar.gz file, only the main instance data is kept
-3. Model - args.model_dir is compressed into a tar.gz file, data from all instance is merged, so be carful with collisions.
+2. Output data - any data in args.output_data_dir is compressed into a output.tar.gz. Only the main instance output data is kept.
+3. Model - any data in args.model_dir is compressed into a model.tar.gz. As data from all instance is merged, be carful with collisions.
 
 A complete example can be seen in `worker3.py`:
 ```python
@@ -394,7 +394,7 @@ open(os.path.join(args.state, "state_dir"), "wt").write("state_dir file")
 # Mark the tasks as completed, to allow other tasks using its output, and to avoid re-running it (unless enforced)
 worker_lib.markCompleted(args)
 ```
-Running command:
+Runner CLI:
 ```bash
 ssm -p simple-sagemaker-example-cli -t task3 -e worker3.py -o ./output/example3
 ```
@@ -408,8 +408,8 @@ Hello, world!
 ```
 
 ## Providing input data
-**Job** can be configured to get a few data sources:
-* A single local path can be used with the `-i` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `args.input_data`
+A **Job** can be configured to get a few data sources:
+* A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `args.input_data`
 * Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `args.input_[name]` when [name] is the same one as was provided on the command line.
 * Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
 
@@ -469,7 +469,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 
 ## Chaining tasks
 The output of a completed **task** on the same **project** can be used as an input to another **task**, by using the `--iit [name] [task name] [output type]` command line parameter, where:
-- [name] - is the name of the input source, caccesible by the worker with `args.input_[name]`
+- [name] - is the name of the input source, acaccesible by the worker with `args.input_[name]`
 - [task name] - the name of the **task** whose output is used as input 
 - [output type] - the **task** output type, one of "model", "output", "state"
 
@@ -726,7 +726,7 @@ tox -e report
 7. If the tests succeed, the new version is publihed to [PyPi](https://pypi.org/project/simple-sagemaker/)
 
 
-# Open issue
+# Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
 3. Local testing/debugging
