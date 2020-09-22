@@ -730,4 +730,4 @@ tox -e report
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
 3. Local testing/debugging
-4. Documentation of CLI and API (Read the docs)
+4. Full documentation of theAPI (Reamde / Read the docs + CLI?)
