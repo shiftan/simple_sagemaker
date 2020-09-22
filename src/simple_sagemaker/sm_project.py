@@ -51,8 +51,8 @@ class SageMakerProject:
             "instance_count",
             "volume_size",
             "use_spot_instances",
-            "max_run",
-            "max_wait",
+            "max_run_mins",
+            "max_wait_mins",
         ],
     )
     # IOParams = collections.namedtuple("IOParams", ["input_data_path", "distribution", "model_uri"])
@@ -152,8 +152,8 @@ class SageMakerProject:
         instance_count=constants.DEFAULT_INSTANCE_COUNT,
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         use_spot_instances=constants.DEFAULT_USE_SPOT,
-        max_run=constants.DEFAULT_MAX_RUN,
-        max_wait=constants.DEFAULT_MAX_WAIT,
+        max_run_mins=constants.DEFAULT_MAX_RUN,
+        max_wait_mins=constants.DEFAULT_MAX_WAIT,
     ):
         f"""Set the default instance params
 
@@ -164,25 +164,25 @@ class SageMakerProject:
         :param volume_size: Size in GB of the EBS volume to use for storing input data.
             Must be large enough to store input data.,defaults to {constants.DEFAULT_VOLUME_SIZE}.
         :type volume_size: int, optional
-        :param use_spot_instances:Specifies whether to use SageMaker Managed Spot instances.
-            If enabled then the max_wait arg should also be set.,defaults to {constants.DEFAULT_USE_SPOT}.
+        :param use_spot_instances:Specifies whether to use SageMaker Managed Spot instances.,
+            defaults to {constants.DEFAULT_USE_SPOT}.
         :type use_spot_instances: bool, optional
-        :param max_run: Timeout in seconds for running.
+        :param max_run_mins: Timeout in minutes for running.
             After this amount of time Amazon SageMaker terminates the job regardless of its current status.,
             defaults to {constants.DEFAULT_MAX_RUN}
-        :type max_run: int, optional
-        :param max_wait: Timeout in seconds waiting for spot instances.
-            After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.,
-            defaults to {constants.DEFAULT_MAX_WAIT}
-        :type max_wait: int, optional
+        :type max_run_mins: int, optional
+        :param max_wait_mins: Timeout in minutes waiting for spot instances.
+            After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.
+            If 0 is specified and spot instances are used, it's set to max_run_mins., defaults to {constants.DEFAULT_MAX_WAIT}
+        :type max_wait_mins: int, optional
         """
         self.defaultInstanceParams = SageMakerProject.InstanceParams(
             instance_type,
             instance_count,
             volume_size,
             use_spot_instances,
-            max_run,
-            max_wait,
+            max_run_mins,
+            max_wait_mins,
         )
 
     def createBucket(self):
