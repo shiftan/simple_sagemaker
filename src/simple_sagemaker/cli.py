@@ -177,15 +177,15 @@ def parseArgs():
     )
     instance_group.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
     instance_group.add_argument(
-        "--max_wait",
+        "--max_wait_mins",
         type=int,
         default=constants.DEFAULT_MAX_WAIT,
         help="""Timeout in minutes waiting for spot instances.
         After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.
-        If 0 is specified and spot instances are used, it's set to max_run""",
+        If 0 is specified and spot instances are used, it's set to max_run_mins""",
     )
     instance_group.add_argument(
-        "--max_run",
+        "--max_run_mins",
         type=int,
         default=constants.DEFAULT_MAX_RUN,
         help="""Timeout in minutes for running.
@@ -410,8 +410,8 @@ def main():
                 "instance_type": "instance_type",
                 "volume_size": "volume_size",
                 "use_spot": "use_spot_instances",
-                "max_run": "max_run",
-                "max_wait": "max_wait",
+                "max_run_mins": "max_run_mins",
+                "max_wait_mins": "max_wait_mins",
             },
         )
     )

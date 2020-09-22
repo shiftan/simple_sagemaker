@@ -124,9 +124,9 @@ class SageMakerTask:
         additional_inputs=dict(),
         model_uri=None,
         use_spot_instances=constants.DEFAULT_USE_SPOT,
-        max_wait=constants.DEFAULT_MAX_WAIT,
+        max_wait_mins=constants.DEFAULT_MAX_WAIT,
         volume_size=constants.DEFAULT_VOLUME_SIZE,
-        max_run=constants.DEFAULT_MAX_RUN,
+        max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
         distribution="FullyReplicated",
         metric_definitions=dict(),
@@ -164,12 +164,12 @@ class SageMakerTask:
             {"Name": k, "Regex": v} for k, v in metric_definitions.items()
         ]
 
-        # zero max_wait if not using spot instances
+        # zero max_wait_mins if not using spot instances
         if not use_spot_instances:
-            max_wait = 0
-        # if using spot, and max_wait isn't specified -> set it to max_run
-        elif not max_wait:
-            max_wait = max_run
+            max_wait_mins = 0
+        # if using spot, and max_wait_mins isn't specified -> set it to max_run_mins
+        elif not max_wait_mins:
+            max_wait_mins = max_run_mins
 
         classes = {
             "pytorch": PyTorch,
@@ -193,10 +193,10 @@ class SageMakerTask:
             dependencies=dependencies,
             container_log_level=logging.INFO,
             volume_size=volume_size,
-            max_run=max_run * 60,
+            max_run_mins=max_run_mins * 60,
             model_uri=model_uri,
             use_spot_instances=use_spot_instances,
-            max_wait=max_wait * 60,
+            max_wait_mins=max_wait_mins * 60,
             tags=tags,
             metric_definitions=metric_definitions,
             enable_sagemaker_metrics=enable_sagemaker_metrics,

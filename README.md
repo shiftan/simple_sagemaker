@@ -116,7 +116,7 @@ usage: ssm [-h] --project_name PROJECT_NAME --task_name TASK_NAME
            ENTRY_POINT [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
            [--instance_type INSTANCE_TYPE] [--instance_count INSTANCE_COUNT]
            [--volume_size VOLUME_SIZE] [--no_spot] [--use_spot]
-           [--max_wait MAX_WAIT] [--max_run MAX_RUN] [--aws_repo AWS_REPO]
+           [--max_wait_mins MAX_WAIT] [--max_run_mins MAX_RUN] [--aws_repo AWS_REPO]
            [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
            [--docker_file_path DOCKER_FILE_PATH]
            [--framework {pytorch,tensorflow}]
@@ -172,12 +172,12 @@ Instance:
   --no_spot             Use on demand instances (default: True)
   --use_spot            Specifies whether to use SageMaker Managed Spot
                         instances. (default: True)
-  --max_wait MAX_WAIT   Timeout in minutes waiting for spot instances. After
+  --max_wait_mins MAX_WAIT   Timeout in minutes waiting for spot instances. After
                         this amount of time Amazon SageMaker will stop waiting
                         for Spot instances to become available. If 0 is
                         specified and spot instances are used, its set to
-                        max_run (default: 0)
-  --max_run MAX_RUN     Timeout in minutes for running. After this amount of
+                        max_run_mins (default: 0)
+  --max_run_mins MAX_RUN     Timeout in minutes for running. After this amount of
                         time Amazon SageMaker terminates the job regardless of
                         its current status. (default: 1440)
 
@@ -540,7 +540,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     # define the code parameters
     sm_project.setDefaultCodeParams(source_dir=None, entry_point=__file__, dependencies=[])
     # define the instance parameters
-    sm_project.setDefaultInstanceParams(instance_count=2, max_run=15)
+    sm_project.setDefaultInstanceParams(instance_count=2, max_run_mins=15)
     # docker image
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",
