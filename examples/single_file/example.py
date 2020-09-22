@@ -22,7 +22,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
         source_dir=None, entry_point=__file__, dependencies=[]
     )
     # define the instance parameters
-    sm_project.setDefaultInstanceParams(instance_count=2)
+    sm_project.setDefaultInstanceParams(instance_count=2, max_run=10)
     # docker image
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",

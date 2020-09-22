@@ -167,22 +167,22 @@ def parseArgs():
         "--use_spot",
         dest="use_spot",
         action="store_true",
-        help="""Specifies whether to use SageMaker Managed Spot instances.
-    If enabled then the max_wait arg should also be set""",
+        help="""Specifies whether to use SageMaker Managed Spot instances.""",
     )
     parser.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
     parser.add_argument(
         "--max_wait",
         type=int,
         default=constants.DEFAULT_MAX_WAIT,
-        help="""Timeout in seconds waiting for spot instances.
-        After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.""",
+        help="""Timeout in minutes waiting for spot instances.
+        After this amount of time Amazon SageMaker will stop waiting for Spot instances to become available.
+        If 0 is specified and spot instances are used, it's set to max_run""",
     )
     parser.add_argument(
         "--max_run",
         type=int,
         default=constants.DEFAULT_MAX_RUN,
-        help="""Timeout in seconds for running.
+        help="""Timeout in minutes for running.
         After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
     )
     # image params

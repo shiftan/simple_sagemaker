@@ -37,17 +37,13 @@ def setDefaultParams(sm_project):
         30  # Size in GB of the EBS volume to use for storing input data during training
     )
     use_spot_instances = True  # False
-    max_run = 24 * 60 * 60
-    max_wait = None
-    if use_spot_instances:
-        max_wait = max_run  # should be >= max_run
+    max_run = 10
     sm_project.setDefaultInstanceParams(
         instance_type,
         training_instance_count,
         volume_size,
         use_spot_instances,
         max_run,
-        max_wait,
     )
 
 
