@@ -95,19 +95,18 @@ class TaskInputAction(InputActionBase):
 
 def parseArgs():
     parser = argparse.ArgumentParser(
-        #config_file_parser_class=configargparse.DefaultConfigFileParser,
+        # config_file_parser_class=configargparse.DefaultConfigFileParser,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     code_group = parser.add_argument_group("Code")
     instance_group = parser.add_argument_group("Instance")
     image_group = parser.add_argument_group("Image")
     running_params = parser.add_argument_group("Running")
-    output_params = parser.add_argument_group("Output")
     IO_params = parser.add_argument_group("I/O")
     download_params = parser.add_argument_group("Download")
 
     # general
-    #parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
+    # parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
     parser.add_argument("--project_name", "-p", required=True, help="Project name.")
     parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     IO_params.add_argument(
