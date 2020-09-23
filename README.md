@@ -13,14 +13,29 @@ To install *Simple Sagemaker*
 ```
 pip install simple-sagemaker
 ```
-Then, you can run
+Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance run the following command:
 ```bash
 ssm cmd -p simple-sagemaker-example-cli-cmd -t cmd-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
-to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance. 
-Output is downloaded to ./output, 
 
-Then, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
+Output including the logs with script stdout is downloaded to `./output`.
+
+```bash
+$ cat ./output/logs/logs0
+....
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 440.33.01    Driver Version: 440.33.01    CUDA Version: 10.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  Tesla V100-SXM2...  On   | 00000000:00:1E.0 Off |                    0 |
+| N/A   46C    P0    27W / 300W |      0MiB / 16160MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+....
+```
+
+Similarily, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
 ```python
 import torch
 
@@ -88,11 +103,41 @@ The **runner** is used to configure **tasks** and **projects**:
 
 
 ## High level flow diagram
-![High level flow diagram](https://github.com/shiftan/simple_sagemaker/tree/master/docs/high_level_flow.svg?raw=true "High level flow")
+![High level flow diagram](https://github.com/shiftan/simple_sagemaker/blob/master/docs/high_level_flow.svg?raw=true "High level flow")
 
 # Worker environment configuration
-Each worker can use the `worker_lib` library to get access to its running configuration parameters.
+The worker can use the `worker_lib` library to get access to its running configuration parameters.
 To get access call `worker_config = worker_lib.WorkerConfig()`.
+
+- channel_names=['data']
+- input_data='/opt/ml/input/data/data'
+- current_host='algo-1'
+- hosts=['algo-1', 'algo-2']
+- input_model='', 
+
+- hps={'arg': 'hello world!', 'task': 1, 'worker': 1}
+- job_name='task1-2020-09-23-17-12-46-0JNcrR6H'
+- model_dir='/opt/ml/model'
+- network_interface='eth0'
+- num_cpus=2
+- num_gpus=0-
+- output_data_dir='/opt/ml/output/data'
+- output_dir='/opt/ml/output'
+- resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}'
+- state='/state'
+
+## State
+State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
+The local path is available in `worker_config.state`. 
+When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_worker_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.worker_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
+1. To skip it next time (unlesss eforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
+2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
+
+## Output
+On to of the state, there're 3 main other output mechanisms:
+1. Logs - any output writen to standard output
+2. Output data - any data in `worker_config.output_data_dir` is compressed into a output.tar.gz. Only the main instance output data is kept.
+3. Model - any data in `worker_config.model_dir` is compressed into a model.tar.gz. As data from all instance is merged, be carful with collisions.
 
 
 # Data maintainance on S3
@@ -369,7 +414,7 @@ wait # wait for all processes
 ```
 The metrics graphs can be viewed on the AWS console:
 
-![Metrics example](https://github.com/shiftan/simple_sagemaker/tree/master/docs/metric_example.jpg?raw=true "Metric Example")
+![Metrics example](https://github.com/shiftan/simple_sagemaker/blob/master/docs/metric_example.jpg?raw=true "Metric Example")
 
 More information can be found [here](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html).
 
@@ -411,18 +456,6 @@ Hello, world!
 ```
 ## Task state and output
 
-### State
-State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
-The local path is available in `worker_config.state`. 
-When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_worker_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.worker_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
-1. To skip it next time (unlesss eforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
-2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
-
-### Output
-On to of the state, there're 3 main other output mechanisms:
-1. Logs - any output writen to standard output
-2. Output data - any data in `worker_config.output_data_dir` is compressed into a output.tar.gz. Only the main instance output data is kept.
-3. Model - any data in `worker_config.model_dir` is compressed into a model.tar.gz. As data from all instance is merged, be carful with collisions.
 
 A complete example can be seen in `worker3.py`:
 ```python
