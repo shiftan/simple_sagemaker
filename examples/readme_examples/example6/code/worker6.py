@@ -30,16 +30,20 @@ def worker1(worker_config):
     logger.info("{pandas} is pre-installed in this image")
 
     # update the state
-    (Path(worker_config.worker_state) / worker_config.current_host).write_text(f"state_{worker_config.current_host}")
+    (Path(worker_config.worker_state) / worker_config.current_host).write_text(
+        f"state_{worker_config.current_host}"
+    )
     # "process" input data into model output
     for file in Path(worker_config.input_data).rglob("*"):
         relp = file.relative_to(worker_config.input_data)
-        path = Path(worker_config.model_dir) / (f"{relp}_proc_by_{worker_config.current_host}")
+        path = Path(worker_config.model_dir) / (
+            f"{relp}_proc_by_{worker_config.current_host}"
+        )
         path.write_text(f"{file.read_text()} processed by {worker_config.current_host}")
     # write to output dir
-    (Path(worker_config.output_data_dir) / f"output_{worker_config.current_host}").write_text(
-        f"output_{worker_config.current_host}"
-    )
+    (
+        Path(worker_config.output_data_dir) / f"output_{worker_config.current_host}"
+    ).write_text(f"output_{worker_config.current_host}")
 
 
 def worker2(worker_config):

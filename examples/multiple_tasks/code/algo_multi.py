@@ -42,13 +42,18 @@ if __name__ == "__main__":
     worker_config = worker_lib.WorkerConfig()
     logBefore(worker_config)
 
-    output_data_dir = os.path.join(worker_config.output_data_dir, worker_config.current_host)
+    output_data_dir = os.path.join(
+        worker_config.output_data_dir, worker_config.current_host
+    )
 
     # create some data in the state dir
     if worker_config.hps["stage"] == 1:
         # put some files in the state directory
         for i in range(10):
-            open(f"{worker_config.worker_state}/state_{worker_config.current_host}_{i+1}", "wt").write("state")
+            open(
+                f"{worker_config.worker_state}/state_{worker_config.current_host}_{i+1}",
+                "wt",
+            ).write("state")
 
         # put something in the model
         modelDir = os.path.join(worker_config.model_dir, worker_config.current_host)

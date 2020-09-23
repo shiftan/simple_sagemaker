@@ -51,7 +51,9 @@ if __name__ == "__main__":
     logBefore(worker_config)
 
     # copy the entire input dir to the output dir
-    output_data_dir = os.path.join(worker_config.output_data_dir, worker_config.current_host)
+    output_data_dir = os.path.join(
+        worker_config.output_data_dir, worker_config.current_host
+    )
     shutil.copytree(worker_config.input_dir, f"{output_data_dir}/input_dir_copy")
     # copy state dir
     shutil.copytree(worker_config.state, f"{output_data_dir}/state_copy")
@@ -68,9 +70,9 @@ if __name__ == "__main__":
     os.makedirs(modelDir, exist_ok=True)
     open(f"{modelDir}/model_dir", "wt").write("model_dir")
 
-    open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write(
-        f"state_{worker_config.current_host}"
-    )
+    open(
+        f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+    ).write(f"state_{worker_config.current_host}")
     worker_config.markCompleted()
 
     # just to show the final directory structue

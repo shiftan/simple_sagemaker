@@ -9,18 +9,28 @@ logger = logging.getLogger(__name__)
 
 def task1(worker_config):
     # update the state per running instance
-    open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write("state")
+    open(
+        f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+    ).write("state")
     # write to the model output directory
     for file in Path(worker_config.input_data).rglob("*"):
         if file.is_file():
             relp = file.relative_to(worker_config.input_data)
-            path = Path(worker_config.model_dir) / (str(relp) + "_proc_by_" + worker_config.current_host)
-            path.write_text(file.read_text() + " processed by " + worker_config.current_host)
-    open(f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt").write("output")
+            path = Path(worker_config.model_dir) / (
+                str(relp) + "_proc_by_" + worker_config.current_host
+            )
+            path.write_text(
+                file.read_text() + " processed by " + worker_config.current_host
+            )
+    open(f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt").write(
+        "output"
+    )
 
 
 def task2(worker_config):
-    logger.info(f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}")
+    logger.info(
+        f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}"
+    )
 
 
 def main():

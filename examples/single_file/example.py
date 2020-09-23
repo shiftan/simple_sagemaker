@@ -89,7 +89,9 @@ def worker():
 
     if int(worker_config.hps["task"]) == 1:
         # update the state per running instance
-        open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write("state")
+        open(
+            f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+        ).write("state")
         # write to the model output directory
         for file in Path(worker_config.input_data).rglob("*"):
             if file.is_file():
@@ -97,10 +99,16 @@ def worker():
                 path = Path(worker_config.model_dir) / (
                     str(relp) + "_proc_by_" + worker_config.current_host
                 )
-                path.write_text(file.read_text() + " processed by " + worker_config.current_host)
-        open(f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt").write("output")
+                path.write_text(
+                    file.read_text() + " processed by " + worker_config.current_host
+                )
+        open(
+            f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt"
+        ).write("output")
     elif int(worker_config.hps["task"]) == 2:
-        logger.info(f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}")
+        logger.info(
+            f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}"
+        )
         logger.info(
             f"Input task2_data_dist: {list(Path(worker_config.input_task2_data_dist).rglob('*'))}"
         )

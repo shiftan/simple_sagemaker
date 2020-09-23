@@ -17,8 +17,9 @@ def _add_argument_default_env_or_other(self, argName, type, envVarName, default)
 def _bind(instance, func, as_name):
     setattr(instance, as_name, func.__get__(instance, instance.__class__))
 
-class WorkerConfig():
-    def __init__(self, init_multi_worker_state = True, set_debug_level = True):
+
+class WorkerConfig:
+    def __init__(self, init_multi_worker_state=True, set_debug_level=True):
         self._otherInstanceStateDeleted = False
         self.config = self.parseArgs()
         if set_debug_level:
@@ -39,7 +40,6 @@ class WorkerConfig():
         # Set root logger level
         logging.getLogger().setLevel(int(os.environ.get("SM_LOG_LEVEL", logging.INFO)))
 
-
     def parseArgs(self):
         """Extracting the environment configuration, i.e. input/output/state paths and running parameters
 
@@ -50,7 +50,9 @@ class WorkerConfig():
 
         parser = argparse.ArgumentParser()
         _bind(
-            parser, _add_argument_default_env_or_other, "add_argument_default_env_or_other"
+            parser,
+            _add_argument_default_env_or_other,
+            "add_argument_default_env_or_other",
         )
 
         # Data and model paths
@@ -74,7 +76,10 @@ class WorkerConfig():
         )
         # Input data configuration from /opt/ml/input/config/inputdataconfig.json
         parser.add_argument_default_env_or_other(
-            "--input-data-config", type=str, envVarName="SM_INPUT_DATA_CONFIG", default=""
+            "--input-data-config",
+            type=str,
+            envVarName="SM_INPUT_DATA_CONFIG",
+            default="",
         )
 
         parser.add_argument(
@@ -110,7 +115,7 @@ class WorkerConfig():
             "--hosts",
             type=lambda x: json.loads(x),
             envVarName="SM_HOSTS",
-            default='',
+            default="",
         )
         parser.add_argument_default_env_or_other(
             "--num_gpus", type=int, envVarName="SM_NUM_GPUS", default=-1
@@ -173,7 +178,6 @@ class WorkerConfig():
         """
         _deleteOtherInstancesState(self.args)
         return _getInstanceStatePath(self.args)
-
 
     def markCompleted(self):
         """Mark the task as completed.
