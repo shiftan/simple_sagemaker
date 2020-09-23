@@ -275,14 +275,10 @@ def runArguments(run_parser, CMD=False):
     )
     IO_params.add_argument(
         "--model_uri",
-        action=InputAction,
-        help=help_for_input_type(
-            InputTuple,
-            """URI where a pre-trained model is stored, either locally or in S3.
+        help="""URI where a pre-trained model is stored, either locally or in S3.
             If specified, the estimator will create a channel pointing to the model so the training job can
             download it. This model can be a ‘model.tar.gz’ from a previous training job, or other artifacts
             coming from a different source.""",
-        ),
     )
     IO_params.add_argument(
         "--input_s3",
