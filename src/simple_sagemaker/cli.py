@@ -279,8 +279,9 @@ def runArguments(run_parser, CMD=False):
         help=help_for_input_type(
             InputTuple,
             """URI where a pre-trained model is stored, either locally or in S3.
-            If specified, the estimator will create a channel pointing to the model so the training job can download it. 
-            This model can be a ‘model.tar.gz’ from a previous training job, or other artifacts coming from a different source.""",
+            If specified, the estimator will create a channel pointing to the model so the training job can
+            download it. This model can be a ‘model.tar.gz’ from a previous training job, or other artifacts
+            coming from a different source.""",
         ),
     )
     IO_params.add_argument(
@@ -498,7 +499,7 @@ def runHandler(args, rest):
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
             "force_running": "force_running",
-            "model_uri", "model_uri"
+            "model_uri": "model_uri",
         },
     )
 
