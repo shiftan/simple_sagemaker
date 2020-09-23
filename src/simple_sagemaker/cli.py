@@ -522,7 +522,7 @@ def main():
     )
     logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
-    args.func(args)
+    args.func(args, rest)
 
 
 if __name__ == "__main__":
