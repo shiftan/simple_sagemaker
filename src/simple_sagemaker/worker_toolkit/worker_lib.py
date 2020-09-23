@@ -46,7 +46,8 @@ class WorkerConfig:
         return: the parsed environment
         """
 
-        # Sagemaker training env vars - see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
+        # Sagemaker training env vars -
+        #   see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
 
         parser = argparse.ArgumentParser()
         _bind(
@@ -147,12 +148,12 @@ class WorkerConfig:
             if env_name in os.environ:
                 args.__setattr__(f"input_{channel_name}", os.environ[env_name])
 
-        logger.info(f"Args: {args}")
+        logger.info(f"Worker config: {args}")
         logger.info(f"Unmatched: {rest}")
         return args
 
     def _getInstanceStatePath(self):
-        path = Path(self.args.state) / self.args.current_host
+        path = Path(self.config.state) / self.config.current_host
         if not path.is_dir():
             logger.info("Creating instance specific state dir")
             path.mkdir(parents=True, exist_ok=True)
@@ -163,9 +164,11 @@ class WorkerConfig:
             return
 
         logger.info("Deleting other instances' state")
-        statePaths = [path for path in Path(self.args.state).glob("*") if path.is_dir()]
+        statePaths = [
+            path for path in Path(self.config.state).glob("*") if path.is_dir()
+        ]
         for path in statePaths:
-            if path.parts[-1] != self.args.current_host:
+            if path.parts[-1] != self.config.current_host:
                 shutil.rmtree(str(path), ignore_errors=True)
         self._otherInstanceStateDeleted = True
 
@@ -176,8 +179,8 @@ class WorkerConfig:
 
         return: the path to the instance specific instance state
         """
-        _deleteOtherInstancesState(self.args)
-        return _getInstanceStatePath(self.args)
+        self._deleteOtherInstancesState()
+        return self._getInstanceStatePath()
 
     def markCompleted(self):
         """Mark the task as completed.
@@ -186,6 +189,6 @@ class WorkerConfig:
         other **tasks** in the same project.
 
         """
-        logger.info(f"Marking instance {self.args.current_host} completion")
-        path = Path(initMultiWorkersState(self.args)) / "__COMPLETED__"
-        path.write_text(self.args.job_name)
+        logger.info(f"Marking instance {self.config.current_host} completion")
+        path = Path(self.initMultiWorkersState()) / "__COMPLETED__"
+        path.write_text(self.config.job_name)
