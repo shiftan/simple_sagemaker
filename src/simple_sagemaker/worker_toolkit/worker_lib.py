@@ -20,10 +20,10 @@ def _bind(instance, func, as_name):
 
 class WorkerConfig:
     def __init__(self, init_multi_worker_state=True, set_debug_level=True):
-        self._otherInstanceStateDeleted = False
-        self.config = self.parseArgs()
         if set_debug_level:
             self.setDebugLevel()
+        self._otherInstanceStateDeleted = False
+        self.config = self.parseArgs()
         if init_multi_worker_state:
             self.config.worker_state = self.initMultiWorkersState()
         pass
