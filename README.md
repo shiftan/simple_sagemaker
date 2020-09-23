@@ -17,7 +17,7 @@ Then, you can run
 ```bash
 ssm cmd -p simple-sagemaker-example-cli-cmd -t cmd-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
-to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.m5.large instance. 
+to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance. 
 Output is downloaded to ./output, 
 
 Then, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
