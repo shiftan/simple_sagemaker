@@ -1,7 +1,6 @@
 import logging
 import subprocess
 import sys
-from pathlib import Path
 
 from worker_toolkit import worker_lib
 
