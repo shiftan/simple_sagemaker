@@ -7,43 +7,40 @@ from worker_toolkit import worker_lib
 logger = logging.getLogger(__name__)
 
 
-def task1(args, state_dir):
+def task1(worker_config):
     # update the state per running instance
-    open(f"{state_dir}/state_{args.current_host}", "wt").write("state")
+    open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write("state")
     # write to the model output directory
-    for file in Path(args.input_data).rglob("*"):
+    for file in Path(worker_config.input_data).rglob("*"):
         if file.is_file():
-            relp = file.relative_to(args.input_data)
-            path = Path(args.model_dir) / (str(relp) + "_proc_by_" + args.current_host)
-            path.write_text(file.read_text() + " processed by " + args.current_host)
-    open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
+            relp = file.relative_to(worker_config.input_data)
+            path = Path(worker_config.model_dir) / (str(relp) + "_proc_by_" + worker_config.current_host)
+            path.write_text(file.read_text() + " processed by " + worker_config.current_host)
+    open(f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt").write("output")
 
 
-def task2(args, state_dir):
-    logger.info(f"Input task2_data: {list(Path(args.input_task2_data).rglob('*'))}")
+def task2(worker_config):
+    logger.info(f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}")
 
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    worker_lib.setDebugLevel()
 
     logger.info("Starting worker...")
     # parse the arguments
-    args = worker_lib.parseArgs()
+    worker_config = worker_lib.WorkerConfig()
 
-    state_dir = worker_lib.initMultiWorkersState(args)
+    logger.info(f"Hyperparams: {worker_config.hps}")
+    logger.info(f"Input data files: {list(Path(worker_config.input_data).rglob('*'))}")
+    logger.info(f"State files: { list(Path(worker_config.state).rglob('*'))}")
 
-    logger.info(f"Hyperparams: {args.hps}")
-    logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
-    logger.info(f"State files: { list(Path(args.state).rglob('*'))}")
-
-    if int(args.hps["task_type"]) == 1:
-        task1(args, state_dir)
-    elif int(args.hps["task_type"]) == 2:
-        task2(args, state_dir)
+    if int(worker_config.hps["task_type"]) == 1:
+        task1(worker_config)
+    elif int(worker_config.hps["task_type"]) == 2:
+        task2(worker_config)
 
     # mark the task as completed
-    worker_lib.markCompleted(args)
+    worker_config.markCompleted()
     logger.info("finished!")
 
 

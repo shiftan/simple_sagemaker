@@ -1,4 +1,4 @@
 from worker_toolkit import worker_lib
 
-args = worker_lib.parseArgs()
-print("-***-", args.hps["msg"])
+worker_config = worker_lib.WorkerConfig(False)
+print("-***-", worker_config.hps["msg"])

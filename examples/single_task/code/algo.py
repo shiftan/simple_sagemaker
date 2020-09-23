@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 
 def listDir(path, recursive=True):
     logger.info(f"*** START listing files in {path}")
-    args = ["ls", "-la", path]
+    cmd_args = ["ls", "-la", path]
     if recursive:
-        args.append("-R")
-    process = subprocess.run(args, stdout=subprocess.PIPE, universal_newlines=True)
+        cmd_args.append("-R")
+    process = subprocess.run(cmd_args, stdout=subprocess.PIPE, universal_newlines=True)
     logger.info(process.stdout)
     logger.info(f"*** END file listing {path}")
 
 
-def logBefore(args):
+def logBefore(worker_config):
     # show the given arguments and environment
     logger.info(f"Argv: {sys.argv}")
     logger.info(f"Env: {os.environ}")
@@ -28,54 +28,51 @@ def logBefore(args):
     logger.info(f"transformers: {transformers}")
     # just to show the initial directory structue
     listDir("/opt/ml")
-    listDir(args.state)
+    listDir(worker_config.state)
 
 
-def logAfter(args):
+def logAfter(worker_config):
     # just to show the final directory structue
     listDir("/opt/ml")
-    listDir(args.state)
+    listDir(worker_config.state)
 
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    worker_lib.setDebugLevel()
     logger.info("Starting algo...")
 
     # parse the arguments
-    args = worker_lib.parseArgs()
+    worker_config = worker_lib.WorkerConfig()
 
     # importing internal and external dependencies
     from external_dependency import lib1  # noqa: F401
     from internal_dependency import lib2  # noqa: F401
 
-    logBefore(args)
+    logBefore(worker_config)
 
     # copy the entire input dir to the output dir
-    output_data_dir = os.path.join(args.output_data_dir, args.current_host)
-    shutil.copytree(args.input_dir, f"{output_data_dir}/input_dir_copy")
+    output_data_dir = os.path.join(worker_config.output_data_dir, worker_config.current_host)
+    shutil.copytree(worker_config.input_dir, f"{output_data_dir}/input_dir_copy")
     # copy state dir
-    shutil.copytree(args.state, f"{output_data_dir}/state_copy")
+    shutil.copytree(worker_config.state, f"{output_data_dir}/state_copy")
     # cteaye a file
     open(f"{output_data_dir}/output_data_dir", "wt").write("output_data_dir")
 
     # create one file in the output dir
-    output_dir = os.path.join(args.output_dir, args.current_host)
+    output_dir = os.path.join(worker_config.output_dir, worker_config.current_host)
     os.makedirs(output_dir, exist_ok=True)
     open(f"{output_dir}/output_dir", "wt").write("output_dir")
 
     # create one file in the output model dir
-    modelDir = os.path.join(args.model_dir, args.current_host)
+    modelDir = os.path.join(worker_config.model_dir, worker_config.current_host)
     os.makedirs(modelDir, exist_ok=True)
     open(f"{modelDir}/model_dir", "wt").write("model_dir")
 
-    # delete other instances state, write file in instance state folder.
-    state_dir = worker_lib.initMultiWorkersState(args)
-    open(f"{state_dir}/state_{args.current_host}", "wt").write(
-        f"state_{args.current_host}"
+    open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write(
+        f"state_{worker_config.current_host}"
     )
-    worker_lib.markCompleted(args)
+    worker_config.markCompleted()
 
     # just to show the final directory structue
     logger.info("finished!")
-    logAfter(args)
+    logAfter(worker_config)

@@ -79,38 +79,34 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 def worker():
     from worker_toolkit import worker_lib
 
-    worker_lib.setDebugLevel()
-
     logger.info("Starting worker...")
     # parse the arguments
-    args = worker_lib.parseArgs()
+    worker_config = worker_lib.WorkerConfig()
 
-    state_dir = worker_lib.initMultiWorkersState(args)
+    logger.info(f"Hyperparams: {worker_config.hps}")
+    logger.info(f"Input data files: {list(Path(worker_config.input_data).rglob('*'))}")
+    logger.info(f"State files: { list(Path(worker_config.state).rglob('*'))}")
 
-    logger.info(f"Hyperparams: {args.hps}")
-    logger.info(f"Input data files: {list(Path(args.input_data).rglob('*'))}")
-    logger.info(f"State files: { list(Path(args.state).rglob('*'))}")
-
-    if int(args.hps["task"]) == 1:
+    if int(worker_config.hps["task"]) == 1:
         # update the state per running instance
-        open(f"{state_dir}/state_{args.current_host}", "wt").write("state")
+        open(f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt").write("state")
         # write to the model output directory
-        for file in Path(args.input_data).rglob("*"):
+        for file in Path(worker_config.input_data).rglob("*"):
             if file.is_file():
-                relp = file.relative_to(args.input_data)
-                path = Path(args.model_dir) / (
-                    str(relp) + "_proc_by_" + args.current_host
+                relp = file.relative_to(worker_config.input_data)
+                path = Path(worker_config.model_dir) / (
+                    str(relp) + "_proc_by_" + worker_config.current_host
                 )
-                path.write_text(file.read_text() + " processed by " + args.current_host)
-        open(f"{args.model_dir}/output_{args.current_host}", "wt").write("output")
-    elif int(args.hps["task"]) == 2:
-        logger.info(f"Input task2_data: {list(Path(args.input_task2_data).rglob('*'))}")
+                path.write_text(file.read_text() + " processed by " + worker_config.current_host)
+        open(f"{worker_config.model_dir}/output_{worker_config.current_host}", "wt").write("output")
+    elif int(worker_config.hps["task"]) == 2:
+        logger.info(f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}")
         logger.info(
-            f"Input task2_data_dist: {list(Path(args.input_task2_data_dist).rglob('*'))}"
+            f"Input task2_data_dist: {list(Path(worker_config.input_task2_data_dist).rglob('*'))}"
         )
 
     # mark the task as completed
-    worker_lib.markCompleted(args)
+    worker_config.markCompleted()
     logger.info("finished!")
 
 
