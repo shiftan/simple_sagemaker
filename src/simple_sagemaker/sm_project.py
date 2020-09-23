@@ -351,6 +351,7 @@ class SageMakerProject:
             job_name = self._getCompletionJobName(task_name)
             assert job_name, f"Task {task_name} isn't completed!"
             smTask.bindToJob(job_name)
+            # self.tasks[task_name] = smTask
         return smTask
 
     def getInputConfig(

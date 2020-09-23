@@ -3,6 +3,7 @@ import collections
 import logging
 import os
 import sys
+from pathlib import Path
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
@@ -121,8 +122,11 @@ def addDownloadArgs(download_params):
     )
 
 
-def runParser(run_parser):
-    run_parser.set_defaults(func=runHandler)
+def runArguments(run_parser, CMD=False):
+    if CMD:
+        run_parser.set_defaults(func=cmdHandler)
+    else:
+        run_parser.set_defaults(func=runHandler)
 
     code_group = run_parser.add_argument_group("Code")
     instance_group = run_parser.add_argument_group("Instance")
@@ -141,31 +145,43 @@ def runParser(run_parser):
         help="S3 bucket name (a default one is used if not given).",
     )
 
-    # coding params
-    code_group.add_argument(
-        "--source_dir",
-        "-s",
-        type=lambda x: fileValidation(run_parser, x),
-        help="""Path (absolute, relative or an S3 URI) to a directory with any other source
-        code dependencies aside from the entry point file. If source_dir is an S3 URI,
-        it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
-    )
-    code_group.add_argument(
-        "--entry_point",
-        "-e",
-        required=True,
-        # type=lambda x: fileValidation(parser, x),
-        help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
-        If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
-    )
+    if CMD:
+        code_group.add_argument(
+            "--cmd_line",
+            "-cmd",
+            help="""The command line to run.""",
+        )
+        code_group.add_argument(
+            "--dir_files",
+            help="""Path to a directory with files that are expected to be in root folder where cmd_line is executed.
+            Note: this is intended to be used for shell script / small files. Input data should be given with relevant
+            other parameters).""",
+        )
+    else:
+        # coding params
+        code_group.add_argument(
+            "--source_dir",
+            "-s",
+            type=lambda x: fileValidation(run_parser, x),
+            help="""Path (absolute, relative or an S3 URI) to a directory with any other source
+            code dependencies aside from the entry point file. If source_dir is an S3 URI,
+            it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
+        )
+        code_group.add_argument(
+            "--entry_point",
+            "-e",
+            required=True,
+            # type=lambda x: fileValidation(parser, x),
+            help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+            If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
+        )
     code_group.add_argument(
         "--dependencies",
         "-d",
         nargs="+",
         type=lambda x: fileValidation(run_parser, x),
-        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
-        aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
-        Structure within this directory are preserved when running on Amazon SageMaker.""",
+        help="""A list of paths to directories (absolute or relative) with any additional libraries that will be exported to the container
+        The library folders will be copied to SageMaker in the same folder where the entrypoint is copied.""",
     )
     # instance params
     instance_group.add_argument(
@@ -324,7 +340,7 @@ def runParser(run_parser):
     addDownloadArgs(download_params)
 
 
-def dataParser(data_parser):
+def dataArguments(data_parser):
     data_parser.add_argument(
         "--project_name", "-p", required=True, help="Project name."
     )
@@ -346,10 +362,12 @@ def parseArgs():
     )
     subparsers = parser.add_subparsers()
     run_parser = subparsers.add_parser("run", help="Run a task")
+    cmd_parser = subparsers.add_parser("cmd", help="Run a command line task")
     data_parser = subparsers.add_parser("data", help="Manage task data")
 
-    runParser(run_parser)
-    dataParser(data_parser)
+    runArguments(run_parser)
+    runArguments(cmd_parser, True)
+    dataArguments(data_parser)
 
     args, rest = parser.parse_known_args()
     return args, rest
@@ -395,6 +413,20 @@ def parseHyperparams(rest):
     for i in range(0, len(rest), 2):
         res[rest[i].strip("-")] = rest[i + 1]
     return res
+
+
+def cmdHandler(args, rest):
+    cmd_launcher = Path(__file__).parent / "cmd_launcher.py"
+    rest.extend(["--SSM_CMD_LINE", args.cmd_line])
+
+    if args.dir_files:
+        if not args.dependencies:
+            args.dependencies = list()
+        files = [str(x) for x in Path(args.dir_files).glob("*")]
+        args.dependencies.extend(files)
+
+    args.entry_point = str(cmd_launcher)
+    runHandler(args, rest)
 
 
 def runHandler(args, rest):

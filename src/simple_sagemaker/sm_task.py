@@ -48,6 +48,7 @@ class SageMakerTask:
         self.image_uri = image_uri
         self.estimators = list()
         self.jobNames = list()
+        self.descriptions = list()
 
         if smSession is None:
             smSession = sagemaker.Session(boto_session=boto3_session)
@@ -213,9 +214,15 @@ class SageMakerTask:
         estimator.fit(inputs=inputs if inputs else None, job_name=job_name)
         # training_job_description = estimator.latest_training_job.describe()
         # logging.info(f"Job is done: {training_job_description}")
+        training_job_description = self.smSession.describe_training_job(job_name)
 
         self.estimators.append(estimator)
         self.jobNames.append(job_name)
+        self.descriptions.append(training_job_description)
+        if "Completed" != training_job_description["TrainingJobStatus"]:
+            logger.error(
+                f"Task failed with status: {training_job_description['TrainingJobStatus']}"
+            )
         return job_name
 
     def bindToJob(self, job_name):
