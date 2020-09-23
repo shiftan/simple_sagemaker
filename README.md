@@ -21,7 +21,7 @@ import torch
 for i in range(torch.cuda.device_count()):
     print(f"-***- Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
-Just run the below command:
+Just run the below cli command (documentation of the CLI is given [below](#cli)):
 ```bash
 ssm -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
@@ -82,7 +82,7 @@ The **runner** is used to configure **tasks** and **projects**:
 
 
 ## High level flow diagram
-![High level flow diagram](docs/high_level_flow.svg?raw=true "High level flow")
+![High level flow diagram](https://github.com/shiftan/simple_sagemaker/tree/master/docs/high_level_flow.svg?raw=true "High level flow")
 
 # Data maintainance on S3
 All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
@@ -251,7 +251,7 @@ Download:
 
 # A fully featured advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
-In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](./examples/readme_examples/example6):
+In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6):
 ```
 .
 |-- Dockerfile
@@ -283,7 +283,7 @@ In order to examplify most of the possible features, the following files are use
 - data - input data files
 - external_dependency - additional code dependency
 
-The code is then launced a few time by [run.sh](./examples/readme_examples/run.sh), to demonstrate different features:
+The code is then launced a few time by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh), to demonstrate different features:
 ```bash
 
 # Example 6_1 - a complete example part 1. 
@@ -322,11 +322,11 @@ wait # wait for all processes
 ```
 The metrics graphs can be viewed on the AWS console:
 
-![High level flow diagram](docs/metric_example.jpg?raw=true "Metric Example")
+![Metrics example](https://github.com/shiftan/simple_sagemaker/tree/master/docs/metric_example.jpg?raw=true "Metric Example")
 
 More information can be found [here](https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html).
 
-Feel free to dive more into the [files of this example](./examples/readme_examples/example6). Specifically, note how the [same worker code](./examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
+Feel free to dive more into the [files of this example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6). Specifically, note how the [same worker code](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6/code/worker6.py) is used for the two parts, and the `task_type` hyperparameter is used to distinguish between the two. 
 
 # More examples
 CLI based examples:
@@ -507,22 +507,22 @@ RUN pip3 install pandas==1.1 scikit-learn==0.21.3
 """
 ```
 Sample usages:
-1. [CLI Example 6_1](./examples/readme_examples/example6)- a CLI example launched by [run.sh](./examples/readme_examples/run.sh)
-2. [single file example](./examples/single_file/example.py) - API with Dockerfile content
-2. [single task example](./examples/single_task/example.py) - API with Dockerfile path
+1. [CLI Example 6_1](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6)- a CLI example launched by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh)
+2. [single file example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_file/example.py) - API with Dockerfile content
+2. [single task example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_task/example.py) - API with Dockerfile path
 
 ## Defining code dependencies
 Additional local code dependencies can be specified with the `dependencies` CLI/API parameters. These dependencies are packed along with
 the source code, and are extracted on the root code folder in run time.
 
 Sample usages:
-1. [CLI Example 6_2](./examples/readme_examples/example6)- a CLI example launched by [run.sh](./examples/readme_examples/run.sh)
-2. [single task example](./examples/single_task/example.py) - API
+1. [CLI Example 6_2](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6)- a CLI example launched by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh)
+2. [single task example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_task/example.py) - API
 
 ---
 
 ## Single file example
-A [single file example](./examples/single_file/example.py) can be found in the [examples directory](./examples).
+A [single file example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_file/example.py) can be found in the [examples directory](https://github.com/shiftan/simple_sagemaker/tree/master/examples).
 First, define the **runner**:
 ```python
 dockerFileContent = """
@@ -655,7 +655,7 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-Running the file, with a sibling directory named `data` with a sample file [as on the example](./examples/single_file/data), prduces the following outputs for Task 1:
+Running the file, with a sibling directory named `data` with a sample file [as on the example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_file/data), prduces the following outputs for Task 1:
 ```
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt')]
@@ -695,7 +695,7 @@ INFO:__main__:finished!
 
 ```
 
-As mentioned, the complete code can be found in [this directory](./examples/single_file), 
+As mentioned, the complete code can be found in [this directory](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_file), 
 
 
 # Development
@@ -730,4 +730,4 @@ tox -e report
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
 3. Local testing/debugging
-4. Full documentation of theAPI (Reamde / Read the docs + CLI?)
+4. Full documentation of the APIs (Reamde / Read the docs + CLI?)
