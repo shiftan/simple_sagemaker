@@ -8,6 +8,7 @@ import sagemaker
 from sagemaker.inputs import TrainingInput
 
 from . import constants
+from .sm_project import SageMakerProject
 
 logger = logging.getLogger(__name__)
 
@@ -93,22 +94,47 @@ class TaskInputAction(InputActionBase):
         self.__append__(args, values)
 
 
-def parseArgs():
-    parser = argparse.ArgumentParser(
-        # config_file_parser_class=configargparse.DefaultConfigFileParser,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+def addDownloadArgs(download_params):
+    download_params.add_argument(
+        "--output_path",
+        "-o",
+        default=None,
+        help="Local path to download the outputs to.",
     )
-    code_group = parser.add_argument_group("Code")
-    instance_group = parser.add_argument_group("Instance")
-    image_group = parser.add_argument_group("Image")
-    running_params = parser.add_argument_group("Running")
-    IO_params = parser.add_argument_group("I/O")
-    download_params = parser.add_argument_group("Download")
+    download_params.add_argument(
+        "--download_state",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    download_params.add_argument(
+        "--download_model",
+        default=False,
+        action="store_true",
+        help="Download the model once task is finished",
+    )
+    download_params.add_argument(
+        "--download_output",
+        default=False,
+        action="store_true",
+        help="Download the output once task is finished",
+    )
+
+
+def runParser(run_parser):
+    run_parser.set_defaults(func=runHandler)
+
+    code_group = run_parser.add_argument_group("Code")
+    instance_group = run_parser.add_argument_group("Instance")
+    image_group = run_parser.add_argument_group("Image")
+    running_params = run_parser.add_argument_group("Running")
+    IO_params = run_parser.add_argument_group("I/O")
+    download_params = run_parser.add_argument_group("Download")
 
     # general
     # parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
-    parser.add_argument("--project_name", "-p", required=True, help="Project name.")
-    parser.add_argument("--task_name", "-t", required=True, help="Task name.")
+    run_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    run_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     IO_params.add_argument(
         "--bucket_name",
         "-b",
@@ -295,31 +321,31 @@ def parseArgs():
         action="append",
         help="Tag to be attached to the jobs executed for this task.",
     )
+    addDownloadArgs(download_params)
 
-    download_params.add_argument(
-        "--output_path",
-        "-o",
-        default=None,
-        help="Local path to download the outputs to.",
+def dataParser(data_parser):
+    data_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    data_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
+    data_parser.add_argument(
+        "--bucket_name",
+        "-b",
+        help="S3 bucket name (a default one is used if not given).",
     )
-    download_params.add_argument(
-        "--download_state",
-        default=False,
-        action="store_true",
-        help="Download the state once task is finished",
+
+    data_parser.set_defaults(func=dataHandler)
+    addDownloadArgs(data_parser)
+
+def parseArgs():
+    parser = argparse.ArgumentParser(
+        # config_file_parser_class=configargparse.DefaultConfigFileParser,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    download_params.add_argument(
-        "--download_model",
-        default=False,
-        action="store_true",
-        help="Download the model once task is finished",
-    )
-    download_params.add_argument(
-        "--download_output",
-        default=False,
-        action="store_true",
-        help="Download the output once task is finished",
-    )
+    subparsers = parser.add_subparsers()
+    run_parser = subparsers.add_parser("run", help="Run a task")
+    data_parser = subparsers.add_parser("data", help="Manage task data")
+    
+    runParser(run_parser)    
+    dataParser(data_parser)
 
     args, rest = parser.parse_known_args()
     return args, rest
@@ -366,22 +392,7 @@ def parseHyperparams(rest):
         res[rest[i].strip("-")] = rest[i + 1]
     return res
 
-
-def main():
-    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
-    logging.basicConfig(
-        stream=sys.stdout,
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-        format=format,
-    )
-    logger.info(f"Running ssm cli, args:{sys.argv}")
-    args, rest = parseArgs()
-
-    file_path = os.path.split(__file__)[0]
-    examples_path = os.path.abspath(os.path.join(file_path, ".."))
-    sys.path.append(examples_path)
-    from simple_sagemaker.sm_project import SageMakerProject
+def runHandler(args, rest):
 
     sm_project = SageMakerProject(
         **getAllParams(
@@ -473,6 +484,39 @@ def main():
             model=args.download_model,
             output=args.download_output,
         )
+        
+def dataHandler(args, rest):
+    sm_project = SageMakerProject(
+        **getAllParams(
+            args,
+            {
+                "project_name": "project_name",
+                "bucket_name": "bucket_name",
+            },
+        )
+    )
+    if args.output_path:
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
+
+
+def main():
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format=format,
+    )
+    logger.info(f"Running ssm cli, args:{sys.argv}")
+    args, rest = parseArgs()
+    args.func(args)
 
 
 if __name__ == "__main__":

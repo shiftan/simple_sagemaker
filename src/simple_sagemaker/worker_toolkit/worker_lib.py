@@ -20,6 +20,13 @@ def _bind(instance, func, as_name):
 
 class WorkerConfig:
     def __init__(self, init_multi_worker_state=True, set_debug_level=True):
+        """Initialize the WorkerConfig object.
+
+        :param init_multi_worker_state: whether to call :func:`initMultiWorkersState` on initialization, defaults to True
+        :type init_multi_worker_state: bool, optional
+        :param set_debug_level: whether to call :func:`setDebugLevel` on initialization, defaults to True
+        :type set_debug_level: bool, optional
+        """
         if set_debug_level:
             self.setDebugLevel()
         self._otherInstanceStateDeleted = False
@@ -101,12 +108,6 @@ class WorkerConfig:
         parser.add_argument_default_env_or_other(
             "--input-model", type=str, envVarName="SM_CHANNEL_MODEL", default=""
         )
-
-        # Hyperparameters
-        parser.add_argument("--epochs", type=int, default=50)
-        parser.add_argument("--batch-size", type=int, default=64)
-        parser.add_argument("--learning-rate", type=float, default=0.05)
-        parser.add_argument("--use-cuda", type=bool, default=False)
 
         # System params
         parser.add_argument_default_env_or_other(

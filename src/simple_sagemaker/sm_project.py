@@ -336,6 +336,23 @@ class SageMakerProject:
         for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
             s3c.delete_object(Bucket=self.bucket_name, Key=file)
 
+    def _getOrBindTask(self, task_name):
+        if task_name in self.tasks:
+            smTask = self.tasks[task_name]
+        else:
+            smTask = SageMakerTask(
+                self.boto3_session,
+                task_name,
+                None,
+                self.project_name,
+                self.bucket_name,
+                smSession=self.smSession,
+            )
+            job_name = self._getCompletionJobName(task_name)
+            assert job_name, f"Task {task_name} isn't completed!"
+            smTask.bindToJob(job_name)
+        return smTask
+
     def getInputConfig(
         self,
         task_name,
@@ -352,21 +369,7 @@ class SageMakerProject:
         :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
         :type task_name: str
         """
-        if task_name in self.tasks:
-            smTask = self.tasks[task_name]
-        else:
-            smTask = SageMakerTask(
-                self.boto3_session,
-                task_name,
-                None,
-                self.project_name,
-                self.bucket_name,
-                smSession=self.smSession,
-            )
-            job_name = self._getCompletionJobName(task_name)
-            assert job_name, f"Task {task_name} isn't completed!"
-            smTask.bindToJob(job_name)
-
+        smTask = self._getOrBindTask(task_name)
         return smTask.getInputConfig(output_type, distribution)
 
     def downloadResults(
@@ -396,7 +399,7 @@ class SageMakerProject:
         :param source: Whether source should be downloaded, defaults to False
         :type task_name: str, optional
         """
-        smTask = self.tasks[task_name]
+        smTask = self._getOrBindTask(task_name)
         return smTask.downloadResults(
             output_base,
             logs=logs,
