@@ -145,7 +145,7 @@ def runParser(run_parser):
     code_group.add_argument(
         "--source_dir",
         "-s",
-        type=lambda x: fileValidation(parser, x),
+        type=lambda x: fileValidation(run_parser, x),
         help="""Path (absolute, relative or an S3 URI) to a directory with any other source
         code dependencies aside from the entry point file. If source_dir is an S3 URI,
         it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
@@ -162,7 +162,7 @@ def runParser(run_parser):
         "--dependencies",
         "-d",
         nargs="+",
-        type=lambda x: fileValidation(parser, x),
+        type=lambda x: fileValidation(run_parser, x),
         help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
         aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
         Structure within this directory are preserved when running on Amazon SageMaker.""",
@@ -323,8 +323,11 @@ def runParser(run_parser):
     )
     addDownloadArgs(download_params)
 
+
 def dataParser(data_parser):
-    data_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    data_parser.add_argument(
+        "--project_name", "-p", required=True, help="Project name."
+    )
     data_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     data_parser.add_argument(
         "--bucket_name",
@@ -335,6 +338,7 @@ def dataParser(data_parser):
     data_parser.set_defaults(func=dataHandler)
     addDownloadArgs(data_parser)
 
+
 def parseArgs():
     parser = argparse.ArgumentParser(
         # config_file_parser_class=configargparse.DefaultConfigFileParser,
@@ -343,8 +347,8 @@ def parseArgs():
     subparsers = parser.add_subparsers()
     run_parser = subparsers.add_parser("run", help="Run a task")
     data_parser = subparsers.add_parser("data", help="Manage task data")
-    
-    runParser(run_parser)    
+
+    runParser(run_parser)
     dataParser(data_parser)
 
     args, rest = parser.parse_known_args()
@@ -391,6 +395,7 @@ def parseHyperparams(rest):
     for i in range(0, len(rest), 2):
         res[rest[i].strip("-")] = rest[i + 1]
     return res
+
 
 def runHandler(args, rest):
 
@@ -484,7 +489,8 @@ def runHandler(args, rest):
             model=args.download_model,
             output=args.download_output,
         )
-        
+
+
 def dataHandler(args, rest):
     sm_project = SageMakerProject(
         **getAllParams(
