@@ -81,47 +81,6 @@ INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_names=[], curren
 INFO:worker_toolkit.worker_lib:Unmatched: ['--SSM_CMD_LINE', 'cat /proc/cpuinfo && nvidia-smi']
 INFO:worker_toolkit.worker_lib:Deleting other instances' state
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
-INFO:__main__:*** START listing files in /opt/ml
-INFO:__main__:[File] /opt/ml/code
-INFO:__main__:[Dir ] /opt/ml/code/cmd_launcher.py
-INFO:__main__:[File] /opt/ml/code/worker_toolkit
-INFO:__main__:[Dir ] /opt/ml/code/worker_toolkit/__init__.py
-INFO:__main__:[File] /opt/ml/code/worker_toolkit/__pycache__
-INFO:__main__:[Dir ] /opt/ml/code/worker_toolkit/__pycache__/__init__.cpython-37.pyc
-INFO:__main__:[Dir ] /opt/ml/code/worker_toolkit/__pycache__/worker_lib.cpython-37.pyc
-INFO:__main__:[Dir ] /opt/ml/code/worker_toolkit/worker_lib.py
-INFO:__main__:[File] /opt/ml/errors
-INFO:__main__:[File] /opt/ml/input
-INFO:__main__:[File] /opt/ml/input/config
-INFO:__main__:[Dir ] /opt/ml/input/config/checkpointconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/debughookconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/hyperparameters.json
-INFO:__main__:[Dir ] /opt/ml/input/config/init-config.json
-INFO:__main__:[Dir ] /opt/ml/input/config/inputdataconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/metric-definition-regex.json
-INFO:__main__:[Dir ] /opt/ml/input/config/resourceconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/trainingjobconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/upstreamoutputdataconfig.json
-INFO:__main__:[File] /opt/ml/input/data
-INFO:__main__:[Dir ] /opt/ml/input/data/checkpoints-manifest
-INFO:__main__:[File] /opt/ml/model
-INFO:__main__:[File] /opt/ml/output
-INFO:__main__:[File] /opt/ml/output/data
-INFO:__main__:[File] /opt/ml/output/metrics
-INFO:__main__:[File] /opt/ml/output/metrics/sagemaker
-INFO:__main__:[File] /opt/ml/output/profiler
-INFO:__main__:[File] /opt/ml/output/tensors
-INFO:__main__:*** END file listing /opt/ml
-INFO:__main__:Current directory: /opt/ml/code
-INFO:__main__:*** START listing files in .
-INFO:__main__:[Dir ] cmd_launcher.py
-INFO:__main__:[File] worker_toolkit
-INFO:__main__:[Dir ] worker_toolkit/__init__.py
-INFO:__main__:[File] worker_toolkit/__pycache__
-INFO:__main__:[Dir ] worker_toolkit/__pycache__/__init__.cpython-37.pyc
-INFO:__main__:[Dir ] worker_toolkit/__pycache__/worker_lib.cpython-37.pyc
-INFO:__main__:[Dir ] worker_toolkit/worker_lib.py
-INFO:__main__:*** END file listing .
 INFO:__main__:Launching: cat /proc/cpuinfo && nvidia-smi
 processor#011: 0
 vendor_id#011: GenuineIntel
