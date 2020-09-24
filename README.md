@@ -59,7 +59,7 @@ CLI based examples:
 - [A fully featured advanced example](#A-fully-featured-advanced-example)
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
-- [Providing input data](#Providing-input-data)
+- [Providing input data](#Providing-channel-data)
 - [Chaining tasks](#Chaining-tasks)
 - [Configuring the docker image](#Configuring-the-docker-image)
 - [Defining code dependencies](#Defining-code-dependencies)
@@ -107,24 +107,25 @@ The **runner** is used to configure **tasks** and **projects**:
 
 # Worker environment configuration
 The worker can use the `worker_lib` library to get access to its running configuration parameters.
-To get access call `worker_config = worker_lib.WorkerConfig()`.
-
-- channel_names=['data']
-- input_data='/opt/ml/input/data/data'
+To get access call `worker_config = worker_lib.WorkerConfig()`, and you 
+- channels=['data']
+- channel_data='/opt/ml/input/data/data'
 - current_host='algo-1'
 - hosts=['algo-1', 'algo-2']
-- input_model='', 
-
 - hps={'arg': 'hello world!', 'task': 1, 'worker': 1}
 - job_name='task1-2020-09-23-17-12-46-0JNcrR6H'
 - model_dir='/opt/ml/model'
 - network_interface='eth0'
 - num_cpus=2
-- num_gpus=0-
+- num_gpus=1
 - output_data_dir='/opt/ml/output/data'
 - output_dir='/opt/ml/output'
 - resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}'
 - state='/state'
+
+## Working directory
+TBD - files
+TBD - running a shell command + env vars
 
 ## State
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
@@ -425,7 +426,7 @@ CLI based examples:
 - [A fully featured advanced example](#A-fully-featured-advanced-example)
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
-- [Providing input data](#Providing-input-data)
+- [Providing input data](#Providing-channel-data)
 - [Chaining tasks](#Chaining-tasks)
 - [Configuring the docker image](#Configuring-the-docker-image)
 - [Defining code dependencies](#Defining-code-dependencies)
@@ -489,8 +490,8 @@ Hello, world!
 
 ## Providing input data
 A **Job** can be configured to get a few data sources:
-* A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `worker_config.input_data`
-* Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `worker_config.input_[name]` when [name] is the same one as was provided on the command line.
+* A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `worker_config.channel_data`
+* Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `worker_config.channel_[name]` when [name] is the same one as was provided on the command line.
 * Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
 
 Assuming a local `data` folder containtin a single `sample_data.txt` file, a complete example can be seen in `worker4.py`:
@@ -517,8 +518,8 @@ def listDir(path):
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
     worker_config = worker_lib.WorkerConfig(False)
-    listDir(worker_config.input_data)
-    listDir(worker_config.input_bucket)
+    listDir(worker_config.channel_data)
+    listDir(worker_config.channel_bucket)
 ```
 Running command:
 ```bash
@@ -548,7 +549,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 
 ## Chaining tasks
 The output of a completed **task** on the same **project** can be used as an input to another **task**, by using the `--iit [name] [task name] [output type]` command line parameter, where:
-- [name] - is the name of the input source, acaccesible by the worker with `worker_config.input_[name]`
+- [name] - is the name of the input source, acaccesible by the worker with `worker_config.channel_[name]`
 - [task name] - the name of the **task** whose output is used as input 
 - [output type] - the **task** output type, one of "model", "output", "state"
 
@@ -636,14 +637,14 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     # *** Task 1 - process input data
     task1_name = "task1"
     # set the input data
-    input_data_path = file_path / "data"
+    channel_data_path = file_path / "data"
     # run the task
     sm_project.runTask(
         task1_name,
         image_uri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
-        input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
+        channel_data_path=str(channel_data_path) if channel_data_path.is_dir() else None,
         clean_state=True,  # clean the current state, also forces re-running
     )
     # download the results
@@ -687,7 +688,7 @@ def worker():
     worker_config = worker_lib.WorkerConfig()
 
     logger.info(f"Hyperparams: {worker_config.hps}")
-    logger.info(f"Input data files: {list(Path(worker_config.input_data).rglob('*'))}")
+    logger.info(f"Input data files: {list(Path(worker_config.channel_data).rglob('*'))}")
     logger.info(f"State files: { list(Path(worker_config.state).rglob('*'))}")
 
     if int(worker_config.hps["task"]) == 1:
@@ -696,9 +697,9 @@ def worker():
             f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
         ).write("state")
         # write to the model output directory
-        for file in Path(worker_config.input_data).rglob("*"):
+        for file in Path(worker_config.channel_data).rglob("*"):
             if file.is_file():
-                relp = file.relative_to(worker_config.input_data)
+                relp = file.relative_to(worker_config.channel_data)
                 path = Path(worker_config.model_dir) / (
                     str(relp) + "_proc_by_" + worker_config.current_host
                 )
@@ -710,10 +711,10 @@ def worker():
         ).write("output")
     elif int(worker_config.hps["task"]) == 2:
         logger.info(
-            f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}"
+            f"Input task2_data: {list(Path(worker_config.channel_task2_data).rglob('*'))}"
         )
         logger.info(
-            f"Input task2_data_dist: {list(Path(worker_config.input_task2_data_dist).rglob('*'))}"
+            f"Input task2_data_dist: {list(Path(worker_config.channel_task2_data_dist).rglob('*'))}"
         )
 
     # mark the task as completed

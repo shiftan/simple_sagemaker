@@ -15,13 +15,13 @@ def worker():
 
     cmd_line = worker_config.hps["SSM_CMD_LINE"]
     logger.info(f"Launching: {cmd_line}")
-    ran_cmd = subprocess.run(cmd_line, shell=True)
-    if ran_cmd.returncode == 0:
+    shell_cmd = subprocess.run(cmd_line, shell=True)
+    if shell_cmd.returncode == 0:
         # mark the task as completed
         worker_config.markCompleted()
 
-    logger.info(f"finished with {ran_cmd.returncode} return code!")
-    return ran_cmd.returncode
+    logger.info(f"finished with {shell_cmd.returncode} return code!")
+    return shell_cmd.returncode
 
 
 if __name__ == "__main__":

@@ -34,8 +34,8 @@ def worker1(worker_config):
         f"state_{worker_config.current_host}"
     )
     # "process" input data into model output
-    for file in Path(worker_config.input_data).rglob("*"):
-        relp = file.relative_to(worker_config.input_data)
+    for file in Path(worker_config.channel_data).rglob("*"):
+        relp = file.relative_to(worker_config.channel_data)
         path = Path(worker_config.model_dir) / (
             f"{relp}_proc_by_{worker_config.current_host}"
         )
@@ -57,7 +57,7 @@ def worker2(worker_config):
 
 def show_inputs(worker_config):
     # just to show the initial directory structue
-    for channel_name in worker_config.channel_names:
+    for channel_name in worker_config.channels:
         input_path = worker_config.__getattr__(f"input_{channel_name}")
         logger.info(f"input channel {channel_name} is at {input_path}")
 

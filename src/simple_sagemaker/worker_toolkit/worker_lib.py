@@ -97,16 +97,16 @@ class WorkerConfig:
             "--hps", type=lambda x: json.loads(x), envVarName="SM_HPS", default="[]"
         )
         parser.add_argument_default_env_or_other(
-            "--channel_names",
+            "--channels",
             type=lambda x: json.loads(x),
             envVarName="SM_CHANNELS",
             default="[]",
         )
         parser.add_argument_default_env_or_other(
-            "--input-data", type=str, envVarName="SM_CHANNEL_DATA", default=""
+            "--channel-data", type=str, envVarName="SM_CHANNEL_DATA", default=""
         )
         parser.add_argument_default_env_or_other(
-            "--input-model", type=str, envVarName="SM_CHANNEL_MODEL", default=""
+            "--channel-model", type=str, envVarName="SM_CHANNEL_MODEL", default=""
         )
 
         # System params
@@ -144,10 +144,10 @@ class WorkerConfig:
 
         args, rest = parser.parse_known_args()
 
-        for channel_name in args.channel_names:
+        for channel_name in args.channels:
             env_name = f"SM_CHANNEL_{channel_name.upper()}"
             if env_name in os.environ:
-                args.__setattr__(f"input_{channel_name}", os.environ[env_name])
+                args.__setattr__(f"channel_{channel_name}", os.environ[env_name])
 
         logger.info(f"Worker config: {args}")
         logger.info(f"Unmatched: {rest}")

@@ -82,10 +82,10 @@ def runner(
         "Task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     )
     # input data params
-    input_data_path = os.path.join(
-        file_path, "input_data"
+    channel_data_path = os.path.join(
+        file_path, "channel_data"
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
-    # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
+    # channel_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
     model_uri = (
         None  # Can be used to supply model data as an additional input, local/s3
@@ -96,7 +96,7 @@ def runner(
         task_name,
         image_uri,
         hyperparameters,
-        input_data_path,
+        channel_data_path,
         model_uri=model_uri,
         distribution=distribution,
         clean_state=True,

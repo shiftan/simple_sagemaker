@@ -20,5 +20,5 @@ def listDir(path):
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
     worker_config = worker_lib.WorkerConfig(False)
-    listDir(worker_config.input_data)
-    listDir(worker_config.input_bucket)
+    listDir(worker_config.channel_data)
+    listDir(worker_config.channel_bucket)

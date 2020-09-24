@@ -64,7 +64,7 @@ if __name__ == "__main__":
         logger.info("Doing nothing...")
 
     # copy all input channels to the output dir
-    for channel_name in worker_config.channel_names:
+    for channel_name in worker_config.channels:
         input_dir = worker_config.__getattr__(f"input_{channel_name}")
         shutil.copytree(input_dir, f"{output_data_dir}/{channel_name}_copy")
     shutil.copytree(worker_config.state, f"{output_data_dir}/state_copy")

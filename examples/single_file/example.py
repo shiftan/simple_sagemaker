@@ -37,14 +37,14 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     # *** Task 1 - process input data
     task1_name = "task1"
     # set the input data
-    input_data_path = file_path / "data"
+    channel_data_path = file_path / "data"
     # run the task
     sm_project.runTask(
         task1_name,
         image_uri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
-        input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
+        channel_data_path=str(channel_data_path) if channel_data_path.is_dir() else None,
         clean_state=True,  # clean the current state, also forces re-running
     )
     # download the results
@@ -84,7 +84,7 @@ def worker():
     worker_config = worker_lib.WorkerConfig()
 
     logger.info(f"Hyperparams: {worker_config.hps}")
-    logger.info(f"Input data files: {list(Path(worker_config.input_data).rglob('*'))}")
+    logger.info(f"Input data files: {list(Path(worker_config.channel_data).rglob('*'))}")
     logger.info(f"State files: { list(Path(worker_config.state).rglob('*'))}")
 
     if int(worker_config.hps["task"]) == 1:
@@ -93,9 +93,9 @@ def worker():
             f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
         ).write("state")
         # write to the model output directory
-        for file in Path(worker_config.input_data).rglob("*"):
+        for file in Path(worker_config.channel_data).rglob("*"):
             if file.is_file():
-                relp = file.relative_to(worker_config.input_data)
+                relp = file.relative_to(worker_config.channel_data)
                 path = Path(worker_config.model_dir) / (
                     str(relp) + "_proc_by_" + worker_config.current_host
                 )
@@ -107,10 +107,10 @@ def worker():
         ).write("output")
     elif int(worker_config.hps["task"]) == 2:
         logger.info(
-            f"Input task2_data: {list(Path(worker_config.input_task2_data).rglob('*'))}"
+            f"Input task2_data: {list(Path(worker_config.channel_task2_dat).rglob('*'))}"
         )
         logger.info(
-            f"Input task2_data_dist: {list(Path(worker_config.input_task2_data_dist).rglob('*'))}"
+            f"Input task2_data_dist: {list(Path(worker_config.channel_task2_dat_dist).rglob('*'))}"
         )
 
     # mark the task as completed
