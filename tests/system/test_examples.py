@@ -37,7 +37,7 @@ def _internalTestExample(caplog, tmp_path, runner):
     print("Running", runner, runner.__name__, runner.__module__)
 
     example_path = os.path.dirname(runner.__code__.co_filename)
-    output_path = os.path.join(tmp_path, "output")
+    output_path = os.path.join(tmp_path, example_path, "output")
     # remove current local output
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
@@ -63,7 +63,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     print("Temp path:", tmp_path)
     print("Running cli:", test_path)
 
-    output_path = os.path.join(tmp_path, "output")
+    output_path = os.path.join(tmp_path, test_path, "output")
     # remove current local output
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
