@@ -81,9 +81,7 @@ def runner(
     )
 
     # task name
-    task_name = (
-        "multi-task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
-    )
+    task_name = "multi-task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     # input data params
     input_data_path = os.path.join(
         file_path, "..", "single_task", "input_data"

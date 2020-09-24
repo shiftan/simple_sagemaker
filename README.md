@@ -22,12 +22,13 @@ Output including the logs with script stdout is downloaded to `./output`.
 
 ```bash
 $ cat ./output/logs/logs0
-....
-processor#011: 7
+processor: 0
 ....
 model name: Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
 ....
 cpu cores: 4
+....
+processor: 7
 ....
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 440.33.01    Driver Version: 440.33.01    CUDA Version: 10.2     |
@@ -59,10 +60,10 @@ $ cat ./output/example1/logs/logs0
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
 ...
 ```
+It's recommended to rewview the [fully featured advanced example](#A-fully-featured-advanced-example) below 
 
 ## More examples (below)
 CLI based examples:
-- [A fully featured advanced example](#A-fully-featured-advanced-example)
 - [Passing command line arguments](#Passing-command-line-arguments)
 - [Task state and output](#Task-state-and-output)
 - [Providing input data](#Providing-channel-data)
