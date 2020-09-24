@@ -1,13 +1,13 @@
 bash: cannot set terminal process group (-1): Inappropriate ioctl for device
 bash: no job control in this shell
-2020-09-13 13:21:52,954 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
-2020-09-13 13:21:52,957 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:21:52,966 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
-2020-09-13 13:21:59,219 sagemaker_pytorch_container.training INFO     Invoking user training script.
-2020-09-13 13:21:59,607 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:21:59,619 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:21:59,630 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-09-13 13:21:59,640 sagemaker-training-toolkit INFO     Invoking user script
+2020-09-24 14:29:26,884 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-09-24 14:29:26,887 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-24 14:29:26,896 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-09-24 14:29:27,541 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-09-24 14:29:27,892 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-24 14:29:27,903 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-24 14:29:27,915 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-09-24 14:29:27,924 sagemaker-training-toolkit INFO     Invoking user script
 
 Training Env:
 
@@ -28,7 +28,7 @@ Training Env:
         "worker": 1
     },
     "input_config_dir": "/opt/ml/input/config",
-    "channel_data_config": {
+    "input_data_config": {
         "data": {
             "TrainingInputMode": "File",
             "S3DistributionType": "ShardedByS3Key",
@@ -37,11 +37,11 @@ Training Env:
     },
     "input_dir": "/opt/ml/input",
     "is_master": false,
-    "job_name": "task1-2020-09-13-13-17-56-FZSEab99",
+    "job_name": "single-file-task1-2020-09-24-14-24-31-w3alpnO5",
     "log_level": 20,
     "master_hostname": "algo-1",
     "model_dir": "/opt/ml/model",
-    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-13-13-16-10_py37/task1/task1-2020-09-13-13-17-56-FZSEab99/source/sourcedir.tar.gz",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-24-14-22-32_py37/single-file-task1/single-file-task1-2020-09-24-14-24-31-w3alpnO5/source/sourcedir.tar.gz",
     "module_name": "example",
     "network_interface_name": "eth0",
     "num_cpus": 2,
@@ -68,7 +68,7 @@ SM_HPS={"arg":"hello world!","task":1,"worker":1}
 SM_USER_ENTRY_POINT=example.py
 SM_FRAMEWORK_PARAMS={}
 SM_RESOURCE_CONFIG={"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}
-SM_channel_data_CONFIG={"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}
+SM_INPUT_DATA_CONFIG={"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}
 SM_OUTPUT_DATA_DIR=/opt/ml/output/data
 SM_CHANNELS=["data"]
 SM_CURRENT_HOST=algo-2
@@ -81,8 +81,8 @@ SM_OUTPUT_DIR=/opt/ml/output
 SM_NUM_CPUS=2
 SM_NUM_GPUS=0
 SM_MODEL_DIR=/opt/ml/model
-SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-13-13-16-10_py37/task1/task1-2020-09-13-13-17-56-FZSEab99/source/sourcedir.tar.gz
-SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data"},"current_host":"algo-2","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"arg":"hello world!","task":1,"worker":1},"input_config_dir":"/opt/ml/input/config","channel_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":false,"job_name":"task1-2020-09-13-13-17-56-FZSEab99","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-13-13-16-10_py37/task1/task1-2020-09-13-13-17-56-FZSEab99/source/sourcedir.tar.gz","module_name":"example","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"example.py"}
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-24-14-22-32_py37/single-file-task1/single-file-task1-2020-09-24-14-24-31-w3alpnO5/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data"},"current_host":"algo-2","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"arg":"hello world!","task":1,"worker":1},"input_config_dir":"/opt/ml/input/config","input_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":false,"job_name":"single-file-task1-2020-09-24-14-24-31-w3alpnO5","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-09-24-14-22-32_py37/single-file-task1/single-file-task1-2020-09-24-14-24-31-w3alpnO5/source/sourcedir.tar.gz","module_name":"example","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"example.py"}
 SM_USER_ARGS=["--arg","hello world!","--task","1","--worker","1"]
 SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
 SM_CHANNEL_DATA=/opt/ml/input/data/data
@@ -97,13 +97,12 @@ Invoking script with the following command:
 
 
 INFO:__main__:Starting worker...
-INFO:worker_toolkit.worker_lib:Args: Namespace(batch_size=64, channel_names=['data'], current_host='algo-2', epochs=50, hosts=['algo-1', 'algo-2'], hps={'arg': 'hello world!', 'task': 1, 'worker': 1}, input_config_dir='/opt/ml/input/config', channel_data='/opt/ml/input/data/data', channel_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', channel_model='', job_name='task1-2020-09-13-13-17-56-FZSEab99', learning_rate=0.05, model_dir='/opt/ml/model', network_interface='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state', use_cuda=False)
-INFO:worker_toolkit.worker_lib:Unmatched: ['--arg', 'hello world!', '--task', '1', '--worker', '1']
 INFO:worker_toolkit.worker_lib:Deleting other instances' state
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
+INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_data='/opt/ml/input/data/data', channel_model='', channels=['data'], current_host='algo-2', hosts=['algo-1', 'algo-2'], hps={'arg': 'hello world!', 'task': 1, 'worker': 1}, input_config_dir='/opt/ml/input/config', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', instance_state='/state/algo-2', job_name='single-file-task1-2020-09-24-14-24-31-w3alpnO5', model_dir='/opt/ml/model', network_interface_name='eth0', num_cpus=2, num_gpus=0, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-2","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state')
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
 INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:__main__:finished!
-2020-09-13 13:21:59,711 sagemaker-training-toolkit INFO     Reporting training SUCCESS
+2020-09-24 14:29:28,017 sagemaker-training-toolkit INFO     Reporting training SUCCESS
