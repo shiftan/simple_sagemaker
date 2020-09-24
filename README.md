@@ -1,7 +1,7 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute work (python/shell/training) work on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworksare enough to distribute any type of work, including shell commands, just without the specific customization.**
+**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
 ## Requirements
 
@@ -13,7 +13,7 @@ To install *Simple Sagemaker*
 ```
 pip install simple-sagemaker
 ```
-Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance run the following `ssm` command (documentation of the `ssm` CLI is given [below](#cli)):
+Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance, run the following `ssm` command (documentation of the `ssm` CLI is given [below](#cli)):
 ```bash
 ssm shell -p simple-sagemaker-example-cli-shell -t shell-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
@@ -42,7 +42,7 @@ processor: 7
 ....
 ```
 
-Similarily, to run the following `worker1.py` on 2 *ml.p3.2xlarge* *spot* instances
+Similarily, to run the following `worker1.py` on two *ml.p3.2xlarge* *spot* instances
 ```python
 import torch
 
@@ -60,7 +60,7 @@ $ cat ./output/example1/logs/logs0
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
 ...
 ```
-It's recommended to review the [fully featured advanced example](#A-fully-featured-advanced-example) below, as a demonstration of most features.
+It's recommended to review the [fully featured advanced example](#A-fully-featured-advanced-example), as a demonstration of most features.
 
 ## More examples (below)
 CLI based examples:
@@ -155,8 +155,8 @@ When running multiple instances, the state data is merged into a single director
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ## Output
-On to of the state, there're 3 main other output mechanisms:
-1. Logs - any output writen to standard output
+On top of the state, there're 3 main other output mechanisms:
+1. Logs - any output writen to standard output / error
 2. Output data - any data in `worker_config.output_data_dir` is compressed into a output.tar.gz. Only the main instance output data is kept.
 3. Model - any data in `worker_config.model_dir` is compressed into a model.tar.gz. As data from all instance is merged, be carful with collisions.
 
