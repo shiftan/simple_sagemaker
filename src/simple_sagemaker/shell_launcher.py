@@ -1,8 +1,8 @@
 import logging
 import os
+import shutil
 import subprocess
 import sys
-import shutil
 
 from worker_toolkit import worker_lib
 
@@ -18,7 +18,7 @@ def worker():
     # Fill the environment varaible with missing parameters
     os.environ["SSM_STATE"] = worker_config.state
     os.environ["SSM_INSTANCE_STATE"] = worker_config.instance_state
-    
+
     # Delete the current file + toolkit as both got injected
     os.remove(__file__)
     shutil.rmtree("./worker_toolkit")
