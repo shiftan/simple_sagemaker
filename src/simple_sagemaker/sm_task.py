@@ -249,9 +249,7 @@ class SageMakerTask:
             # uploadedUri = sagemaker_session.upload_data(path='data', bucket=bucket, key_prefix=prefix)
             sync = S3Sync(self.boto3_session)
             self.inputS3Uri = sagemaker.s3.s3_path_join(self.baseTaskS3Uri, "input")
-            logger.info(
-                f"Syncing data from {input_data_path} to {self.inputS3Uri}..."
-            )
+            logger.info(f"Syncing data from {input_data_path} to {self.inputS3Uri}...")
             sync.syncFolderToS3(
                 input_data_path,
                 self.bucket_name,

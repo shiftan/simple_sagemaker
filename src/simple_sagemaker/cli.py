@@ -499,9 +499,7 @@ def runHandler(args, rest):
         },
     )
 
-    input_data_path, distribution, inputs = parseInputsAndAllowAccess(
-        args, sm_project
-    )
+    input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
     hyperparameters = parseHyperparams(rest)
     tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
