@@ -71,7 +71,7 @@ if __name__ == "__main__":
     open(f"{modelDir}/model_dir", "wt").write("model_dir")
 
     open(
-        f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+        f"{worker_config.instance_state}/state_{worker_config.current_host}", "wt"
     ).write(f"state_{worker_config.current_host}")
     worker_config.markCompleted()
 

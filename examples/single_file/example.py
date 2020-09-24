@@ -92,7 +92,7 @@ def worker():
     if int(worker_config.hps["task"]) == 1:
         # update the state per running instance
         open(
-            f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+            f"{worker_config.instance_state}/state_{worker_config.current_host}", "wt"
         ).write("state")
         # write to the model output directory
         for file in Path(worker_config.channel_data).rglob("*"):

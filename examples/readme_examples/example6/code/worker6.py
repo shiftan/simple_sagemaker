@@ -30,7 +30,7 @@ def worker1(worker_config):
     logger.info("{pandas} is pre-installed in this image")
 
     # update the state
-    (Path(worker_config.worker_state) / worker_config.current_host).write_text(
+    (Path(worker_config.instance_state) / worker_config.current_host).write_text(
         f"state_{worker_config.current_host}"
     )
     # "process" input data into model output

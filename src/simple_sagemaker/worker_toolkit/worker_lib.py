@@ -19,11 +19,11 @@ def _bind(instance, func, as_name):
 
 
 class WorkerConfig:
-    def __init__(self, init_multi_worker_state=True, set_debug_level=True):
+    def __init__(self, init_multi_instance_state=True, set_debug_level=True):
         """Initialize the WorkerConfig object.
 
-        :param init_multi_worker_state: whether to call :func:`initMultiWorkersState` on initialization, defaults to True
-        :type init_multi_worker_state: bool, optional
+        :param init_multi_instance_state: whether to call :func:`initMultiWorkersState` on initialization, defaults to True
+        :type init_multi_instance_state: bool, optional
         :param set_debug_level: whether to call :func:`setDebugLevel` on initialization, defaults to True
         :type set_debug_level: bool, optional
         """
@@ -31,9 +31,10 @@ class WorkerConfig:
             self.setDebugLevel()
         self._otherInstanceStateDeleted = False
         self.config = self.parseArgs()
-        if init_multi_worker_state:
-            self.config.worker_state = self.initMultiWorkersState()
-        pass
+        if init_multi_instance_state:
+            self.config.instance_state = self.initMultiWorkersState()
+
+        logger.info(f"Worker config: {self.config}")
 
     def __getattr__(self, item):
         """Fall back (from __getattribute__) to get access to the configuration parameter"""
@@ -73,7 +74,7 @@ class WorkerConfig:
         parser.add_argument_default_env_or_other(
             "--output-dir", type=str, envVarName="SM_OUTPUT_DIR", default=""
         )
-        # parser.add_argument_default_env_or_other('--output_worker_config.worker_state', type=str,
+        # parser.add_argument_default_env_or_other('--output_worker_config.instance_state', type=str,
         #   envVarName='SM_OUTPUT_INTERMEDIATE_DIR', default="")
 
         parser.add_argument_default_env_or_other(
@@ -89,10 +90,6 @@ class WorkerConfig:
             envVarName="SM_INPUT_DATA_CONFIG",
             default="",
         )
-
-        parser.add_argument(
-            "--state", type=str, default="/state"
-        )  # TODO: parse dynamically
         parser.add_argument_default_env_or_other(
             "--hps", type=lambda x: json.loads(x), envVarName="SM_HPS", default="[]"
         )
@@ -129,7 +126,7 @@ class WorkerConfig:
             default=multiprocessing.cpu_count(),
         )
         parser.add_argument_default_env_or_other(
-            "--network_interface",
+            "--network_interface_name",
             type=str,
             envVarName="SM_NETWORK_INTERFACE_NAME",
             default="",
@@ -142,6 +139,10 @@ class WorkerConfig:
             "--resource-config", type=str, envVarName="SM_RESOURCE_CONFIG", default=""
         )
 
+        parser.add_argument(
+            "--state", type=str, default="/state"
+        )  # TODO: parse dynamically
+
         args, rest = parser.parse_known_args()
 
         for channel_name in args.channels:
@@ -149,8 +150,6 @@ class WorkerConfig:
             if env_name in os.environ:
                 args.__setattr__(f"channel_{channel_name}", os.environ[env_name])
 
-        logger.info(f"Worker config: {args}")
-        logger.info(f"Unmatched: {rest}")
         return args
 
     def _getInstanceStatePath(self):

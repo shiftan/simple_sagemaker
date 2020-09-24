@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import sys
+import os
 
 from worker_toolkit import worker_lib
 
@@ -12,6 +13,8 @@ def worker():
 
     # parse the arguments
     worker_config = worker_lib.WorkerConfig()
+    os.environ["SSM_STATE"] = worker_config.state
+    os.environ["SSM_INSTANCE_STATE"] = worker_config.instance_state
 
     cmd_line = worker_config.hps["SSM_CMD_LINE"]
     logger.info(f"Launching: {cmd_line}")

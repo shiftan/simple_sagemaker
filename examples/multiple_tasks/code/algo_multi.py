@@ -51,7 +51,7 @@ if __name__ == "__main__":
         # put some files in the state directory
         for i in range(10):
             open(
-                f"{worker_config.worker_state}/state_{worker_config.current_host}_{i+1}",
+                f"{worker_config.instance_state}/state_{worker_config.current_host}_{i+1}",
                 "wt",
             ).write("state")
 

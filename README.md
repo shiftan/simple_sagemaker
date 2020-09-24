@@ -118,20 +118,22 @@ The worker can access the running configuration parameters in two way
 1. The environment varaibles, e.g. `SM_NUM_CPUS` represents the number of CPUs.
 2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accesible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
 
-- channels=['data']
-- channel_data='/opt/ml/input/data/data'
-- current_host='algo-1'
-- hosts=['algo-1', 'algo-2']
-- hps={'arg': 'hello world!', 'task': 1, 'worker': 1}
-- job_name='task1-2020-09-23-17-12-46-0JNcrR6H'
-- model_dir='/opt/ml/model'
-- network_interface_name='eth0'
-- num_cpus=2
-- num_gpus=1
-- output_data_dir='/opt/ml/output/data'
-- output_dir='/opt/ml/output'
-- resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}'
-- state='/state'
+| Description | Environment variable | `worker_config` | Example |
+| ----------- | ----------- | ----------- | ----------- |
+| Names of the input channels | SM_CHANNELS | channels | ['data']
+| The data input channel | SM_CHANNEL_DATA | channel_data | '/opt/ml/input/data/data'
+| Path where the input model (given by `model_uri` parameter) is located | SM_CHANNEL_MODEL | channel_model | '/opt/ml/input/data/model'
+| Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
+| Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
+| Additional command line parameters / hyperparameters | SM_HPS | hps | {'arg': 'hello world!', 'task': 1, 'worker': 1}
+| The name of the current running **job** | SAGEMAKER_JOB_NAME | job_name | 'task1-2020-09-23-17-12-46-0JNcrR6H'
+| The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
+| The number of available CPUs on this instance | SM_NUM_CPUS | num_cpus | 2
+| The number of available GPUs  instance| SM_NUM_GPUS | num_gpus | 1
+| Path where model output should be stored | SM_MODEL_DIR | model_dir | '/opt/ml/model'
+| The path where output data should be stored | SM_OUTPUT_DATA_DIR | output_data_dir | '/opt/ml/output/data'
+| The root path of where state should be stored | SSM_STATE | state | '/state'
+| The instance specific state path | SSM_INSTANCE_STATE | state | '/state/algo-1'
 
 ## Working directory
 TBD - files
@@ -140,7 +142,7 @@ TBD - running a shell command + env vars
 ## State
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
 The local path is available in `worker_config.state`. 
-When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_worker_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.worker_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
+When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
 1. To skip it next time (unlesss eforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
@@ -704,7 +706,7 @@ def worker():
     if int(worker_config.hps["task"]) == 1:
         # update the state per running instance
         open(
-            f"{worker_config.worker_state}/state_{worker_config.current_host}", "wt"
+            f"{worker_config.instance_state}/state_{worker_config.current_host}", "wt"
         ).write("state")
         # write to the model output directory
         for file in Path(worker_config.channel_data).rglob("*"):
