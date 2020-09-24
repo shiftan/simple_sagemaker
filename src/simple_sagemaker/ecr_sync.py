@@ -94,9 +94,18 @@ class ECRSync:
         elif os.path.isfile(docker_file_path_or_content):
             docker_file_path_or_content = open(docker_file_path_or_content, "rt").read()
 
-        docker_file_path_or_content = docker_file_path_or_content.replace(
-            "__BASE_IMAGE__", baseimage_uri
-        )
+        # If it's not there -> add it :)
+        if "__BASE_IMAGE__" not in docker_file_path_or_content:
+            logger.warning(
+                "__BASE_IMAGE__ couln't be found in docker_file_path_or_content, it was added on the beginning!"
+            )
+            docker_file_path_or_content = (
+                f"FROM {baseimage_uri}\n" + docker_file_path_or_content
+            )
+        else:
+            docker_file_path_or_content = docker_file_path_or_content.replace(
+                "__BASE_IMAGE__", baseimage_uri
+            )
 
         logging.info(
             f"Building {docker_file_path_or_content} to {repo_name}:{image_tag} and pushing to {aws_repo_name}..."
