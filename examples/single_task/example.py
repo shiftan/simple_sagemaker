@@ -98,7 +98,7 @@ def runner(
         hyperparameters,
         input_data_path,
         model_uri=model_uri,
-        distribution=distribution,
+        input_distribution=distribution,
         clean_state=True,
     )
 
