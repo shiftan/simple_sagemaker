@@ -1,7 +1,7 @@
 import logging
+import os
 import subprocess
 import sys
-import os
 
 from worker_toolkit import worker_lib
 

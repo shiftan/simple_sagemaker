@@ -114,26 +114,32 @@ The **runner** is used to configure **tasks** and **projects**:
 
 # Worker environment
 The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, and the entry point is then excuted.
-The worker can access the running configuration parameters in two way
+The worker can access the running configuration parameters in two ways:
 1. The environment varaibles, e.g. `SM_NUM_CPUS` represents the number of CPUs.
 2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accesible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
 
-| Description | Environment variable | `worker_config` | Example |
+The complete list of configuration parameters:
+| Description | Environment variable | `worker_config` field name | Example |
 | ----------- | ----------- | ----------- | ----------- |
+| The name of the current running **job** | SAGEMAKER_JOB_NAME | job_name | 'task1-2020-09-23-17-12-46-0JNcrR6H'
+| **Input channels**:|
 | Names of the input channels | SM_CHANNELS | channels | ['data']
 | The data input channel | SM_CHANNEL_DATA | channel_data | '/opt/ml/input/data/data'
 | Path where the input model (given by `model_uri` parameter) is located | SM_CHANNEL_MODEL | channel_model | '/opt/ml/input/data/model'
-| Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
-| Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
+| Generally - path where the channel [ChannelName] is located | SM_CHANNEL_[ChannelName] | channel_[ChannelName] | '/opt/ml/input/data/[ChannelName]'
 | Additional command line parameters / hyperparameters | SM_HPS | hps | {'arg': 'hello world!', 'task': 1, 'worker': 1}
-| The name of the current running **job** | SAGEMAKER_JOB_NAME | job_name | 'task1-2020-09-23-17-12-46-0JNcrR6H'
-| The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
+| **State**:|
+| The root path of where state should be stored | SSM_STATE | state | '/state'
+| The instance specific state path | SSM_INSTANCE_STATE | instance_state | '/state/algo-1'
+| **Output**:|
+| The path where output data should be stored | SM_OUTPUT_DATA_DIR | output_data_dir | '/opt/ml/output/data'
+| Path where model output should be stored | SM_MODEL_DIR | model_dir | '/opt/ml/model'
+| **System**:|
 | The number of available CPUs on this instance | SM_NUM_CPUS | num_cpus | 2
 | The number of available GPUs  instance| SM_NUM_GPUS | num_gpus | 1
-| Path where model output should be stored | SM_MODEL_DIR | model_dir | '/opt/ml/model'
-| The path where output data should be stored | SM_OUTPUT_DATA_DIR | output_data_dir | '/opt/ml/output/data'
-| The root path of where state should be stored | SSM_STATE | state | '/state'
-| The instance specific state path | SSM_INSTANCE_STATE | state | '/state/algo-1'
+| Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
+| Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
+| The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
 
 ## Working directory
 TBD - files
