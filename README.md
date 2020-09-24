@@ -79,7 +79,7 @@ API based example:
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
+* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`, see [below](#Configuration)), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
 
 The **runner** is used to configure **tasks** and **projects**: 
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
@@ -102,7 +102,7 @@ The **runner** is used to configure **tasks** and **projects**:
     - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
 4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
 5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named `ssm`) to control the execution (a.k.a implement the **runner**, see below)
-    - In most cases it's only about 1 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
+    - In most cases it's only about 1 line for getting the environment configuration (e.g. input/output/state paths and running parameters, see [below](#Configuration)) and passing it on to the original code
 6. Easy customization of the docker image (based on a pre-built one)
 7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
     - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
@@ -114,11 +114,14 @@ The **runner** is used to configure **tasks** and **projects**:
 
 # Worker environment
 The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, and the entry point is then excuted.
-The worker can access the running configuration parameters in two ways:
+
+## Configuration
+The worker can access the environment configuration parameters in two ways:
 1. The environment varaibles, e.g. `SM_NUM_CPUS` represents the number of CPUs.
 2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accesible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
 
 The complete list of configuration parameters:
+
 | Description | Environment variable | `worker_config` field name | Example |
 | ----------- | ----------- | ----------- | ----------- |
 | The name of the current running **job** | SAGEMAKER_JOB_NAME | job_name | 'task1-2020-09-23-17-12-46-0JNcrR6H'
@@ -140,10 +143,6 @@ The complete list of configuration parameters:
 | Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
 | Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
 | The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
-
-## Working directory
-TBD - files
-TBD - running a shell command + env vars
 
 ## State
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
@@ -357,7 +356,6 @@ optional arguments:
   --download_state      Download the state once task is finished
   --download_model      Download the model once task is finished
   --download_output     Download the output once task is finished
-______________________________________________________________________
 ```
 
 # A fully featured advanced example
@@ -507,7 +505,7 @@ Hello, world!
 ```
 
 ## Providing input data
-A **Job** can be configured to get a few data sources:
+A **Job** can be configured to get a few data channels:
 * A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `worker_config.channel_data`
 * Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `worker_config.channel_[name]` when [name] is the same one as was provided on the command line.
 * Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
