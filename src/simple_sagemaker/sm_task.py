@@ -208,7 +208,7 @@ class SageMakerTask:
             inputs.update(
                 {
                     "data": TrainingInput(
-                        self.inputS3Uri, input_distribution=input_distribution
+                        self.inputS3Uri, distribution=input_distribution
                     )
                 }
             )
