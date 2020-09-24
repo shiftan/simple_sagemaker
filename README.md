@@ -60,7 +60,7 @@ $ cat ./output/example1/logs/logs0
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
 ...
 ```
-It's recommended to rewview the [fully featured advanced example](#A-fully-featured-advanced-example) below 
+It's recommended to review the [fully featured advanced example](#A-fully-featured-advanced-example) below, as a demonstration of most features.
 
 ## More examples (below)
 CLI based examples:
@@ -79,7 +79,7 @@ API based example:
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the code being distribute, with possible minimal code changes to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`), i.e. input/output/state paths, running parameters etc.
+* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
 
 The **runner** is used to configure **tasks** and **projects**: 
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
@@ -90,19 +90,19 @@ The **runner** is used to configure **tasks** and **projects**:
     - The output of a completed task can be consumed as input by a consequetive task
 
 # Main features
-1. Simpler - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
+1. "Simpler" - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
     - Jobs IAM role creation, including policies for accesing needed S3 buckets
     - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
     - Downloading the results from S3
     - ...
-2. Cheaper - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
+2. "Cheaper" - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
 3. Abstraction of how data is maintianed on AWS (S3 service)
     - No need to mess with S3 paths, the data is automatically
     - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
 4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
 5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named `ssm`) to control the execution (a.k.a implement the **runner**, see below)
-    - In most cases it's only about 2 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
+    - In most cases it's only about 1 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
 6. Easy customization of the docker image (based on a pre-built one)
 7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
     - (Amazon SageMaker Developer Guide)[https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html]
@@ -112,9 +112,12 @@ The **runner** is used to configure **tasks** and **projects**:
 ## High level flow diagram
 ![High level flow diagram](https://github.com/shiftan/simple_sagemaker/blob/master/docs/high_level_flow.svg?raw=true "High level flow")
 
-# Worker environment configuration
-The worker can use the `worker_lib` library to get access to its running configuration parameters.
-To get access call `worker_config = worker_lib.WorkerConfig()`, and you 
+# Worker environment
+The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, and the entry point is then excuted.
+The worker can access the running configuration parameters in two way
+1. The environment varaibles, e.g. `SM_NUM_CPUS` represents the number of CPUs.
+2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accesible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
+
 - channels=['data']
 - channel_data='/opt/ml/input/data/data'
 - current_host='algo-1'
@@ -122,7 +125,7 @@ To get access call `worker_config = worker_lib.WorkerConfig()`, and you
 - hps={'arg': 'hello world!', 'task': 1, 'worker': 1}
 - job_name='task1-2020-09-23-17-12-46-0JNcrR6H'
 - model_dir='/opt/ml/model'
-- network_interface='eth0'
+- network_interface_name='eth0'
 - num_cpus=2
 - num_gpus=1
 - output_data_dir='/opt/ml/output/data'
