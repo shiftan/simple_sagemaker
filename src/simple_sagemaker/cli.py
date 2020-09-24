@@ -3,11 +3,13 @@ import collections
 import logging
 import os
 import sys
+from pathlib import Path
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
 
 from . import constants
+from .sm_project import SageMakerProject
 
 logger = logging.getLogger(__name__)
 
@@ -93,53 +95,93 @@ class TaskInputAction(InputActionBase):
         self.__append__(args, values)
 
 
-def parseArgs():
-    parser = argparse.ArgumentParser(
-        # config_file_parser_class=configargparse.DefaultConfigFileParser,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+def addDownloadArgs(download_params):
+    download_params.add_argument(
+        "--output_path",
+        "-o",
+        default=None,
+        help="Local path to download the outputs to.",
     )
-    code_group = parser.add_argument_group("Code")
-    instance_group = parser.add_argument_group("Instance")
-    image_group = parser.add_argument_group("Image")
-    running_params = parser.add_argument_group("Running")
-    IO_params = parser.add_argument_group("I/O")
-    download_params = parser.add_argument_group("Download")
+    download_params.add_argument(
+        "--download_state",
+        default=False,
+        action="store_true",
+        help="Download the state once task is finished",
+    )
+    download_params.add_argument(
+        "--download_model",
+        default=False,
+        action="store_true",
+        help="Download the model once task is finished",
+    )
+    download_params.add_argument(
+        "--download_output",
+        default=False,
+        action="store_true",
+        help="Download the output once task is finished",
+    )
+
+
+def runArguments(run_parser, shell=False):
+    if shell:
+        run_parser.set_defaults(func=shellHandler)
+    else:
+        run_parser.set_defaults(func=runHandler)
+
+    code_group = run_parser.add_argument_group("Code")
+    instance_group = run_parser.add_argument_group("Instance")
+    image_group = run_parser.add_argument_group("Image")
+    running_params = run_parser.add_argument_group("Running")
+    IO_params = run_parser.add_argument_group("I/O")
+    download_params = run_parser.add_argument_group("Download")
 
     # general
     # parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
-    parser.add_argument("--project_name", "-p", required=True, help="Project name.")
-    parser.add_argument("--task_name", "-t", required=True, help="Task name.")
+    run_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
+    run_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
     IO_params.add_argument(
         "--bucket_name",
         "-b",
         help="S3 bucket name (a default one is used if not given).",
     )
 
-    # coding params
-    code_group.add_argument(
-        "--source_dir",
-        "-s",
-        type=lambda x: fileValidation(parser, x),
-        help="""Path (absolute, relative or an S3 URI) to a directory with any other source
-        code dependencies aside from the entry point file. If source_dir is an S3 URI,
-        it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
-    )
-    code_group.add_argument(
-        "--entry_point",
-        "-e",
-        required=True,
-        # type=lambda x: fileValidation(parser, x),
-        help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
-        If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
-    )
+    if shell:
+        code_group.add_argument(
+            "--cmd_line",
+            "--cmd",
+            help="""The command line to run.""",
+        )
+        code_group.add_argument(
+            "--dir_files",
+            help="""Path to a directory with files that are expected to be in root folder where cmd_line is executed.
+            Note: this is intended to be used for shell script / small files. Input data should be given with relevant
+            other parameters).""",
+        )
+    else:
+        # coding params
+        code_group.add_argument(
+            "--source_dir",
+            "-s",
+            type=lambda x: fileValidation(run_parser, x),
+            help="""Path (absolute, relative or an S3 URI) to a directory with any other source
+            code dependencies aside from the entry point file. If source_dir is an S3 URI,
+            it must point to a tar.gz file. Structure within this directory are preserved when running on Amazon SageMaker.""",
+        )
+        code_group.add_argument(
+            "--entry_point",
+            "-e",
+            required=True,
+            # type=lambda x: fileValidation(parser, x),
+            help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+            If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
+        )
     code_group.add_argument(
         "--dependencies",
         "-d",
         nargs="+",
-        type=lambda x: fileValidation(parser, x),
-        help="""Path (absolute, relative or an S3 URI) to a directory with any other training source code dependencies
-        aside from the entry point file. If source_dir is an S3 URI, it must point to a tar.gz file.
-        Structure within this directory are preserved when running on Amazon SageMaker.""",
+        type=lambda x: fileValidation(run_parser, x),
+        help="""A list of paths to directories (absolute or relative) with any additional libraries that will be exported to the container
+        The library folders will be copied to SageMaker in the same folder where the entrypoint is copied.""",
     )
     # instance params
     instance_group.add_argument(
@@ -232,6 +274,13 @@ def parseArgs():
         tuple=InputTuple,
     )
     IO_params.add_argument(
+        "--model_uri",
+        help="""URI where a pre-trained model is stored, either locally or in S3.
+            If specified, the estimator will create a channel pointing to the model so the training job can
+            download it. This model can be a ‘model.tar.gz’ from a previous training job, or other artifacts
+            coming from a different source.""",
+    )
+    IO_params.add_argument(
         "--input_s3",
         "--iis",
         action=S3InputAction,
@@ -295,31 +344,37 @@ def parseArgs():
         action="append",
         help="Tag to be attached to the jobs executed for this task.",
     )
+    addDownloadArgs(download_params)
 
-    download_params.add_argument(
-        "--output_path",
-        "-o",
-        default=None,
-        help="Local path to download the outputs to.",
+
+def dataArguments(data_parser):
+    data_parser.add_argument(
+        "--project_name", "-p", required=True, help="Project name."
     )
-    download_params.add_argument(
-        "--download_state",
-        default=False,
-        action="store_true",
-        help="Download the state once task is finished",
+    data_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
+    data_parser.add_argument(
+        "--bucket_name",
+        "-b",
+        help="S3 bucket name (a default one is used if not given).",
     )
-    download_params.add_argument(
-        "--download_model",
-        default=False,
-        action="store_true",
-        help="Download the model once task is finished",
+
+    data_parser.set_defaults(func=dataHandler)
+    addDownloadArgs(data_parser)
+
+
+def parseArgs():
+    parser = argparse.ArgumentParser(
+        # config_file_parser_class=configargparse.DefaultConfigFileParser,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    download_params.add_argument(
-        "--download_output",
-        default=False,
-        action="store_true",
-        help="Download the output once task is finished",
-    )
+    subparsers = parser.add_subparsers()
+    run_parser = subparsers.add_parser("run", help="Run a task")
+    shell_parser = subparsers.add_parser("shell", help="Run a command line task")
+    data_parser = subparsers.add_parser("data", help="Manage task data")
+
+    runArguments(run_parser)
+    runArguments(shell_parser, True)
+    dataArguments(data_parser)
 
     args, rest = parser.parse_known_args()
     return args, rest
@@ -367,21 +422,21 @@ def parseHyperparams(rest):
     return res
 
 
-def main():
-    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
-    logging.basicConfig(
-        stream=sys.stdout,
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-        format=format,
-    )
-    logger.info(f"Running ssm cli, args:{sys.argv}")
-    args, rest = parseArgs()
+def shellHandler(args, rest):
+    shell_launcher = Path(__file__).parent / "shell_launcher.py"
+    rest.extend(["--SSM_CMD_LINE", args.cmd_line])
 
-    file_path = os.path.split(__file__)[0]
-    examples_path = os.path.abspath(os.path.join(file_path, ".."))
-    sys.path.append(examples_path)
-    from simple_sagemaker.sm_project import SageMakerProject
+    if args.dir_files:
+        if not args.dependencies:
+            args.dependencies = list()
+        files = [str(x) for x in Path(args.dir_files).glob("*")]
+        args.dependencies.extend(files)
+
+    args.entry_point = str(shell_launcher)
+    runHandler(args, rest)
+
+
+def runHandler(args, rest):
 
     sm_project = SageMakerProject(
         **getAllParams(
@@ -440,6 +495,7 @@ def main():
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
             "force_running": "force_running",
+            "model_uri": "model_uri",
         },
     )
 
@@ -473,6 +529,40 @@ def main():
             model=args.download_model,
             output=args.download_output,
         )
+
+
+def dataHandler(args, rest):
+    sm_project = SageMakerProject(
+        **getAllParams(
+            args,
+            {
+                "project_name": "project_name",
+                "bucket_name": "bucket_name",
+            },
+        )
+    )
+    if args.output_path:
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
+
+
+def main():
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format=format,
+    )
+    logger.info(f"Running ssm cli, args:{sys.argv}")
+    args, rest = parseArgs()
+    args.func(args, rest)
 
 
 if __name__ == "__main__":

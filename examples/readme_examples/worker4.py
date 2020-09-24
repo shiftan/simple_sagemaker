@@ -19,7 +19,6 @@ def listDir(path):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
-    worker_lib.setDebugLevel()
-    args = worker_lib.parseArgs()
-    listDir(args.input_data)
-    listDir(args.input_bucket)
+    worker_config = worker_lib.WorkerConfig(False)
+    listDir(worker_config.channel_data)
+    listDir(worker_config.channel_bucket)

@@ -23,26 +23,30 @@ def listDir(path, ignore_patterns=[]):
     logger.info(f"*** END file listing {path}")
 
 
-def worker1(args, state_dir):
+def worker1(worker_config):
     # a library that is pre-installed in the docker image, as defined in the Dockerfile
     import pandas  # noqa: F401
 
     logger.info("{pandas} is pre-installed in this image")
 
     # update the state
-    (Path(state_dir) / args.current_host).write_text(f"state_{args.current_host}")
-    # "process" input data into model output
-    for file in Path(args.input_data).rglob("*"):
-        relp = file.relative_to(args.input_data)
-        path = Path(args.model_dir) / (f"{relp}_proc_by_{args.current_host}")
-        path.write_text(f"{file.read_text()} processed by {args.current_host}")
-    # write to output dir
-    (Path(args.output_data_dir) / f"output_{args.current_host}").write_text(
-        f"output_{args.current_host}"
+    (Path(worker_config.instance_state) / worker_config.current_host).write_text(
+        f"state_{worker_config.current_host}"
     )
+    # "process" input data into model output
+    for file in Path(worker_config.channel_data).rglob("*"):
+        relp = file.relative_to(worker_config.channel_data)
+        path = Path(worker_config.model_dir) / (
+            f"{relp}_proc_by_{worker_config.current_host}"
+        )
+        path.write_text(f"{file.read_text()} processed by {worker_config.current_host}")
+    # write to output dir
+    (
+        Path(worker_config.output_data_dir) / f"output_{worker_config.current_host}"
+    ).write_text(f"output_{worker_config.current_host}")
 
 
-def worker2(args, state_dir):
+def worker2(worker_config):
     # importing an external dependency
     from external_dependency import lib1  # noqa: F401
 
@@ -51,39 +55,37 @@ def worker2(args, state_dir):
     logger.info("Score=20;")
 
 
-def show_inputs(args, state_dir):
+def show_inputs(worker_config):
     # just to show the initial directory structue
-    for channel_name in args.channel_names:
-        input_path = args.__getattribute__(f"input_{channel_name}")
+    for channel_name in worker_config.channels:
+        input_path = worker_config.__getattr__(f"channel_{channel_name}")
         logger.info(f"input channel {channel_name} is at {input_path}")
 
     listDir("/opt/ml", ["__pycache__"])
-    listDir(args.state)
+    listDir(worker_config.state)
 
 
-def show_output(args, state_dir):
+def show_output(worker_config):
     # show the final directory structue
     listDir("/opt/ml", ["/opt/ml/input", "/opt/ml/code", "__pycache__"])
-    listDir(args.state)
+    listDir(worker_config.state)
 
 
 def worker():
     logging.basicConfig(stream=sys.stdout)
-    worker_lib.setDebugLevel()
     # parse the arguments
-    args = worker_lib.parseArgs()
+    worker_config = worker_lib.WorkerConfig()
     # get the instance specific state path
-    state_dir = worker_lib.initMultiWorkersState(args)
-    show_inputs(args, state_dir)
+    show_inputs(worker_config)
 
-    if int(args.hps["task_type"]) == 1:
-        worker1(args, state_dir)
-    elif int(args.hps["task_type"]) == 2:
-        worker2(args, state_dir)
+    if int(worker_config.hps["task_type"]) == 1:
+        worker1(worker_config)
+    elif int(worker_config.hps["task_type"]) == 2:
+        worker2(worker_config)
 
     # mark the task as completed
-    worker_lib.markCompleted(args)
-    show_output(args, state_dir)
+    worker_config.markCompleted()
+    show_output(worker_config)
 
     logger.info("finished!")
 
