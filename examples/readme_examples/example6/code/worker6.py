@@ -58,7 +58,7 @@ def worker2(worker_config):
 def show_inputs(worker_config):
     # just to show the initial directory structue
     for channel_name in worker_config.channels:
-        input_path = worker_config.__getattr__(f"input_{channel_name}")
+        input_path = worker_config.__getattr__(f"channel_{channel_name}")
         logger.info(f"input channel {channel_name} is at {input_path}")
 
     listDir("/opt/ml", ["__pycache__"])
