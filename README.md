@@ -79,7 +79,7 @@ API based example:
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`, see [below](#Configuration)), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
+* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_toolkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`, see [below](#Configuration)), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
 
 The **runner** is used to configure **tasks** and **projects**: 
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
@@ -113,7 +113,10 @@ The **runner** is used to configure **tasks** and **projects**:
 ![High level flow diagram](https://github.com/shiftan/simple_sagemaker/blob/master/docs/high_level_flow.svg?raw=true "High level flow")
 
 # Worker environment
-The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, and the entry point is then excuted.
+The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), 
+along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, 
+and the entry point is then excuted. 
+On top of the above, for python code tasks, the `task_toolkit` library is also added as a dependency in this folder.
 
 ## Configuration
 The worker can access the environment configuration parameters in two ways:
