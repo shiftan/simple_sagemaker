@@ -7,7 +7,6 @@ from time import gmtime, strftime
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
-from sagemaker.processing import ProcessingOutput, ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
 from sagemaker.tensorflow.estimator import TensorFlow
 

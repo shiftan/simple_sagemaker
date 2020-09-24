@@ -211,7 +211,8 @@ class SageMakerProject:
 
         :param bucket_name: The name of the bucket
         :type bucket_name: str
-        :param policy_name: The policy name to be allowed access to `bucket_name`, defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
+        :param policy_name: The policy name to be allowed access to `bucket_name`,
+        defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
         :type policy_name: str
         """
         iam_utils.allowAccessToS3Bucket(
