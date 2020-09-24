@@ -213,13 +213,13 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
                [--instance_type INSTANCE_TYPE]
                [--instance_count INSTANCE_COUNT] [--volume_size VOLUME_SIZE]
-               [--no_spot] [--use_spot] [--max_wait_mins MAX_WAIT_MINS]
+               [--no_spot] [--use_spot_instances] [--max_wait_mins MAX_WAIT_MINS]
                [--max_run_mins MAX_RUN_MINS] [--aws_repo_name aws_repo_name]
                [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
                [--docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT]
                [--framework {pytorch,tensorflow}]
                [--framework_version FRAMEWORK_VERSION]
-               [--python_version PYTHON_VERSION]
+               [--py_version PY_VERSION]
                [--input_path INPUT_PATH [INPUT_PATH ...]]
                [--input_s3 INPUT_S3 [INPUT_S3 ...]]
                [--input_task INPUT_TASK [INPUT_TASK ...]] [--force_running]
@@ -264,7 +264,7 @@ Instance:
                         Size in GB of the EBS volume to use for storing input
                         data. Must be large enough to store input data.
   --no_spot             Use on demand instances
-  --use_spot            Specifies whether to use SageMaker Managed Spot
+  --use_spot_instances            Specifies whether to use SageMaker Managed Spot
                         instances.
   --max_wait_mins MAX_WAIT_MINS
                         Timeout in minutes waiting for spot instances. After
@@ -291,7 +291,7 @@ Image:
                         learning-containers/blob/master/available_images.md
   --framework_version FRAMEWORK_VERSION, --fv FRAMEWORK_VERSION
                         The framework version
-  --python_version PYTHON_VERSION, --pv PYTHON_VERSION
+  --py_version PY_VERSION, --pv PY_VERSION
                         The python version
 
 Running:
@@ -607,7 +607,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 ## Configuring the docker image
 The image used to run a task can either be selected from a [pre-built ones](https://github.com/aws/deep-learning-containers/blob/master/available_images.md) 
 or extended with additional Dockerfile commands.
-The `framework`, `framework_version` and `python_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path_or_content`, it used along with `aws_repo_name`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
+The `framework`, `framework_version` and `py_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path_or_content`, it used along with `aws_repo_name`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
 The base image should be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image (according to the provided parameters above) before building it.
 The API parameter for the Dockerfile path is named `docker_file_path_or_content` and allows to provide the content of the Dockerfile, e.g. 
 ```python

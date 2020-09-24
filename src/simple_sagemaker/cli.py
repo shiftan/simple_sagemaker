@@ -207,17 +207,17 @@ def runArguments(run_parser, shell=False):
     )
     instance_group.add_argument(
         "--no_spot",
-        dest="use_spot",
+        dest="use_spot_instances",
         action="store_false",
         help="Use on demand instances",
     )
     instance_group.add_argument(
-        "--use_spot",
-        dest="use_spot",
+        "--use_spot_instances",
+        dest="use_spot_instances",
         action="store_true",
         help="""Specifies whether to use SageMaker Managed Spot instances.""",
     )
-    instance_group.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
+    instance_group.set_defaults(use_spot_instances=constants.DEFAULT_USE_SPOT)
     instance_group.add_argument(
         "--max_wait_mins",
         type=int,
@@ -258,7 +258,7 @@ def runArguments(run_parser, shell=False):
         help="The framework version",
     )
     image_group.add_argument(
-        "--python_version",
+        "--py_version",
         "--pv",
         help="The python version",
     )
@@ -465,7 +465,7 @@ def runHandler(args, rest):
                 "instance_count": "instance_count",
                 "instance_type": "instance_type",
                 "volume_size": "volume_size",
-                "use_spot": "use_spot_instances",
+                "use_spot_instances": "use_spot_instances",
                 "max_run_mins": "max_run_mins",
                 "max_wait_mins": "max_wait_mins",
             },
@@ -481,7 +481,7 @@ def runHandler(args, rest):
                 "docker_file_path_or_content": "docker_file_path_or_content",
                 "framework": "framework",
                 "framework_version": "framework_version",
-                "python_version": "py_version",
+                "py_version": "py_version",
             },
         )
     )
