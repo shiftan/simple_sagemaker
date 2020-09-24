@@ -637,14 +637,14 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     # *** Task 1 - process input data
     task1_name = "task1"
     # set the input data
-    channel_data_path = file_path / "data"
+    input_data_path = file_path / "data"
     # run the task
     sm_project.runTask(
         task1_name,
         image_uri,
         distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
-        channel_data_path=str(channel_data_path) if channel_data_path.is_dir() else None,
+        input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
         clean_state=True,  # clean the current state, also forces re-running
     )
     # download the results

@@ -29,7 +29,7 @@ def task1(worker_config):
 
 def task2(worker_config):
     logger.info(
-        f"Input task2_data: {list(Path(worker_config.channel_task2_dat).rglob('*'))}"
+        f"Input task2_data: {list(Path(worker_config.channel_task2_data).rglob('*'))}"
     )
 
 
@@ -41,7 +41,9 @@ def main():
     worker_config = worker_lib.WorkerConfig()
 
     logger.info(f"Hyperparams: {worker_config.hps}")
-    logger.info(f"Input data files: {list(Path(worker_config.channel_data).rglob('*'))}")
+    logger.info(
+        f"Input data files: {list(Path(worker_config.channel_data).rglob('*'))}"
+    )
     logger.info(f"State files: { list(Path(worker_config.state).rglob('*'))}")
 
     if int(worker_config.hps["task_type"]) == 1:

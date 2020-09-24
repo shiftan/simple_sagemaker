@@ -55,7 +55,7 @@ class SageMakerProject:
             "max_wait_mins",
         ],
     )
-    # IOParams = collections.namedtuple("IOParams", ["channel_data_path", "distribution", "model_uri"])
+    # IOParams = collections.namedtuple("IOParams", ["input_data_path", "distribution", "model_uri"])
 
     def __init__(
         self,
@@ -246,7 +246,7 @@ class SageMakerProject:
         task_name,
         image_uri,
         hyperparameters,
-        channel_data_path=None,
+        input_data_path=None,
         clean_state=False,
         force_running=False,
         tags=dict(),
@@ -262,9 +262,9 @@ class SageMakerProject:
         :type image_uri: str
         :param hyperparameters: Hyperparameters for this tasks
         :type hyperparameters: dict
-        :param channel_data_path: Local/s3 path for the input data.
+        :param input_data_path: Local/s3 path for the input data.
             If it's a local path, it will be sync'ed to the task folder on the selected S3 bucket.
-        :type channel_data_path: str, optional
+        :type input_data_path: str, optional
         :param clean_state: Whether to clear the task state before running it. If the task was already completed,
             it will be running again if set, otherwise its current output will be taken without running it again.,
             defaults to False
@@ -297,8 +297,8 @@ class SageMakerProject:
             self.bucket_name,
             smSession=self.smSession,
         )
-        if channel_data_path:
-            smTask.uploadOrSetInputData(channel_data_path)
+        if input_data_path:
+            smTask.uploadOrSetInputData(input_data_path)
         args = self.defaultCodeParams._asdict()
         args.update(self.defaultInstanceParams._asdict())
 

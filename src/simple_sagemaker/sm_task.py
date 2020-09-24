@@ -235,23 +235,25 @@ class SageMakerTask:
         for file in self.smSession.list_s3_files(bucket, prefix):
             s3c.delete_object(Bucket=bucket, Key=file)
 
-    def uploadOrSetInputData(self, channel_data_path):
+    def uploadOrSetInputData(self, input_data_path):
         """
         Use a local/s3 path as input data, uploads/sync to Task's input path if local path is given
 
         Arguments:
-            channel_data_path - local/s3 path of input data
+            input_data_path - local/s3 path of input data
         """
-        if channel_data_path.lower().startswith("s3://"):
-            logger.info(f"Setting input data to {channel_data_path}...")
-            self.inputS3Uri = channel_data_path
+        if input_data_path.lower().startswith("s3://"):
+            logger.info(f"Setting input data to {input_data_path}...")
+            self.inputS3Uri = input_data_path
         else:
             # uploadedUri = sagemaker_session.upload_data(path='data', bucket=bucket, key_prefix=prefix)
             sync = S3Sync(self.boto3_session)
             self.inputS3Uri = sagemaker.s3.s3_path_join(self.baseTaskS3Uri, "input")
-            logger.info(f"Syncing data from {channel_data_path} to {self.inputS3Uri}...")
+            logger.info(
+                f"Syncing data from {input_data_path} to {self.inputS3Uri}..."
+            )
             sync.syncFolderToS3(
-                channel_data_path,
+                input_data_path,
                 self.bucket_name,
                 sagemaker.s3.parse_s3_url(self.inputS3Uri)[1],
             )

@@ -395,10 +395,10 @@ def getAllParams(args, mapping):
 
 
 def parseInputsAndAllowAccess(args, sm_project):
-    channel_data_path = None
+    input_data_path = None
     distribution = "FullyReplicated"
     if args.input_path:
-        channel_data_path, distribution = args.input_path[0]
+        input_data_path, distribution = args.input_path[0]
 
     inputs = dict()
     if args.input_task:
@@ -412,7 +412,7 @@ def parseInputsAndAllowAccess(args, sm_project):
             sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
-    return channel_data_path, distribution, inputs
+    return input_data_path, distribution, inputs
 
 
 def parseHyperparams(rest):
@@ -499,7 +499,9 @@ def runHandler(args, rest):
         },
     )
 
-    channel_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
+    input_data_path, distribution, inputs = parseInputsAndAllowAccess(
+        args, sm_project
+    )
     hyperparameters = parseHyperparams(rest)
     tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
@@ -512,7 +514,7 @@ def runHandler(args, rest):
         args.task_name,
         image_uri,
         hyperparameters=hyperparameters,
-        channel_data_path=channel_data_path,
+        input_data_path=input_data_path,
         distribution=distribution,
         additional_inputs=inputs,
         tags=tags,
