@@ -23,10 +23,10 @@ Output including the logs with script stdout is downloaded to `./output`.
 ```bash
 $ cat ./output/logs/logs0
 processor: 0
-....
 model name: Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
-....
 cpu cores: 4
+....
+processor: 2
 ....
 processor: 7
 ....
@@ -406,7 +406,8 @@ The code is then launced a few time by [run.sh](https://github.com/shiftan/simpl
 #   - 2 instance (--ic)
 #   - Use an on-demand instance (--no_spot)
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
-    -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
+    -i $BASEDIR/example6/data ShardedByS3Key \
+    --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
     --ic 2 --task_type 1 -o $1/example6_1
 
@@ -417,7 +418,8 @@ ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e 
 #   - Tags the jobs (--tag)
 #   - Defines sagemaker metrics (-m, --md)
 ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
-    -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model --iit task_6_1_state task6-1 state ShardedByS3Key \
+    -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model \
+    --iit task_6_1_state task6-1 state ShardedByS3Key \
     -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
     --ic 2 --task_type 2 -o $1/example6_2 &
 
@@ -425,14 +427,22 @@ ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e 
 #   - A completed task isn't exsecuted again, but the current output is used instead. 
 #       --ks (keep state, the default) is used to keep the current state
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
-    -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
+    -i $BASEDIR/example6/data ShardedByS3Key \
+    --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
     --ic 2 --task_type 1 -o $1/example6_1 > $1/example6_1_2_stdout --ks &
 
 
 wait # wait for all processes
 ```
-The metrics graphs can be viewed on the AWS console:
+
+(`worker6.py`)[https://github.com/shiftan/simple_sagemaker/blob/master/examples/readme_examples/example6/code/worker6.py] contains the following:
+```python
+    logger.info("Score=10;")
+    time.sleep(60)  # sleep to be able to see the two scores
+    logger.info("Score=20;")
+```
+which get captured by the `"Score=(.*?);"` regular expression in the `ssm` command above, then the metrics graphs can be viewed on the AWS console:
 
 ![Metrics example](https://github.com/shiftan/simple_sagemaker/blob/master/docs/metric_example.jpg?raw=true "Metric Example")
 
@@ -491,7 +501,8 @@ open(os.path.join(worker_config.output_data_dir, "output_data_dir"), "wt").write
 open(os.path.join(worker_config.model_dir, "model_dir"), "wt").write("model_dir file")
 open(os.path.join(worker_config.state, "state_dir"), "wt").write("state_dir file")
 
-# Mark the tasks as completed, to allow other tasks using its output, and to avoid re-running it (unless enforced)
+# Mark the tasks as completed, to allow other tasks to use its output, 
+# and to avoid re-running it (unless enforced)
 worker_config.markCompleted()
 ```
 Runner CLI:
@@ -542,7 +553,8 @@ if __name__ == "__main__":
 ```
 Running command:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task4 -e worker4.py -i ./data --iis bucket s3://awsglue-datasets/examples/us-legislators/all/persons.json -o ./output/example4
+ssm run -p simple-sagemaker-example-cli -t task4 -e worker4.py -i ./data \
+    --iis bucket s3://awsglue-datasets/examples/us-legislators/all/persons.json -o ./output/example4
 ```
 Output from the log file
 ```

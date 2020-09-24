@@ -1,4 +1,5 @@
 import logging
+import subprocess
 
 import boto3
 
@@ -23,3 +24,20 @@ def test_task(caplog, tmp_path):
     image_uri = None
     smTask = SageMakerTask(boto3_session, "taskName", image_uri, prefix="tests/smoke")
     smTask = smTask
+
+def _testCliInternal(cmd):
+    shell_cmd = subprocess.run(cmd, shell=True)
+    print("**************", shell_cmd)
+    assert shell_cmd.returncode == 0
+
+def test_cli_help():
+    _testCliInternal("ssm -h")
+
+def test_cli_run_help():
+    _testCliInternal("ssm run -h")
+
+def test_cli_shell_help():
+    _testCliInternal("ssm shell -h")
+
+def test_cli_data_help():
+    _testCliInternal("ssm data -h")
