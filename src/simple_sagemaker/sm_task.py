@@ -129,7 +129,7 @@ class SageMakerTask:
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
-        distribution="FullyReplicated",
+        input_distribution="FullyReplicated",
         metric_definitions=dict(),
         enable_sagemaker_metrics=False,
         **additionalEstimatorArgs,
@@ -206,7 +206,11 @@ class SageMakerTask:
         inputs = dict()
         if self.inputS3Uri:
             inputs.update(
-                {"data": TrainingInput(self.inputS3Uri, distribution=distribution)}
+                {
+                    "data": TrainingInput(
+                        self.inputS3Uri, input_distribution=input_distribution
+                    )
+                }
             )
         if additional_inputs:
             inputs.update(additional_inputs)

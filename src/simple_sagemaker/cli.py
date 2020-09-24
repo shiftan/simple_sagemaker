@@ -1,5 +1,6 @@
 import argparse
 import collections
+import json
 import logging
 import os
 import sys
@@ -306,6 +307,12 @@ def runArguments(run_parser, shell=False):
         action="store_true",
         help="Force running the task even if it's already completed.",
     )
+    running_params.add_argument(
+        "--distribution",
+        help="""Tensorflows' distribution policy, see
+        https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training.""",
+        type=lambda x: json.loads(x),
+    )
     IO_params.add_argument(
         "--clean_state",
         "--cs",
@@ -496,11 +503,14 @@ def runHandler(args, rest):
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
             "force_running": "force_running",
+            "distribution": "distribution",
             "model_uri": "model_uri",
         },
     )
 
-    input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
+    input_data_path, input_distribution, inputs = parseInputsAndAllowAccess(
+        args, sm_project
+    )
     hyperparameters = parseHyperparams(rest)
     tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
@@ -514,7 +524,7 @@ def runHandler(args, rest):
         image_uri,
         hyperparameters=hyperparameters,
         input_data_path=input_data_path,
-        distribution=distribution,
+        input_distribution=input_distribution,
         additional_inputs=inputs,
         tags=tags,
         metric_definitions=metric_definitions,
