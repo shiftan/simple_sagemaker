@@ -27,7 +27,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",
         repo_name="task_repo",
-        img_tag="latest",
+        image_tag="latest",
         docker_file_path_or_content=dockerFileContent,
     )
     image_uri = sm_project.buildOrGetImage(

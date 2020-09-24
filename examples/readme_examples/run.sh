@@ -11,13 +11,14 @@ ssm run -p ${2}simple-sagemaker-example-cli${3} -t cli-task1 -e $BASEDIR/worker1
 # Example 6_1 - a complete example part 1. 
 #   - Uses local data folder as input, that is distributed among instances (--i, ShardedByS3Key)
 #   - Uses a public s3 bucket as an additional input (--iis)
-#   - Builds a custom docker image (--df, --repo_name, --aws_repo)
+#   - Builds a custom docker image (--df, --repo_name, --aws_repo_name, --docker_file_path_or_content)
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
 #   - Use an on-demand instance (--no_spot)
 ssm run -p ${2}simple-sagemaker-example-cli${3} -t cli-task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" --no_spot \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
+    --docker_file_path_or_content $BASEDIR/example6/Dockerfile --no_spot \
     --download_state --download_model --download_output --max_run_mins 15 \
     --ic 2 --task_type 1 -o $1/example6_1 ${@:4} &
 
@@ -44,7 +45,7 @@ wait # wait for all processes
 #   --ks (keep state) is used to keep the current state and demonstrate that existing output is used, without running the task again
 ssm run -p ${2}simple-sagemaker-example-cli${3} -t cli-task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
     --download_state --download_model --download_output --max_run_mins 15 \
     --ic 2 --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_2_stdout --ks &
 

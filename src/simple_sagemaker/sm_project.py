@@ -34,10 +34,10 @@ class SageMakerProject:
         [
             "aws_repo_name",
             "repo_name",
-            "img_tag",
+            "image_tag",
             "docker_file_path_or_content",
             "framework",
-            "version",
+            "framework_version",
             "py_version",
         ],
     )
@@ -88,10 +88,10 @@ class SageMakerProject:
         self,
         aws_repo_name=None,
         repo_name=None,
-        img_tag=constants.DEFAULT_REPO_TAG,
+        image_tag=constants.DEFAULT_REPO_TAG,
         docker_file_path_or_content=None,
         framework="pytorch",
-        version=None,
+        framework_version=None,
         py_version=None,
     ):
         """Set the default image params
@@ -100,27 +100,28 @@ class SageMakerProject:
         :type aws_repo_name: str
         :param repo_name: Name of local repository
         :type repo_name: str
-        :param img_tag: Tag for both the local and ECS images
-        :type img_tag: str
+        :param image_tag: Tag for both the local and ECS images
+        :type image_tag: str
         :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content. If not
-            set, the pre-built image is used
+            set, the pre-built image is used. The base image should be set to `__BASE_IMAGE__` within the Dockerfile,
+            and is automatically replaced with the correct base image
         :type docker_file_path_or_content: str
         :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.
             For more details See https://github.com/aws/deep-learning-containers/blob/master/available_images.md.,
             defaults to "pyrorch".
         :type framework: str
-        :param version: The framework version
-        :type version: str
+        :param framework_version: The framework version
+        :type framework_version: str
         :param py_version: The python version
         :type py_version: str
         """
         self.defaultImageParams = SageMakerProject.ImageParams(
             aws_repo_name,
             repo_name,
-            img_tag,
+            image_tag,
             docker_file_path_or_content,
             framework,
-            version,
+            framework_version,
             py_version,
         )
 

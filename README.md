@@ -214,9 +214,9 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--instance_type INSTANCE_TYPE]
                [--instance_count INSTANCE_COUNT] [--volume_size VOLUME_SIZE]
                [--no_spot] [--use_spot] [--max_wait_mins MAX_WAIT_MINS]
-               [--max_run_mins MAX_RUN_MINS] [--aws_repo AWS_REPO]
+               [--max_run_mins MAX_RUN_MINS] [--aws_repo_name aws_repo_name]
                [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
-               [--docker_file_path DOCKER_FILE_PATH]
+               [--docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT]
                [--framework {pytorch,tensorflow}]
                [--framework_version FRAMEWORK_VERSION]
                [--python_version PYTHON_VERSION]
@@ -278,13 +278,13 @@ Instance:
                         its current status.
 
 Image:
-  --aws_repo AWS_REPO, --ar AWS_REPO
+  --aws_repo_name aws_repo_name, --ar aws_repo_name
                         Name of ECS repository.
   --repo_name REPO_NAME, --rn REPO_NAME
                         Name of local repository.
   --image_tag IMAGE_TAG
                         Image tag.
-  --docker_file_path DOCKER_FILE_PATH, --df DOCKER_FILE_PATH
+  --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
                         Path to a directory containing the DockerFile
   --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
                         The framework to use, see https://github.com/aws/deep-
@@ -401,14 +401,15 @@ The code is then launced a few time by [run.sh](https://github.com/shiftan/simpl
 # Example 6_1 - a complete example part 1. 
 #   - Uses local data folder as input, that is distributed among instances (--i, ShardedByS3Key)
 #   - Uses a public s3 bucket as an additional input (--iis)
-#   - Builds a custom docker image (--df, --repo_name, --aws_repo)
+#   - Builds a custom docker image (--df, --repo_name, --aws_repo_name, --docker_file_path_or_content)
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
 #   - Use an on-demand instance (--no_spot)
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
+    --docker_file_path_or_content $BASEDIR/example6/Dockerfile --no_spot \
     --ic 2 --task_type 1 -o $1/example6_1
 
 # Example 6_2 - a complete example part 2.
@@ -429,7 +430,7 @@ ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e 
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
     --ic 2 --task_type 1 -o $1/example6_1 > $1/example6_1_2_stdout --ks &
 
 
@@ -607,7 +608,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 ## Configuring the docker image
 The image used to run a task can either be selected from a [pre-built ones](https://github.com/aws/deep-learning-containers/blob/master/available_images.md) 
 or extended with additional Dockerfile commands.
-The `framework`, `framework_version` and `python_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path`, it used along with `aws_repo`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
+The `framework`, `framework_version` and `python_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path_or_content`, it used along with `aws_repo_name`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
 The base image should be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image (according to the provided parameters above) before building it.
 The API parameter for the Dockerfile path is named `docker_file_path_or_content` and allows to provide the content of the Dockerfile, e.g. 
 ```python
@@ -658,7 +659,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",
         repo_name="task_repo",
-        img_tag="latest",
+        image_tag="latest",
         docker_file_path_or_content=dockerFileContent,
     )
     image_uri = sm_project.buildOrGetImage(

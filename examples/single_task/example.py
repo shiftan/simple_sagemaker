@@ -17,10 +17,10 @@ def setDefaultParams(sm_project):
     # docker image params
     aws_repo_name = "task_repo"  # remote (ECR) rpository name
     repo_name = "task_repo"  # local repository name
-    img_tag = "latest"  # tag for local & remote images
+    image_tag = "latest"  # tag for local & remote images
     docker_file_path = os.path.join(file_path, "docker")  # path of the local Dockerfile
     sm_project.setDefaultImageParams(
-        aws_repo_name, repo_name, img_tag, docker_file_path
+        aws_repo_name, repo_name, image_tag, docker_file_path
     )
 
     # job code path, entrypoint and params

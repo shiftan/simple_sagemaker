@@ -33,7 +33,7 @@ class ECRSync:
         self,
         instance_type,
         framework,
-        version,
+        framework_version,
         py_version,
         image_scope="training",
     ):
@@ -43,11 +43,11 @@ class ECRSync:
             "tensorflow": ("2.3.0", "py37"),
         }
 
-        if version is None or py_version is None:
-            version, py_version = defaults[framework]
+        if framework_version is None or py_version is None:
+            framework_version, py_version = defaults[framework]
 
         logger.info(
-            f"Getting the image for {framework}, version {version}, python version {py_version}"
+            f"Getting the image for {framework}, framework_version {framework_version}, python version {py_version}"
         )
 
         region_name = self.boto3_session.region_name
@@ -56,7 +56,7 @@ class ECRSync:
         baseimage_uri = image_uris.retrieve(
             framework,
             region=region_name,
-            version=version,
+            version=framework_version,
             py_version=py_version,
             image_scope=image_scope,
             instance_type=instance_type,
@@ -68,14 +68,14 @@ class ECRSync:
         docker_file_path_or_content,
         aws_repo_name,
         repo_name,
-        img_tag,
+        image_tag,
         instance_type,
         framework,
-        version,
+        framework_version,
         py_version,
     ):
         baseimage_uri = self.getPrebuiltImage(
-            instance_type, framework, version, py_version
+            instance_type, framework, framework_version, py_version
         )
 
         if not docker_file_path_or_content:
@@ -85,21 +85,21 @@ class ECRSync:
         repo_uri = self.getOrCreateRepo(aws_repo_name)
 
         build_args = dict()
-        build_args["tag"] = repo_name + ":" + img_tag
+        build_args["tag"] = repo_name + ":" + image_tag
 
-        if os.path.isdir(docker_file_path_or_content) or os.path.isfile(
-            docker_file_path_or_content
-        ):
+        if os.path.isdir(docker_file_path_or_content):
             docker_file_path_or_content = open(
                 os.path.join(docker_file_path_or_content, "Dockerfile"), "rt"
             ).read()
+        elif os.path.isfile(docker_file_path_or_content):
+            docker_file_path_or_content = open(docker_file_path_or_content, "rt").read()
 
         docker_file_path_or_content = docker_file_path_or_content.replace(
             "__BASE_IMAGE__", baseimage_uri
         )
 
         logging.info(
-            f"Building {docker_file_path_or_content} to {repo_name}:{img_tag} and pushing to {aws_repo_name}..."
+            f"Building {docker_file_path_or_content} to {repo_name}:{image_tag} and pushing to {aws_repo_name}..."
         )
 
         fileObj = BytesIO(docker_file_path_or_content.encode("utf-8"))
@@ -125,15 +125,15 @@ class ECRSync:
             builtImageDigest = build_repo_digests[0].split("@")[1]
         if not build_repo_digests or (builtImageDigest not in images_digests):
             logging.info("Tagging and pushing the image...")
-            res = image[0].tag(repo_uri, img_tag)
+            res = image[0].tag(repo_uri, image_tag)
             assert res
 
             # push the image to ECR
             for line in client.images.push(
-                repo_uri, img_tag, auth_config=auth_config, stream=True, decode=True
+                repo_uri, image_tag, auth_config=auth_config, stream=True, decode=True
             ):
                 logging.info(line)
-            image_uri = f"{repo_uri}:{img_tag}"
+            image_uri = f"{repo_uri}:{image_tag}"
         else:
             logging.info("Image already exists!")
             image_idx = images_digests.index(builtImageDigest)

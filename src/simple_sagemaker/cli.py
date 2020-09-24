@@ -234,15 +234,16 @@ def runArguments(run_parser, shell=False):
         After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
     )
     # image params
-    image_group.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
+    image_group.add_argument("--aws_repo_name", "--ar", help="Name of ECS repository.")
     image_group.add_argument("--repo_name", "--rn", help="Name of local repository.")
     image_group.add_argument(
         "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
     )
     image_group.add_argument(
-        "--docker_file_path",
+        "--docker_file_path_or_content",
         "--df",
-        help="Path to a directory containing the DockerFile",
+        help="""Path to a directory containing the DockerFile. The base image should be set to
+        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
     )
     image_group.add_argument(
         "--framework",
@@ -474,12 +475,12 @@ def runHandler(args, rest):
         **getAllParams(
             args,
             {
-                "aws_repo": "aws_repo_name",
+                "aws_repo_name": "aws_repo_name",
                 "repo_name": "repo_name",
-                "image_tag": "img_tag",
-                "docker_file_path": "docker_file_path_or_content",
+                "image_tag": "image_tag",
+                "docker_file_path_or_content": "docker_file_path_or_content",
                 "framework": "framework",
-                "framework_version": "version",
+                "framework_version": "framework_version",
                 "python_version": "py_version",
             },
         )
@@ -553,7 +554,7 @@ def dataHandler(args, rest):
 
 
 def main():
-    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.30s] %(message)s"
     logging.basicConfig(
         stream=sys.stdout,
         level=logging.INFO,
