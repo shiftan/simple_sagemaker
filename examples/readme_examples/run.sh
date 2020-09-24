@@ -8,8 +8,8 @@ echo "Running with", $@
 # Example 1 - hello world
 ssm run -p ${2}simple-sagemaker-example-cli${3} -t task1 -e $BASEDIR/worker1.py -o $1/example1 --it ml.p3.2xlarge --ic 2 ${@:4} --max_run_mins 15 &
 
-# CMD example
-ssm cmd -p ${2}simple-sagemaker-example-cli${3} -t cmd-task --cmd_line "cat /proc/cpuinfo && nvidia-smi" --no_spot -o $1/example_cmd --it ml.p3.2xlarge ${@:4} --max_run_mins 15 &
+# Shell example
+ssm shell -p ${2}simple-sagemaker-example-cli${3} -t shell-task --cmd_line "cat /proc/cpuinfo && nvidia-smi" --no_spot -o $1/example_cmd --it ml.p3.2xlarge ${@:4} --max_run_mins 15 &
 
 wait # wait for all processes
 

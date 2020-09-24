@@ -122,9 +122,9 @@ def addDownloadArgs(download_params):
     )
 
 
-def runArguments(run_parser, CMD=False):
-    if CMD:
-        run_parser.set_defaults(func=cmdHandler)
+def runArguments(run_parser, shell=False):
+    if shell:
+        run_parser.set_defaults(func=shellHandler)
     else:
         run_parser.set_defaults(func=runHandler)
 
@@ -145,10 +145,10 @@ def runArguments(run_parser, CMD=False):
         help="S3 bucket name (a default one is used if not given).",
     )
 
-    if CMD:
+    if shell:
         code_group.add_argument(
             "--cmd_line",
-            "-cmd",
+            "--cmd",
             help="""The command line to run.""",
         )
         code_group.add_argument(
@@ -369,11 +369,11 @@ def parseArgs():
     )
     subparsers = parser.add_subparsers()
     run_parser = subparsers.add_parser("run", help="Run a task")
-    cmd_parser = subparsers.add_parser("cmd", help="Run a command line task")
+    shell_parser = subparsers.add_parser("shell", help="Run a command line task")
     data_parser = subparsers.add_parser("data", help="Manage task data")
 
     runArguments(run_parser)
-    runArguments(cmd_parser, True)
+    runArguments(shell_parser, True)
     dataArguments(data_parser)
 
     args, rest = parser.parse_known_args()
@@ -422,8 +422,8 @@ def parseHyperparams(rest):
     return res
 
 
-def cmdHandler(args, rest):
-    cmd_launcher = Path(__file__).parent / "cmd_launcher.py"
+def shellHandler(args, rest):
+    shell_launcher = Path(__file__).parent / "shell_launcher.py"
     rest.extend(["--SSM_CMD_LINE", args.cmd_line])
 
     if args.dir_files:
@@ -432,7 +432,7 @@ def cmdHandler(args, rest):
         files = [str(x) for x in Path(args.dir_files).glob("*")]
         args.dependencies.extend(files)
 
-    args.entry_point = str(cmd_launcher)
+    args.entry_point = str(shell_launcher)
     runHandler(args, rest)
 
 

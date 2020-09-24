@@ -1,7 +1,7 @@
 # Simple Sagemaker 
-A **simpler** and **cheaper** way to distribute python (training) code on machines of your choice in the (AWS) cloud.
+A **simpler** and **cheaper** way to distribute (training) work on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress. Only [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported (but these images can be used to distribute any python code, if no special additional needs are set).**
+**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported (but these images can be used to distribute any work, including shell commands, if no special additional needs are set).**
 
 ## Requirements
 
@@ -15,7 +15,7 @@ pip install simple-sagemaker
 ```
 Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance run the following command:
 ```bash
-ssm cmd -p simple-sagemaker-example-cli-cmd -t cmd-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
+ssm shell -p simple-sagemaker-example-cli-shell -t shell-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
 
 Output including the logs with script stdout is downloaded to `./output`.
@@ -68,7 +68,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 # Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of python code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of work (python/shell) code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
@@ -166,17 +166,17 @@ The files and directories structure is as follows:
 # CLI
 The ssm CLI supports 3 commands:
 - run - to run a python based task
-- cmd - to run a CMD based task
+- shell - to run a shell based task
 - data - to manage (download/clear state) the data of an existing task
 ```bash
 $ ssm -h
 
-usage: ssm [-h] {run,cmd,data} ...
+usage: ssm [-h] {run,shell,data} ...
 
 positional arguments:
-  {run,cmd,data}
+  {run,shell,data}
     run           Run a task
-    cmd           Run a command line task
+    shell           Run a command line task
     data          Manage task data
 
 optional arguments:
@@ -314,8 +314,8 @@ Download:
   --download_model      Download the model once task is finished
   --download_output     Download the output once task is finished
 ```
-Running a CMD based task is very similar, except for `source_dir` and `entry_point` which are replaced by
-`cmd_line` and `cmd_line`, respectively. Run `ssm cmd -h` for more details.
+Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by
+`dir_files` and `cmd_line`, respectively. Run `ssm shell -h` for more details.
 
 To manage the data of an existing command:
 ```bash

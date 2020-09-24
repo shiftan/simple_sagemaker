@@ -22,14 +22,18 @@
             "program": "${workspaceFolder}/src/cli_launcher.py",
             "console": "integratedTerminal",
             "cwd": "${fileDirname}",
+            "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             },
             "args": [
-                "-p", "tests/simple-sagemaker-example-cli_2020-09-13-17-48-15_py37", 
+                "shell",
+                "-p", "tests/aaa", 
                 //"--instance_type", "ml.p3.2xlarge",
-                "-t", "task3",
-                "-e",  "${workspaceFolder}/examples/readme_examples/worker3.py",
+                "-t", "task2",
+                "--cmd_line", "echo 222 333",
+                "--dir_files",  "${workspaceFolder}/examples/readme_examples/data",
+                //"-e",  "${workspaceFolder}/examples/readme_examples/worker3.py",
                 "-o", "${workspaceFolder}/output",
                 "--no_spot",
                 "-f", "tensorflow",
