@@ -436,13 +436,13 @@ ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e 
 wait # wait for all processes
 ```
 
-(`worker6.py`)[https://github.com/shiftan/simple_sagemaker/blob/master/examples/readme_examples/example6/code/worker6.py] contains the following:
+[`worker6.py`](https://github.com/shiftan/simple_sagemaker/blob/master/examples/readme_examples/example6/code/worker6.py) contains the following:
 ```python
     logger.info("Score=10;")
     time.sleep(60)  # sleep to be able to see the two scores
     logger.info("Score=20;")
 ```
-which get captured by the `"Score=(.*?);"` regular expression in the `ssm` command above, then the metrics graphs can be viewed on the AWS console:
+This get captured by the `"Score=(.*?);"` regular expression in the `ssm` command above, then the metrics graphs can be viewed on the AWS console:
 
 ![Metrics example](https://github.com/shiftan/simple_sagemaker/blob/master/docs/metric_example.jpg?raw=true "Metric Example")
 
