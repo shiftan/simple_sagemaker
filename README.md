@@ -1,7 +1,7 @@
 # Simple Sagemaker 
-A **simpler** and **cheaper** way to distribute (training) work on machines of your choice in the (AWS) cloud.
+A **simpler** and **cheaper** way to distribute work (python/shell/training) work on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported (but these images can be used to distribute any work, including shell commands, if no special additional needs are set).**
+**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworksare enough to distribute any type of work, including shell commands, just without the specific customization.**
 
 ## Requirements
 
@@ -13,7 +13,7 @@ To install *Simple Sagemaker*
 ```
 pip install simple-sagemaker
 ```
-Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance run the following command:
+Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance run the following `ssm` command (documentation of the `ssm` CLI is given [below](#cli)):
 ```bash
 ssm shell -p simple-sagemaker-example-cli-shell -t shell-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
@@ -22,6 +22,12 @@ Output including the logs with script stdout is downloaded to `./output`.
 
 ```bash
 $ cat ./output/logs/logs0
+....
+processor#011: 7
+....
+model name: Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+....
+cpu cores: 4
 ....
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 440.33.01    Driver Version: 440.33.01    CUDA Version: 10.2     |
@@ -42,13 +48,13 @@ import torch
 for i in range(torch.cuda.device_count()):
     print(f"-***- Device {i}: {torch.cuda.get_device_properties(i)}")
 ```
-Just run the below cli command (documentation of the CLI is given [below](#cli)):
+Just run the below `ssm` command:
 ```bash
 ssm run -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
-The output logs are saved to `./output/example1/logs`. 
-The relevant part from the log files (`./output/example1/logs/logs0` and `./output/example1/logs/logs1`) is:
-```
+The output is saved to `./output/example1`, logs to `./output/example1/logs/logs0` and `./output/example1/logs/logs1`:
+```bash
+$ cat ./output/example1/logs/logs0
 ...
 -***- Device 0: _CudaDeviceProperties(name='Tesla V100-SXM2-16GB', major=7, minor=0, total_memory=16160MB, multi_processor_count=80)
 ...
@@ -68,10 +74,10 @@ API based example:
 - [Single file example](#Single-file-example)
 
 # Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of work (python/shell) code on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
-* The **runner** is the main part of this package, can mostly be controlled by using the **ssm** command line interface (CLI), or be fully customized by using the python API.
+* The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
 * The **worker** is basically the code being distribute, with possible minimal code changes to use a small `task_tollkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`), i.e. input/output/state paths, running parameters etc.
 
 The **runner** is used to configure **tasks** and **projects**: 
@@ -94,7 +100,7 @@ The **runner** is used to configure **tasks** and **projects**:
     - No need to mess with S3 paths, the data is automatically
     - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
 4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
-5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named ***ssm***) to control the execution (a.k.a implement the **runner**, see below)
+5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named `ssm`) to control the execution (a.k.a implement the **runner**, see below)
     - In most cases it's only about 2 line for getting the environment configuration (e.g. input/output/state paths and running parameters) and passing it on to the original code
 6. Easy customization of the docker image (based on a pre-built one)
 7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
@@ -165,7 +171,7 @@ The files and directories structure is as follows:
 - [Job name 2] - another execution of the same task
 
 # CLI
-The ssm CLI supports 3 commands:
+The `ssm` CLI supports 3 commands:
 - run - to run a python based task
 - shell - to run a shell based task
 - data - to manage (download/clear state) the data of an existing task

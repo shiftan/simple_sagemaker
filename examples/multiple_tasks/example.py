@@ -82,7 +82,7 @@ def runner(
 
     # task name
     task_name = (
-        "Task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
+        "multi-task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     )
     # input data params
     input_data_path = os.path.join(
@@ -111,7 +111,7 @@ def runner(
     shutil.rmtree(outputDir1, ignore_errors=True)
     sm_project.downloadResults(task_name, outputDir1)
 
-    task_name2 = "Task2"
+    task_name2 = "multi-task2"
     hyperparameters = {"stage": 2}
     additional_inputs = dict()
     additional_inputs["task1_state1"] = sm_project.getInputConfig(task_name, "state")
