@@ -86,7 +86,7 @@ def runner(
     )
     # input data params
     input_data_path = os.path.join(
-        file_path, "..", "single_task", "channel_data"
+        file_path, "..", "single_task", "input_data"
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
     # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
