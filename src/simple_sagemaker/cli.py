@@ -1,5 +1,6 @@
 import argparse
 import collections
+import json
 import logging
 import os
 import sys
@@ -207,17 +208,17 @@ def runArguments(run_parser, shell=False):
     )
     instance_group.add_argument(
         "--no_spot",
-        dest="use_spot",
+        dest="use_spot_instances",
         action="store_false",
         help="Use on demand instances",
     )
     instance_group.add_argument(
-        "--use_spot",
-        dest="use_spot",
+        "--use_spot_instances",
+        dest="use_spot_instances",
         action="store_true",
         help="""Specifies whether to use SageMaker Managed Spot instances.""",
     )
-    instance_group.set_defaults(use_spot=constants.DEFAULT_USE_SPOT)
+    instance_group.set_defaults(use_spot_instances=constants.DEFAULT_USE_SPOT)
     instance_group.add_argument(
         "--max_wait_mins",
         type=int,
@@ -234,15 +235,16 @@ def runArguments(run_parser, shell=False):
         After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
     )
     # image params
-    image_group.add_argument("--aws_repo", "--ar", help="Name of ECS repository.")
+    image_group.add_argument("--aws_repo_name", "--ar", help="Name of ECS repository.")
     image_group.add_argument("--repo_name", "--rn", help="Name of local repository.")
     image_group.add_argument(
         "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
     )
     image_group.add_argument(
-        "--docker_file_path",
+        "--docker_file_path_or_content",
         "--df",
-        help="Path to a directory containing the DockerFile",
+        help="""Path to a directory containing the DockerFile. The base image should be set to
+        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
     )
     image_group.add_argument(
         "--framework",
@@ -257,7 +259,7 @@ def runArguments(run_parser, shell=False):
         help="The framework version",
     )
     image_group.add_argument(
-        "--python_version",
+        "--py_version",
         "--pv",
         help="The python version",
     )
@@ -304,6 +306,12 @@ def runArguments(run_parser, shell=False):
         default=False,
         action="store_true",
         help="Force running the task even if it's already completed.",
+    )
+    running_params.add_argument(
+        "--distribution",
+        help="""Tensorflows' distribution policy, see
+        https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training.""",
+        type=lambda x: json.loads(x),
     )
     IO_params.add_argument(
         "--clean_state",
@@ -464,7 +472,7 @@ def runHandler(args, rest):
                 "instance_count": "instance_count",
                 "instance_type": "instance_type",
                 "volume_size": "volume_size",
-                "use_spot": "use_spot_instances",
+                "use_spot_instances": "use_spot_instances",
                 "max_run_mins": "max_run_mins",
                 "max_wait_mins": "max_wait_mins",
             },
@@ -474,13 +482,13 @@ def runHandler(args, rest):
         **getAllParams(
             args,
             {
-                "aws_repo": "aws_repo_name",
+                "aws_repo_name": "aws_repo_name",
                 "repo_name": "repo_name",
-                "image_tag": "img_tag",
-                "docker_file_path": "docker_file_path_or_content",
+                "image_tag": "image_tag",
+                "docker_file_path_or_content": "docker_file_path_or_content",
                 "framework": "framework",
-                "framework_version": "version",
-                "python_version": "py_version",
+                "framework_version": "framework_version",
+                "py_version": "py_version",
             },
         )
     )
@@ -495,11 +503,14 @@ def runHandler(args, rest):
             "clean_state": "clean_state",
             "enable_sagemaker_metrics": "enable_sagemaker_metrics",
             "force_running": "force_running",
+            "distribution": "distribution",
             "model_uri": "model_uri",
         },
     )
 
-    input_data_path, distribution, inputs = parseInputsAndAllowAccess(args, sm_project)
+    input_data_path, input_distribution, inputs = parseInputsAndAllowAccess(
+        args, sm_project
+    )
     hyperparameters = parseHyperparams(rest)
     tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
@@ -513,7 +524,7 @@ def runHandler(args, rest):
         image_uri,
         hyperparameters=hyperparameters,
         input_data_path=input_data_path,
-        distribution=distribution,
+        input_distribution=input_distribution,
         additional_inputs=inputs,
         tags=tags,
         metric_definitions=metric_definitions,
@@ -553,7 +564,7 @@ def dataHandler(args, rest):
 
 
 def main():
-    format = "%(levelname)-.1s [%(asctime)s][%(name)-.10s] %(message)s"
+    format = "%(levelname)-.1s [%(asctime)s][%(name)-.30s] %(message)s"
     logging.basicConfig(
         stream=sys.stdout,
         level=logging.INFO,

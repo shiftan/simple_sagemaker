@@ -27,7 +27,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",
         repo_name="task_repo",
-        img_tag="latest",
+        image_tag="latest",
         docker_file_path_or_content=dockerFileContent,
     )
     image_uri = sm_project.buildOrGetImage(
@@ -42,7 +42,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.runTask(
         task1_name,
         image_uri,
-        distribution="ShardedByS3Key",  # distribute the input files among the workers
+        input_distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
         input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
         clean_state=True,  # clean the current state, also forces re-running

@@ -24,8 +24,9 @@ def listDir(path, ignore_patterns=[]):
 
 
 def worker1(worker_config):
-    # a library that is pre-installed in the docker image, as defined in the Dockerfile
+    # a libraries that were pre-installed in the docker image, as defined in the Dockerfile
     import pandas  # noqa: F401
+    import sklearn  # noqa: F401
 
     logger.info("{pandas} is pre-installed in this image")
 

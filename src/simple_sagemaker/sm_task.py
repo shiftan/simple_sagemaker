@@ -7,7 +7,6 @@ from time import gmtime, strftime
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
-from sagemaker.processing import ProcessingOutput, ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
 from sagemaker.tensorflow.estimator import TensorFlow
 
@@ -85,33 +84,6 @@ class SageMakerTask:
         job_name = f"{self.task_name}-{timestamp_prefix}-{randString}"
         return job_name
 
-    def __runProcessingJob(
-        self, code, instance_type, instance_count, sagemaker_session
-    ):
-        # TODO: fix refactoring
-        assert False, "Should be fixed"
-        script_processor = ScriptProcessor(
-            command=["python3"],
-            image_uri=self.image_uri,
-            role=self.role_name,
-            instance_count=instance_count,
-            instance_type=instance_type,
-            sagemaker_session=sagemaker_session,
-        )
-
-        job_name = self._getJobName()
-        outputs = [ProcessingOutput(source="/opt/ml/processing/output")]
-        script_processor.run(
-            code=code,
-            inputs=None,
-            outputs=outputs,
-            arguments=["aa", "bb"],
-            job_name=job_name,
-        )
-        script_processor_job_description = script_processor.jobs[-1].describe()
-        print(script_processor_job_description)
-        return job_name
-
     def runTrainingJob(
         self,
         framework,
@@ -129,7 +101,7 @@ class SageMakerTask:
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
-        distribution="FullyReplicated",
+        input_distribution="FullyReplicated",
         metric_definitions=dict(),
         enable_sagemaker_metrics=False,
         **additionalEstimatorArgs,
@@ -206,7 +178,11 @@ class SageMakerTask:
         inputs = dict()
         if self.inputS3Uri:
             inputs.update(
-                {"data": TrainingInput(self.inputS3Uri, distribution=distribution)}
+                {
+                    "data": TrainingInput(
+                        self.inputS3Uri, distribution=input_distribution
+                    )
+                }
             )
         if additional_inputs:
             inputs.update(additional_inputs)

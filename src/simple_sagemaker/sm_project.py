@@ -34,10 +34,10 @@ class SageMakerProject:
         [
             "aws_repo_name",
             "repo_name",
-            "img_tag",
+            "image_tag",
             "docker_file_path_or_content",
             "framework",
-            "version",
+            "framework_version",
             "py_version",
         ],
     )
@@ -88,10 +88,10 @@ class SageMakerProject:
         self,
         aws_repo_name=None,
         repo_name=None,
-        img_tag=constants.DEFAULT_REPO_TAG,
+        image_tag=constants.DEFAULT_REPO_TAG,
         docker_file_path_or_content=None,
         framework="pytorch",
-        version=None,
+        framework_version=None,
         py_version=None,
     ):
         """Set the default image params
@@ -100,27 +100,28 @@ class SageMakerProject:
         :type aws_repo_name: str
         :param repo_name: Name of local repository
         :type repo_name: str
-        :param img_tag: Tag for both the local and ECS images
-        :type img_tag: str
+        :param image_tag: Tag for both the local and ECS images
+        :type image_tag: str
         :param docker_file_path_or_content: Path to a directory containing the Dockerfile, or just the content. If not
-            set, the pre-built image is used
+            set, the pre-built image is used. The base image should be set to `__BASE_IMAGE__` within the Dockerfile,
+            and is automatically replaced with the correct base image
         :type docker_file_path_or_content: str
         :param framework: The framework to based on. Only "pytorch" and "tensorflow" are currently supported.
             For more details See https://github.com/aws/deep-learning-containers/blob/master/available_images.md.,
             defaults to "pyrorch".
         :type framework: str
-        :param version: The framework version
-        :type version: str
+        :param framework_version: The framework version
+        :type framework_version: str
         :param py_version: The python version
         :type py_version: str
         """
         self.defaultImageParams = SageMakerProject.ImageParams(
             aws_repo_name,
             repo_name,
-            img_tag,
+            image_tag,
             docker_file_path_or_content,
             framework,
-            version,
+            framework_version,
             py_version,
         )
 
@@ -210,7 +211,8 @@ class SageMakerProject:
 
         :param bucket_name: The name of the bucket
         :type bucket_name: str
-        :param policy_name: The polict to be allowed access to `bucket_name`, defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
+        :param policy_name: The policy name to be allowed access to `bucket_name`,
+        defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
         :type policy_name: str
         """
         iam_utils.allowAccessToS3Bucket(
@@ -223,7 +225,7 @@ class SageMakerProject:
 
     def buildOrGetImage(self, instance_type, **kwargs):
         """Get the image URI, according to the image params. If a custom image is used, i.e. when `docker_file_path_or_content` was
-        given, it's firsdt built and pushed to ECS.
+        given, it's first built and pushed to ECS.
 
         :param instance_type: The EC2 instance type that is going to run that image
         :type instance_type: str
@@ -269,7 +271,7 @@ class SageMakerProject:
             it will be running again if set, otherwise its current output will be taken without running it again.,
             defaults to False
         :type clean_state: bool, optional
-        :param force_running: Whether to forec running the task even if it was already completed (but without
+        :param force_running: Whether to force running the task even if it was already completed (but without
             clearing the current state), defaults to False
         :type force_running: bool, optional
         :param force_running: Tags to be attached to the jobs executed for this task, e.g. {"TagName": "TagValue"}.
@@ -279,10 +281,13 @@ class SageMakerProject:
             https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html
         :type metric_definitions: dict, optional
         :param enable_sagemaker_metrics: Enables SageMaker Metrics Time Series, defaults
-        :type enable_sagemaker_metrics: nool, optional
+        :type enable_sagemaker_metrics: bool, optional
 
         :Keyword Arguments:
             Paramaters to overwrite the default code or instance params.
+            :param distribution: Tensorflows' distribution policy, see
+                https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training.
+            :type distribution: dict
 
         return: the image URI
         rtype: str
@@ -360,7 +365,7 @@ class SageMakerProject:
         output_type,
         distribution="FullyReplicated",
     ):
-        """Get the class:`sagemaker.inputs.TrainingInput` configuation for an output of a task from this
+        """Get the class:`sagemaker.inputs.TrainingInput` configuration for an output of a task from this
         project to be used as an input for another task.
 
         :param task_name: The name of the task whose output is needed

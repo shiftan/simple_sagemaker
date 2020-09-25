@@ -7,5 +7,27 @@
         "**/__pycache__/**": true,
         "**/runs/**": true,
         "**/wandbd/run*": true,
-    }
+    },
+    "cSpell.words": [
+        "CPUS",
+        "CUDA",
+        "Posix",
+        "Sharded",
+        "Xeon",
+        "algo",
+        "awsglue",
+        "conda",
+        "cpuinfo",
+        "cpython",
+        "drwxr",
+        "entrypoint",
+        "hyperparameters",
+        "pycache",
+        "pytorch",
+        "rglob",
+        "scikit",
+        "sourcedir",
+        "tensorflow",
+        "xlarge"
+    ]
 }

@@ -1,7 +1,7 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute work (python/shell/training) work on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [Tensorflow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
+**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
 ## Requirements
 
@@ -42,7 +42,7 @@ processor: 7
 ....
 ```
 
-Similarily, to run the following `worker1.py` on two *ml.p3.2xlarge* *spot* instances
+Similarly, to run the following `worker1.py` on two *ml.p3.2xlarge* *spot* instances
 ```python
 import torch
 
@@ -75,7 +75,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 # Background
-*Simple Sagemaker* is a thin warpper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+*Simple Sagemaker* is a thin wrapper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
@@ -85,23 +85,23 @@ The **runner** is used to configure **tasks** and **projects**:
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
 - A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
     - State is maintained between consecutive execution of the same **task** (see more [below](#Task-state-and-output))
-    - Task can be markd as completed, to avoid re-running it next time (unlesss eforced otherwise)
-- A **prjoect** is a series of related **tasks**, with possible depencencies
-    - The output of a completed task can be consumed as input by a consequetive task
+    - Task can be marked as completed, to avoid re-running it next time (unless enforced otherwise)
+- A **project** is a series of related **tasks**, with possible dependencies
+    - The output of a completed task can be consumed as input by a consecutive task
 
 # Main features
 1. "Simpler" - Except for holding an AWS account credentials, no other pre-configuration nor knowledge is assumed (well, almost :). Behind the scenes you get:
-    - Jobs IAM role creation, including policies for accesing needed S3 buckets
+    - Jobs IAM role creation, including policies for accessing needed S3 buckets
     - Building and uploading a customized docker image to AWS (ECS service)
     - Synchronizing local source code / input data to a S3 bucket
     - Downloading the results from S3
     - ...
 2. "Cheaper" - ["pay only for what you use"](https://aws.amazon.com/sagemaker/pricing/), and save [up to 90% of the cost](https://docs.aws.amazon.com/sagemaker/latest/dg/model-managed-spot-training.html) with spot instances, which got used by default!
-3. Abstraction of how data is maintianed on AWS (S3 service)
+3. Abstraction of how data is maintained on AWS (S3 service)
     - No need to mess with S3 paths, the data is automatically
-    - State is automaticall maintained between consequetive execution of **jobs** that belongs to the same **task**
+    - State is automatically maintained between consecutive execution of **jobs** that belongs to the same **task**
 4. A simple way to define how data flows between **tasks** of the same **project**, e.g. how the first **task**'s outputs is used as an input for a second **task**
-5. (Almost) no code changes are to youe existing code - the API is mostly wrapped by a command line interface (named `ssm`) to control the execution (a.k.a implement the **runner**, see below)
+5. (Almost) no code changes are to the existing code - the API is mostly wrapped by a command line interface (named `ssm`) to control the execution (a.k.a implement the **runner**, see below)
     - In most cases it's only about 1 line for getting the environment configuration (e.g. input/output/state paths and running parameters, see [below](#Configuration)) and passing it on to the original code
 6. Easy customization of the docker image (based on a pre-built one)
 7. The rest of the SageMaker advantages, which (mostly) behaves "normally" as defined by AWS, e.g.
@@ -115,13 +115,13 @@ The **runner** is used to configure **tasks** and **projects**:
 # Worker environment
 The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), 
 along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, 
-and the entry point is then excuted. 
+and the entry point is then executed. 
 On top of the above, for python code tasks, the `task_toolkit` library is also added as a dependency in this folder.
 
 ## Configuration
 The worker can access the environment configuration parameters in two ways:
-1. The environment varaibles, e.g. `SM_NUM_CPUS` represents the number of CPUs.
-2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accesible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
+1. The environment variables, e.g. `SM_NUM_CPUS` represents the number of CPUs.
+2. Using the `worker_lib` library: initialize a `WorkerConfig` instance, `worker_config = worker_lib.WorkerConfig()`, and then all params can be accessible from the `worker_config` variable, e.g.  `worker_lib.num_cpus` is the number of CPUs.
 
 The complete list of configuration parameters:
 
@@ -151,17 +151,17 @@ The complete list of configuration parameters:
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
 The local path is available in `worker_config.state`. 
 When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
-1. To skip it next time (unlesss eforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
+1. To skip it next time (unless enforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ## Output
 On top of the state, there're 3 main other output mechanisms:
-1. Logs - any output writen to standard output / error
+1. Logs - any output written to standard output / error
 2. Output data - any data in `worker_config.output_data_dir` is compressed into a output.tar.gz. Only the main instance output data is kept.
 3. Model - any data in `worker_config.model_dir` is compressed into a model.tar.gz. As data from all instance is merged, be carful with collisions.
 
 
-# Data maintainance on S3
+# Data maintenance on S3
 All data, including input, code, state and output, is maintained on S3. The bucket to use can be defined, or the default one is used.
 The files and directories structure is as follows:
 ```
@@ -183,6 +183,12 @@ The files and directories structure is as follows:
     - output.tar.gz - the *main instance* output data (other outputs are ignored)
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
+
+# Distributed training
+Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for distributed training. Make sure to configure `framework`, 
+`framework_version` and `py_version` to use the image that matches your needs ([the full list is here](https://github.com/aws/deep-learning-containers/blob/master/available_images.md)). For TensorFlow you'll need to use the `distribution` parameters. For more details on the built in support see:
+- PyTorch - [Distributed PyTorch Training](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html#distributed-pytorch-training)
+- TensorFlow - [Distributed TensorFlow Training](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training). 
 
 # CLI
 The `ssm` CLI supports 3 commands:
@@ -213,13 +219,13 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
                [--instance_type INSTANCE_TYPE]
                [--instance_count INSTANCE_COUNT] [--volume_size VOLUME_SIZE]
-               [--no_spot] [--use_spot] [--max_wait_mins MAX_WAIT_MINS]
-               [--max_run_mins MAX_RUN_MINS] [--aws_repo AWS_REPO]
+               [--no_spot] [--use_spot_instances] [--max_wait_mins MAX_WAIT_MINS]
+               [--max_run_mins MAX_RUN_MINS] [--aws_repo_name aws_repo_name]
                [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
-               [--docker_file_path DOCKER_FILE_PATH]
+               [--docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT]
                [--framework {pytorch,tensorflow}]
                [--framework_version FRAMEWORK_VERSION]
-               [--python_version PYTHON_VERSION]
+               [--py_version PY_VERSION]
                [--input_path INPUT_PATH [INPUT_PATH ...]]
                [--input_s3 INPUT_S3 [INPUT_S3 ...]]
                [--input_task INPUT_TASK [INPUT_TASK ...]] [--force_running]
@@ -264,7 +270,7 @@ Instance:
                         Size in GB of the EBS volume to use for storing input
                         data. Must be large enough to store input data.
   --no_spot             Use on demand instances
-  --use_spot            Specifies whether to use SageMaker Managed Spot
+  --use_spot_instances            Specifies whether to use SageMaker Managed Spot
                         instances.
   --max_wait_mins MAX_WAIT_MINS
                         Timeout in minutes waiting for spot instances. After
@@ -278,20 +284,20 @@ Instance:
                         its current status.
 
 Image:
-  --aws_repo AWS_REPO, --ar AWS_REPO
+  --aws_repo_name aws_repo_name, --ar aws_repo_name
                         Name of ECS repository.
   --repo_name REPO_NAME, --rn REPO_NAME
                         Name of local repository.
   --image_tag IMAGE_TAG
                         Image tag.
-  --docker_file_path DOCKER_FILE_PATH, --df DOCKER_FILE_PATH
+  --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
                         Path to a directory containing the DockerFile
   --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
                         The framework to use, see https://github.com/aws/deep-
                         learning-containers/blob/master/available_images.md
   --framework_version FRAMEWORK_VERSION, --fv FRAMEWORK_VERSION
                         The framework version
-  --python_version PYTHON_VERSION, --pv PYTHON_VERSION
+  --py_version PY_VERSION, --pv PY_VERSION
                         The python version
 
 Running:
@@ -363,7 +369,7 @@ optional arguments:
 
 # A fully featured advanced example
 And now to a real advanced and fully featured version, yet simple to implement.
-In order to examplify most of the possible features, the following files are used in [CLI Example 6_1](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6):
+In order to exemplify most of the possible features, the following files are used in [CLI Example 6_1](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6):
 ```
 .
 |-- Dockerfile
@@ -395,20 +401,20 @@ In order to examplify most of the possible features, the following files are use
 - data - input data files
 - external_dependency - additional code dependency
 
-The code is then launced a few time by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh), to demonstrate different features:
+The code is then launched a few time by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh), to demonstrate different features:
 ```bash
 
 # Example 6_1 - a complete example part 1. 
 #   - Uses local data folder as input, that is distributed among instances (--i, ShardedByS3Key)
 #   - Uses a public s3 bucket as an additional input (--iis)
-#   - Builds a custom docker image (--df, --repo_name, --aws_repo)
+#   - Builds a custom docker image (--df, --repo_name, --aws_repo_name)
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
 #   - Use an on-demand instance (--no_spot)
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" --no_spot \
     --ic 2 --task_type 1 -o $1/example6_1
 
 # Example 6_2 - a complete example part 2.
@@ -424,12 +430,12 @@ ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e 
     --ic 2 --task_type 2 -o $1/example6_2 &
 
 # Running task6_1 again
-#   - A completed task isn't exsecuted again, but the current output is used instead. 
+#   - A completed task isn't executed again, but the current output is used instead. 
 #       --ks (keep state, the default) is used to keep the current state
 ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
-    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo "task6_repo" \
+    --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
     --ic 2 --task_type 1 -o $1/example6_1 > $1/example6_1_2_stdout --ks &
 
 
@@ -464,7 +470,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line in assumed to be an hypermarameter, and is accesible for the **worker** by the `hps` dictionary within the environmnet configuration.
+Any extra argument passed to the command line in assumed to be an additional command line argument / hyperparameter, and is accessible for the **worker** by the `hps` dictionary within the environment configuration.
 For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib
@@ -520,11 +526,11 @@ Hello, world!
 
 ## Providing input data
 A **Job** can be configured to get a few data channels:
-* A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accesible in `worker_config.channel_data`
-* Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accesible by the worker with `worker_config.channel_[name]` when [name] is the same one as was provided on the command line.
+* A single local path can be used with the `-i/--input_path` argument. This path is synchronized to the **task** directory on the S3 bucket before running the **task**. On the **worker** side the data is accessible in `worker_config.channel_data`
+* Additional S3 paths (many) can be set as well. Each input source is provided with `--iis [name] [S3 URI]`, and is accessible by the worker with `worker_config.channel_[name]` when [name] is the same one as was provided on the command line.
 * Setting an output of a another **task** on the same **project**, see below ["Chaining tasks"](#Chaining-tasks)
 
-Assuming a local `data` folder containtin a single `sample_data.txt` file, a complete example can be seen in `worker4.py`:
+Assuming a local `data` folder containing a single `sample_data.txt` file, a complete example can be seen in `worker4.py`:
 ```python
 import logging
 import subprocess
@@ -580,7 +586,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 
 ## Chaining tasks
 The output of a completed **task** on the same **project** can be used as an input to another **task**, by using the `--iit [name] [task name] [output type]` command line parameter, where:
-- [name] - is the name of the input source, acaccesible by the worker with `worker_config.channel_[name]`
+- [name] - is the name of the input source, accessible by the worker with `worker_config.channel_[name]`
 - [task name] - the name of the **task** whose output is used as input 
 - [output type] - the **task** output type, one of "model", "output", "state"
 
@@ -607,7 +613,7 @@ INFO:__main__:*** END file listing /opt/ml/input/data/bucket
 ## Configuring the docker image
 The image used to run a task can either be selected from a [pre-built ones](https://github.com/aws/deep-learning-containers/blob/master/available_images.md) 
 or extended with additional Dockerfile commands.
-The `framework`, `framework_version` and `python_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path`, it used along with `aws_repo`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
+The `framework`, `framework_version` and `py_version` CLI parameters are used to define the pre-built image, then if a path to a directory containing the Dockerfile is given by `docker_file_path_or_content`, it used along with `aws_repo_name`, `repo_name` and `image_tag` to build and push an image to ECS, and then set it as the used image.
 The base image should be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image (according to the provided parameters above) before building it.
 The API parameter for the Dockerfile path is named `docker_file_path_or_content` and allows to provide the content of the Dockerfile, e.g. 
 ```python
@@ -658,7 +664,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.setDefaultImageParams(
         aws_repo_name="task_repo",
         repo_name="task_repo",
-        img_tag="latest",
+        image_tag="latest",
         docker_file_path_or_content=dockerFileContent,
     )
     image_uri = sm_project.buildOrGetImage(
@@ -673,7 +679,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.runTask(
         task1_name,
         image_uri,
-        distribution="ShardedByS3Key",  # distribute the input files among the workers
+        input_distribution="ShardedByS3Key",  # distribute the input files among the workers
         hyperparameters={"worker": 1, "arg": "hello world!", "task": 1},
         input_data_path=str(input_data_path) if input_data_path.is_dir() else None,
         clean_state=True,  # clean the current state, also forces re-running
@@ -753,7 +759,7 @@ def worker():
     logger.info("finished!")
 ```
 
-To pack everything in a single file, we use the command line argumen `--worker` (as defined in the `runner` function) to distinguish between **runner** and worker runs
+To pack everything in a single file, we use the command line argument `--worker` (as defined in the `runner` function) to distinguish between **runner** and worker runs
 ```python
 import logging
 import shutil
@@ -843,11 +849,11 @@ tox -e report
     - Every push is tested for linting + some
 6. Create a pull request to the master branch
     - Every master push is fully tested
-7. If the tests succeed, the new version is publihed to [PyPi](https://pypi.org/project/simple-sagemaker/)
+7. If the tests succeed, the new version is published to [PyPi](https://pypi.org/project/simple-sagemaker/)
 
 
 # Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
 3. Local testing/debugging
-4. Full documentation of the APIs (Reamde / Read the docs + CLI?)
+4. Full documentation of the APIs (Readme / Read the docs + CLI?)
