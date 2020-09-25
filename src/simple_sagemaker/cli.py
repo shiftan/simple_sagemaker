@@ -28,16 +28,17 @@ def fileOrS3Validation(parser, arg):
 
 
 InputTuple = collections.namedtuple("Input", ("path", "distribution"))
-S3InputTuple = collections.namedtuple(
-    "S3Input", ("input_name", "s3_uri", "distribution")
+Input_S3Tuple = collections.namedtuple(
+    "Input_S3", ("input_name", "s3_uri", "distribution")
 )
-TaskInputTuple = collections.namedtuple(
-    "TaskInput", ("input_name", "task_name", "type", "distribution")
+InputTaskTuple = collections.namedtuple(
+    "InputTask", ("input_name", "task_name", "type", "distribution")
 )
 
 
 def help_for_input_type(tuple, additional_text=""):
-    res = f"{tuple.__name__}: {', '.join(tuple._fields[:-1])} [distribution]"
+    field_names = " ".join([x.upper() for x in tuple._fields[:-1]])
+    res = f"{tuple.__name__.upper()}: {field_names} [distribution]"
     if additional_text:
         res += "\n" + additional_text
     return res
@@ -78,7 +79,7 @@ class InputAction(InputActionBase):
         self.__append__(args, values)
 
 
-class S3InputAction(InputActionBase):
+class Input_S3Action(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
         if not values[1].startswith("s3://"):
             raise ValueError(f"{values[1]} has to be a s3 path!")
@@ -86,13 +87,15 @@ class S3InputAction(InputActionBase):
         self.__append__(args, values)
 
 
-class TaskInputAction(InputActionBase):
+InputTaskTypes = ["state", "model", "source", "output"]
+
+
+class InputTaskAction(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
         # print (f'{args} {values} {option_string}')
         # print("****", values, hasattr(args, self.dest))
-        taskInputTypes = ["state", "model", "source", "output"]
-        if values[2] not in taskInputTypes:
-            raise ValueError(f"{values[2]} has to be one of {taskInputTypes}!")
+        if values[2] not in InputTaskTypes:
+            raise ValueError(f"{values[2]} has to be one of {InputTaskTypes}!")
         self.__append__(args, values)
 
 
@@ -285,21 +288,22 @@ def runArguments(run_parser, shell=False):
     IO_params.add_argument(
         "--input_s3",
         "--iis",
-        action=S3InputAction,
+        action=Input_S3Action,
         help=help_for_input_type(
-            S3InputTuple, "Additional S3 input sources (a few can be given)."
+            Input_S3Tuple, "Additional S3 input sources (a few can be given)."
         ),
-        tuple=S3InputTuple,
+        tuple=Input_S3Tuple,
     )
     IO_params.add_argument(
         "--input_task",
         "--iit",
-        action=TaskInputAction,
+        action=InputTaskAction,
         help=help_for_input_type(
-            TaskInputTuple,
-            "Use an output of a completed task in the same project as an input source (a few can be given).",
+            InputTaskTuple,
+            f"""Use an output of a completed task in the same project as an input source (a few can be given).
+            Type should be one of {InputTaskTypes}.""",
         ),
-        tuple=TaskInputTuple,
+        tuple=InputTaskTuple,
     )
     running_params.add_argument(
         "--force_running",
