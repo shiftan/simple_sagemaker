@@ -219,17 +219,18 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
                [--instance_type INSTANCE_TYPE]
                [--instance_count INSTANCE_COUNT] [--volume_size VOLUME_SIZE]
-               [--no_spot] [--use_spot_instances] [--max_wait_mins MAX_WAIT_MINS]
-               [--max_run_mins MAX_RUN_MINS] [--aws_repo_name aws_repo_name]
-               [--repo_name REPO_NAME] [--image_tag IMAGE_TAG]
+               [--no_spot] [--use_spot_instances]
+               [--max_wait_mins MAX_WAIT_MINS] [--max_run_mins MAX_RUN_MINS]
+               [--aws_repo_name AWS_REPO_NAME] [--repo_name REPO_NAME]
+               [--image_tag IMAGE_TAG]
                [--docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT]
                [--framework {pytorch,tensorflow}]
                [--framework_version FRAMEWORK_VERSION]
                [--py_version PY_VERSION]
                [--input_path INPUT_PATH [INPUT_PATH ...]]
-               [--input_s3 INPUT_S3 [INPUT_S3 ...]]
+               [--model_uri MODEL_URI] [--input_s3 INPUT_S3 [INPUT_S3 ...]]
                [--input_task INPUT_TASK [INPUT_TASK ...]] [--force_running]
-               [--clean_state] [--keep_state]
+               [--distribution DISTRIBUTION] [--clean_state] [--keep_state]
                [--metric_definitions name regexp] [--enable_sagemaker_metrics]
                [--tag key value] [--output_path OUTPUT_PATH]
                [--download_state] [--download_model] [--download_output]
@@ -270,13 +271,13 @@ Instance:
                         Size in GB of the EBS volume to use for storing input
                         data. Must be large enough to store input data.
   --no_spot             Use on demand instances
-  --use_spot_instances            Specifies whether to use SageMaker Managed Spot
+  --use_spot_instances  Specifies whether to use SageMaker Managed Spot
                         instances.
   --max_wait_mins MAX_WAIT_MINS
                         Timeout in minutes waiting for spot instances. After
                         this amount of time Amazon SageMaker will stop waiting
                         for Spot instances to become available. If 0 is
-                        specified and spot instances are used, its set to
+                        specified and spot instances are used, it's set to
                         max_run_mins
   --max_run_mins MAX_RUN_MINS
                         Timeout in minutes for running. After this amount of
@@ -284,14 +285,17 @@ Instance:
                         its current status.
 
 Image:
-  --aws_repo_name aws_repo_name, --ar aws_repo_name
+  --aws_repo_name AWS_REPO_NAME, --ar AWS_REPO_NAME
                         Name of ECS repository.
   --repo_name REPO_NAME, --rn REPO_NAME
                         Name of local repository.
   --image_tag IMAGE_TAG
                         Image tag.
   --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
-                        Path to a directory containing the DockerFile
+                        Path to a directory containing the DockerFile. The
+                        base image should be set to `__BASE_IMAGE__` within
+                        the Dockerfile, and is automatically replaced with the
+                        correct base image.
   --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
                         The framework to use, see https://github.com/aws/deep-
                         learning-containers/blob/master/available_images.md
@@ -301,7 +305,11 @@ Image:
                         The python version
 
 Running:
-  --force_running       Force running the task even if its already completed.
+  --force_running       Force running the task even if it's already completed.
+  --distribution DISTRIBUTION
+                        Tensorflows' distribution policy, see https://sagemake
+                        r.readthedocs.io/en/stable/frameworks/tensorflow/using
+                        _tf.html#distributed-training.
   --tag key value       Tag to be attached to the jobs executed for this task.
 
 I/O:
@@ -309,9 +317,16 @@ I/O:
                         S3 bucket name (a default one is used if not given).
   --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
                         Input: path [distribution] Local/s3 path for the input
-                        data. If a local path is given, it will be synced to
+                        data. If a local path is given, it will be sync'ed to
                         the task folder on the selected S3 bucket before
                         launching the task.
+  --model_uri MODEL_URI
+                        URI where a pre-trained model is stored, either
+                        locally or in S3. If specified, the estimator will
+                        create a channel pointing to the model so the training
+                        job can download it. This model can be a
+                        ‘model.tar.gz’ from a previous training job, or other
+                        artifacts coming from a different source.
   --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
                         S3Input: input_name, s3_uri [distribution] Additional
                         S3 input sources (a few can be given).
