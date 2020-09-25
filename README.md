@@ -5,6 +5,14 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 
 ## Requirements
 
+<dl>
+  <dt>Definition list</dt>
+  <dd>Is something people use sometimes.</dd>
+
+  <dt>Markdown in HTML</dt>
+  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+</dl>
+
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
 
@@ -197,22 +205,6 @@ The `ssm` CLI supports 3 commands:
 - data - to manage (download/clear state) the data of an existing task
 ```bash
 $ ssm -h
-
-usage: ssm [-h] {run,shell,data} ...
-
-positional arguments:
-  {run,shell,data}
-    run           Run a task
-    shell           Run a command line task
-    data          Manage task data
-
-optional arguments:
-  -h, --help      show this help message and exit
-```
-
-To run a python based task:
-```bash
-$ ssm run -h
 usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
                --entry_point ENTRY_POINT
@@ -277,7 +269,7 @@ Instance:
                         Timeout in minutes waiting for spot instances. After
                         this amount of time Amazon SageMaker will stop waiting
                         for Spot instances to become available. If 0 is
-                        specified and spot instances are used, it's set to
+                        specified and spot instances are used, its set to
                         max_run_mins
   --max_run_mins MAX_RUN_MINS
                         Timeout in minutes for running. After this amount of
@@ -307,7 +299,7 @@ Image:
 Running:
   --force_running       Force running the task even if it's already completed.
   --distribution DISTRIBUTION
-                        Tensorflows' distribution policy, see https://sagemake
+                        Tensorflows distribution policy, see https://sagemake
                         r.readthedocs.io/en/stable/frameworks/tensorflow/using
                         _tf.html#distributed-training.
   --tag key value       Tag to be attached to the jobs executed for this task.
@@ -316,8 +308,8 @@ I/O:
   --bucket_name BUCKET_NAME, -b BUCKET_NAME
                         S3 bucket name (a default one is used if not given).
   --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
-                        Input: path [distribution] Local/s3 path for the input
-                        data. If a local path is given, it will be sync'ed to
+                        INPUT: PATH [distribution] Local/s3 path for the input
+                        data. If a local path is given, it will be synced to
                         the task folder on the selected S3 bucket before
                         launching the task.
   --model_uri MODEL_URI
@@ -328,12 +320,13 @@ I/O:
                         ‘model.tar.gz’ from a previous training job, or other
                         artifacts coming from a different source.
   --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
-                        S3Input: input_name, s3_uri [distribution] Additional
+                        INPUT_S3: INPUT_NAME S3_URI [distribution] Additional
                         S3 input sources (a few can be given).
   --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
-                        TaskInput: input_name, task_name, type [distribution]
+                        INPUTTASK: INPUT_NAME TASK_NAME TYPE [distribution]
                         Use an output of a completed task in the same project
-                        as an input source (a few can be given).
+                        as an input source (a few can be given). Type should
+                        be one of ['state', 'model', 'source', 'output'].
   --clean_state, --cs   Clear the task state before running it. The task will
                         be running again even if it was already completed
                         before.
