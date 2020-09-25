@@ -37,7 +37,7 @@ InputTaskTuple = collections.namedtuple(
 
 
 def help_for_input_type(tuple, additional_text=""):
-    field_names = ' '.join([x.upper() for x in tuple._fields[:-1]])
+    field_names = " ".join([x.upper() for x in tuple._fields[:-1]])
     res = f"{tuple.__name__.upper()}: {field_names} [distribution]"
     if additional_text:
         res += "\n" + additional_text
@@ -300,7 +300,7 @@ def runArguments(run_parser, shell=False):
         action=InputTaskAction,
         help=help_for_input_type(
             InputTaskTuple,
-            f"""Use an output of a completed task in the same project as an input source (a few can be given). 
+            f"""Use an output of a completed task in the same project as an input source (a few can be given).
             Type should be one of {InputTaskTypes}.""",
         ),
         tuple=InputTaskTuple,
