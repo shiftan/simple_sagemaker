@@ -865,3 +865,9 @@ tox -e report
 2. Handling spot instance / timeout termination / signals
 3. Local testing/debugging
 4. Full documentation of the APIs (Readme / Read the docs + CLI?)
+5. Add support for additional SageMaker features:
+    - [Built in algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
+    - More [frameworks](https://sagemaker.readthedocs.io/en/stable/frameworks/index.html)
+    - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)
+    - [Debugger](https://docs.aws.amazon.com/sagemaker/latest/dg/train-debugger.html)
+    - [Automatic Tuning](https://docs.aws.amazon.com/sagemaker/latest/dg/automatic-model-tuning.html)
