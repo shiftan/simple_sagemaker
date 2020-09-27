@@ -53,7 +53,7 @@ jobs:
         aws-region: us-east-1
     - name: Smoke tests
       run: |
-        tox -e py -- --capture=no --log-cli-level=INFO tests/smoke/
+        tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
     - name: System tests & check coverage
       if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'master')
       run: |
