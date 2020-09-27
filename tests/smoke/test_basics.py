@@ -1,8 +1,15 @@
 import logging
 import subprocess
+import os
+import shutil
+import sys
+from time import gmtime, strftime
 
 import boto3
+from ..system.compare_outputs import isAsExpected
 
+file_path = os.path.split(__file__)[0]
+examples_path = os.path.abspath(os.path.join(file_path, "..", "..", "examples"))
 
 def test_project(caplog, tmp_path):
     caplog.set_level(logging.INFO)
@@ -46,3 +53,28 @@ def test_cli_shell_help():
 
 def test_cli_data_help():
     _testCliInternal("ssm data -h")
+
+
+
+def _internalTestCli(test_path, caplog, tmp_path):
+    caplog.set_level(logging.INFO)
+    print("Temp path:", tmp_path)
+    print("Running cli:", test_path)
+
+    output_path = os.path.join(tmp_path, test_path, "output_smoke")
+    # remove current local output
+    shutil.rmtree(output_path, ignore_errors=True)
+    # prefix/suffix for project name
+    py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
+    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+    postfix = f"_{time_string}_{py_version_string}"
+    prefix = "tests_smoke/"
+
+    run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
+    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
+
+    expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
+    assert isAsExpected(output_path, expected_path)
+
+def test_readme_examples(caplog, tmp_path):
+    _internalTestCli("readme_examples", caplog, tmp_path)

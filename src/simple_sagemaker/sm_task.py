@@ -30,6 +30,7 @@ class SageMakerTask:
         prefix,
         bucket_name=None,
         smSession=None,
+        local_mode=False,
     ):
         """
         Initializes a task
@@ -48,6 +49,7 @@ class SageMakerTask:
         self.estimators = list()
         self.jobNames = list()
         self.descriptions = list()
+        self.local_mode = local_mode
 
         if smSession is None:
             smSession = sagemaker.Session(boto_session=boto3_session)
@@ -60,8 +62,11 @@ class SageMakerTask:
         self.baseTaskS3Uri = SageMakerTask.getBaseTaskS3Uri(
             bucket_name, prefix, task_name
         )
-        self.stateS3Uri = SageMakerTask.getStateS3Uri(bucket_name, prefix, task_name)
-        self.stateLocalPath = constants.LOCAL_STATE_PATH
+        self.stateS3Uri = None
+        self.stateLocalPath = None
+        if not local_mode:
+            self.stateS3Uri = SageMakerTask.getStateS3Uri(bucket_name, prefix, task_name)
+            self.stateLocalPath = constants.LOCAL_STATE_PATH
         self.inputS3Uri = None
 
         self.internalDependencies = [
@@ -264,13 +269,15 @@ class SageMakerTask:
             model + output + state + source == 1
         ), "Onlt one output type flag should be set"
         uri = None
+        # Bug? in SageMaker local mode - model and output are saved directly to output dir, not in a sub folder
+        output_dir = "" if self.local_mode else "output"
         if model:
             uri = sagemaker.s3.s3_path_join(
-                self.getOutputUri(), "output", "model.tar.gz"
+                self.getOutputUri(), output_dir, "model.tar.gz"
             )
         elif output:
             uri = sagemaker.s3.s3_path_join(
-                self.getOutputUri(), "output", "output.tar.gz"
+                self.getOutputUri(), output_dir, "output.tar.gz"
             )
         elif state:
             uri = self.stateS3Uri

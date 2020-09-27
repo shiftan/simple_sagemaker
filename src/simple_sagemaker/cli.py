@@ -31,8 +31,8 @@ InputTuple = collections.namedtuple("Input", ("path", "distribution"))
 Input_S3Tuple = collections.namedtuple(
     "Input_S3", ("input_name", "s3_uri", "distribution")
 )
-InputTaskTuple = collections.namedtuple(
-    "InputTask", ("input_name", "task_name", "type", "distribution")
+Input_Task_Tuple = collections.namedtuple(
+    "Input_Task", ("input_name", "task_name", "type", "distribution")
 )
 
 
@@ -87,15 +87,15 @@ class Input_S3Action(InputActionBase):
         self.__append__(args, values)
 
 
-InputTaskTypes = ["state", "model", "source", "output"]
+Input_Task_Types = ["state", "model", "source", "output"]
 
 
-class InputTaskAction(InputActionBase):
+class Input_Task_Action(InputActionBase):
     def __call__(self, parser, args, values, option_string=None):
         # print (f'{args} {values} {option_string}')
         # print("****", values, hasattr(args, self.dest))
-        if values[2] not in InputTaskTypes:
-            raise ValueError(f"{values[2]} has to be one of {InputTaskTypes}!")
+        if values[2] not in Input_Task_Types:
+            raise ValueError(f"{values[2]} has to be one of {Input_Task_Types}!")
         self.__append__(args, values)
 
 
@@ -297,13 +297,13 @@ def runArguments(run_parser, shell=False):
     IO_params.add_argument(
         "--input_task",
         "--iit",
-        action=InputTaskAction,
+        action=Input_Task_Action,
         help=help_for_input_type(
-            InputTaskTuple,
+            Input_Task_Tuple,
             f"""Use an output of a completed task in the same project as an input source (a few can be given).
-            Type should be one of {InputTaskTypes}.""",
+            Type should be one of {Input_Task_Types}.""",
         ),
-        tuple=InputTaskTuple,
+        tuple=Input_Task_Tuple,
     )
     running_params.add_argument(
         "--force_running",
@@ -449,16 +449,17 @@ def shellHandler(args, rest):
 
 
 def runHandler(args, rest):
-
-    sm_project = SageMakerProject(
-        **getAllParams(
-            args,
-            {
-                "project_name": "project_name",
-                "bucket_name": "bucket_name",
-            },
-        )
+    code_params = getAllParams(
+        args,
+        {
+            "project_name": "project_name",
+            "bucket_name": "bucket_name",
+        },
     )
+    if "local" in args.instance_type:
+        code_params["local_mode"] = True
+    sm_project = SageMakerProject(**code_params)
+
     sm_project.setDefaultCodeParams(
         **getAllParams(
             args,
