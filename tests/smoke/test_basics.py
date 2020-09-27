@@ -1,5 +1,6 @@
 import logging
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -82,7 +83,5 @@ def _internalTestCli(test_path, caplog, tmp_path):
 
 
 def test_readme_examples(caplog, tmp_path):
-    import platform
-
     if platform.system() in ["Linux", "Windows"]:
         _internalTestCli("readme_examples", caplog, tmp_path)
