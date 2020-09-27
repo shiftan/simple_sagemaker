@@ -71,7 +71,10 @@ def _internalTestCli(test_path, caplog, tmp_path):
     postfix = f"_{os.name}_{py_version_string}_{time_string}"
     prefix = "tests_smoke/"
 
-    run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
+    if platform.system() == "Linux":
+        run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
+    elif platform.system() == "Windows":
+        run_shell = os.path.join(examples_path, test_path, "run_smoke.bat")
     subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
 
     expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
@@ -81,5 +84,5 @@ def _internalTestCli(test_path, caplog, tmp_path):
 def test_readme_examples(caplog, tmp_path):
     import platform
 
-    if platform.system() == "Linux":
+    if platform.system() in ["Linux", "Windows"]:
         _internalTestCli("readme_examples", caplog, tmp_path)
