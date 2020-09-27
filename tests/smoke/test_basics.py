@@ -72,10 +72,11 @@ def _internalTestCli(test_path, caplog, tmp_path):
     prefix = "tests_smoke/"
 
     run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
-    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
+    if os.name != 'nt':
+        subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
 
-    expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
-    assert isAsExpected(output_path, expected_path)
+        expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
+        assert isAsExpected(output_path, expected_path)
 
 
 def test_readme_examples(caplog, tmp_path):
