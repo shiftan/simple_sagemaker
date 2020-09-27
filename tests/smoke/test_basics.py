@@ -72,7 +72,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     prefix = "tests_smoke/"
 
     run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
-    if os.name != 'nt':
+    if os.name != "nt":
         subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
 
         expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
