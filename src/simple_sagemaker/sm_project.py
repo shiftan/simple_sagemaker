@@ -80,11 +80,12 @@ class SageMakerProject:
         if smSession is None:
             if local_mode:
                 from sagemaker.local import LocalSession
+
                 smSession = LocalSession(boto_session=boto3_session)
-                #smSession.config = {'local': {'local_code': True}}
+                # smSession.config = {'local': {'local_code': True}}
             else:
                 smSession = sagemaker.Session(boto_session=boto3_session)
-    
+
         self.smSession = smSession
 
         if not bucket_name:

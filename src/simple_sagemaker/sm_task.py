@@ -65,7 +65,9 @@ class SageMakerTask:
         self.stateS3Uri = None
         self.stateLocalPath = None
         if not local_mode:
-            self.stateS3Uri = SageMakerTask.getStateS3Uri(bucket_name, prefix, task_name)
+            self.stateS3Uri = SageMakerTask.getStateS3Uri(
+                bucket_name, prefix, task_name
+            )
             self.stateLocalPath = constants.LOCAL_STATE_PATH
         self.inputS3Uri = None
 

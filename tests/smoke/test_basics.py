@@ -1,15 +1,17 @@
 import logging
-import subprocess
 import os
 import shutil
+import subprocess
 import sys
 from time import gmtime, strftime
 
 import boto3
+
 from ..system.compare_outputs import isAsExpected
 
 file_path = os.path.split(__file__)[0]
 examples_path = os.path.abspath(os.path.join(file_path, "..", "..", "examples"))
+
 
 def test_project(caplog, tmp_path):
     caplog.set_level(logging.INFO)
@@ -55,7 +57,6 @@ def test_cli_data_help():
     _testCliInternal("ssm data -h")
 
 
-
 def _internalTestCli(test_path, caplog, tmp_path):
     caplog.set_level(logging.INFO)
     print("Temp path:", tmp_path)
@@ -75,6 +76,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
 
     expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
     assert isAsExpected(output_path, expected_path)
+
 
 def test_readme_examples(caplog, tmp_path):
     _internalTestCli("readme_examples", caplog, tmp_path)

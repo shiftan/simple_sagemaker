@@ -75,9 +75,16 @@ def compareLog(expected_content, output_content):
 
     return True
 
+
 def _getAllProcesses(ps__elf_file):
     pattern = "\\d\\d:\\d\\d:\\d\\d"
-    return set([re.split(pattern, line)[-1].strip() for line in ps__elf_file.read_text().splitlines()[1:]])
+    return set(
+        [
+            re.split(pattern, line)[-1].strip()
+            for line in ps__elf_file.read_text().splitlines()[1:]
+        ]
+    )
+
 
 def comparePsElfOutput(expectedfile_path, outputfile_path):
     processes_exp = _getAllProcesses(expectedfile_path)
@@ -88,6 +95,7 @@ def comparePsElfOutput(expectedfile_path, outputfile_path):
         return False
 
     return True
+
 
 def compareFileContent(expectedfile_path, outputfile_path, file_name):
     differences = []
