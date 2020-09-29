@@ -59,6 +59,8 @@ jobs:
         restart-service *docker*
         dir $Env:ProgramFiles\Docker -s
         &$Env:ProgramFiles\Docker\docker.exe --help
+        [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
+        Restart-Service Docker
       # &$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Smoke tests
       run: |
