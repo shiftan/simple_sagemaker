@@ -15,10 +15,11 @@ jobs:
     strategy:
       max-parallel: 10
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        #os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
         python-version: [3.6, 3.7, 3.8]
     env:
-      LCOW_SUPPORTED__: 1
+      LCOW_SUPPORTED: 1
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -57,7 +58,6 @@ jobs:
       run: |
         restart-service *docker*
         dir $Env:ProgramFiles\Docker -s
-        &$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Smoke tests
       run: |
         tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
