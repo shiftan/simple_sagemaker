@@ -353,7 +353,14 @@ class SageMakerProject:
 
     def cleanState(self, task_name):
         """Clean the task state"""
-        smTask = self._getOrBindTask(task_name)
+        smTask = SageMakerTask(
+                self.boto3_session,
+                task_name,
+                None,
+                self.project_name,
+                self.bucket_name,
+                smSession=self.smSession,
+        )
         return smTask.clean_state()
 
 
