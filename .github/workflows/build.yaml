@@ -55,8 +55,8 @@ jobs:
     - name: Prepare windows environment
       if : matrix.os == 'windows-latest'
       run: |
-        powershell "restart-service *docker*" 
-        powershell "&$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine" 
+        powershell restart-service *docker*
+        powershell "&$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchLinuxEngine
     - name: Smoke tests
       run: |
         tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
