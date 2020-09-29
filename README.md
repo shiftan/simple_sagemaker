@@ -6,6 +6,8 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 ## Requirements
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
+3. (Optional) The [Docker Engine](https://docs.docker.com/get-docker/), to be able to customize a docker image
+4. (Optional) The [Docker Compose](https://docs.docker.com/compose/install/), for local testing
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -182,6 +184,13 @@ The files and directories structure is as follows:
     - output.tar.gz - the *main instance* output data (other outputs are ignored)
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
+
+# Local mode
+SageMaker offers partial ["local mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) support in order to test locally. The basic mode runs just the docker locally, while keep using S3 for input/output, and there's the `local_code` mode that does everything locally.
+To use the basic mode with *Simple Sagemaker*, `local` or `local_gpu` as instance type and `local_mode = True` for `SageMakerProject` constructor (this is done automatically with `ssm` CLI).
+Notes:
+- Local mode doesn't support all features, e.g. state isn't supported. More notes and exclusions can be seen on the [documentation](["local_mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) )
+- `local_code` mode isn't currently supported by *Simple Sagemaker*
 
 # Distributed training
 Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for distributed training. Make sure to configure `framework`, 
@@ -852,9 +861,8 @@ tox -e report
 # Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
-3. Local testing/debugging
-4. Full documentation of the APIs (Readme / Read the docs + CLI?)
-5. Add support for additional SageMaker features:
+3. Full documentation of the APIs (Readme / Read the docs + CLI?)
+4. Add support for additional SageMaker features:
     - [Built in algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
     - More [frameworks](https://sagemaker.readthedocs.io/en/stable/frameworks/index.html)
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)

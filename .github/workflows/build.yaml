@@ -45,7 +45,7 @@ jobs:
     - name: Lint
       run: |
         tox -e lint
-    - name: Configure AWS Credentials
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -53,7 +53,7 @@ jobs:
         aws-region: us-east-1
     - name: Smoke tests
       run: |
-        tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
+        tox -e py -- --capture=no --log-cli-level=INFO tests/smoke/
     - name: System tests & check coverage
       if: matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' && (startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/tags') ||  github.base_ref  == 'master')
       run: |

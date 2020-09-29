@@ -83,5 +83,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
 
 
 def test_readme_examples(caplog, tmp_path):
-    if platform.system() in ["Linux", "Windows"]:
+    # Windows can't currently work due to lack of support in running linux images
+    # Mac can't currently work as it doesn't have a docker engine
+    if platform.system() in ["Linux"]:
         _internalTestCli("readme_examples", caplog, tmp_path)
