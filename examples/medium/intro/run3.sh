@@ -1,5 +1,5 @@
 BASEDIR=$(dirname "$0")
-pushd 
+pushd .
 cd $BASEDIR/example3
 
 ssm run -p ssm-ex -t ex3-1 -s ./code -e ssm_ex3_worker.py \
@@ -13,6 +13,6 @@ ssm run -p ssm-ex -t ex3-2 -s ./code -e ssm_ex3_worker.py \
     -d ./external_dependency --iit ex3_1_model ex3-1 model \
     --iit ex3_1_state ex3-1 state ShardedByS3Key \
     -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
-    --ic 2 --task_type 2 -o $1/ex3_2
+    --ic 2 --task_type 2 -o $1/ex3_2 --cs
 
 popd

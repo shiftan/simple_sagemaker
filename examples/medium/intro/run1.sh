@@ -1,5 +1,5 @@
 BASEDIR=$(dirname "$0")
-pushd 
+pushd .
 cd $BASEDIR
 
 # Clean the current state to make sure the code runs again

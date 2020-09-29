@@ -15,7 +15,9 @@ class S3Sync:
         self.s3_client = boto3_sessions.client("s3")
 
     def syncFolderToS3(self, source: str, dest: str, prefix: str) -> [str]:
+        print (source, dest, prefix)
         paths = self.listFolderFiles(source)
+        print (paths)
         objects = self.listS3Bucket(dest, prefix)
 
         # Getting the keys and ordering to perform binary search
@@ -70,7 +72,7 @@ class S3Sync:
         """
         folder_path = folder_path.rstrip("/")
         files = [
-            str(x)[len(folder_path) + 1 :]
+            str(x.relative_to(folder_path))
             for x in Path(folder_path).rglob("*")
             if not x.is_dir()
         ]
