@@ -58,6 +58,8 @@ jobs:
       run: |
         restart-service *docker*
         dir $Env:ProgramFiles\Docker -s
+        &$Env:ProgramFiles\Docker\docker.exe --help
+      # &$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Smoke tests
       run: |
         tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
