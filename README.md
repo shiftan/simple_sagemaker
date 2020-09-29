@@ -3,9 +3,12 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 
 **Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
+
 ## Requirements
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
+3. (Optional) The [Docker Engine](https://docs.docker.com/get-docker/), to be able to customize a docker image
+4. (Optional) The [Docker Compose](https://docs.docker.com/compose/install/), for local testing
 
 ## Getting started
 To install *Simple Sagemaker*
@@ -72,6 +75,10 @@ CLI based examples:
 
 API based example:
 - [Single file example](#Single-file-example)
+
+## Motivation
+Well, I couldn't find a simple and cheap way to run my existing code on cloud. And, I wanted to try having my own OS project including documentation and a full automated testing and publishing piepline, so here it is :) 
+Please refer to [this blog post](https://medium.com/@shiftan/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9?postPublishedType=repub).
 
 # Background
 *Simple Sagemaker* is a thin wrapper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
@@ -182,6 +189,13 @@ The files and directories structure is as follows:
     - output.tar.gz - the *main instance* output data (other outputs are ignored)
     - sourcedir.tar.gz - source code and dependencies
 - [Job name 2] - another execution of the same task
+
+# Local mode
+SageMaker offers partial ["local mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) support in order to test locally. The basic mode runs just the docker locally, while keep using S3 for input/output, and there's the `local_code` mode that does everything locally.
+To use the basic mode with *Simple Sagemaker*, `local` or `local_gpu` as instance type and `local_mode = True` for `SageMakerProject` constructor (this is done automatically with `ssm` CLI).
+Notes:
+- Local mode doesn't support all features, e.g. state isn't supported. More notes and exclusions can be seen on the [documentation](["local_mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) )
+- `local_code` mode isn't currently supported by *Simple Sagemaker*
 
 # Distributed training
 Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for distributed training. Make sure to configure `framework`, 
@@ -635,8 +649,6 @@ Sample usages:
 1. [CLI Example 6_2](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/example6)- a CLI example launched by [run.sh](https://github.com/shiftan/simple_sagemaker/tree/master/examples/readme_examples/run.sh)
 2. [single task example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_task/example.py) - API
 
----
-
 ## Single file example
 A [single file example](https://github.com/shiftan/simple_sagemaker/tree/master/examples/single_file/example.py) can be found in the [examples directory](https://github.com/shiftan/simple_sagemaker/tree/master/examples).
 First, define the **runner**:
@@ -854,9 +866,8 @@ tox -e report
 # Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Handling spot instance / timeout termination / signals
-3. Local testing/debugging
-4. Full documentation of the APIs (Readme / Read the docs + CLI?)
-5. Add support for additional SageMaker features:
+3. Full documentation of the APIs (Readme / Read the docs + CLI?)
+4. Add support for additional SageMaker features:
     - [Built in algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
     - More [frameworks](https://sagemaker.readthedocs.io/en/stable/frameworks/index.html)
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)

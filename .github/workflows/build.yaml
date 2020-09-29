@@ -13,7 +13,7 @@ jobs:
     #if: github.event_name != 'push' || (!startsWith(github.ref, 'refs/heads/master'))
     
     strategy:
-      max-parallel: 5
+      max-parallel: 10
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
@@ -45,7 +45,7 @@ jobs:
     - name: Lint
       run: |
         tox -e lint
-    - name: Configure AWS Credentials
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

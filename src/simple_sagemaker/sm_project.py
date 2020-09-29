@@ -64,19 +64,28 @@ class SageMakerProject:
         role_name=constants.DEFAULT_IAM_ROLE,
         bucket_name=None,
         smSession=None,
+        local_mode=False,
     ):
         """Constructor"""
         self.project_name = project_name
         self.role_name = role_name
         self.role_created = False
         self.tasks = {}
+        self.local_mode = local_mode
 
         if boto3_session is None:
             boto3_session = boto3.Session()
         self.boto3_session = boto3_session
 
         if smSession is None:
-            smSession = sagemaker.Session(boto_session=boto3_session)
+            if local_mode:
+                from sagemaker.local import LocalSession
+
+                smSession = LocalSession(boto_session=boto3_session)
+                # smSession.config = {'local': {'local_code': True}}
+            else:
+                smSession = sagemaker.Session(boto_session=boto3_session)
+
         self.smSession = smSession
 
         if not bucket_name:
@@ -301,6 +310,7 @@ class SageMakerProject:
             self.project_name,
             self.bucket_name,
             smSession=self.smSession,
+            local_mode=self.local_mode,
         )
         if input_data_path:
             smTask.uploadOrSetInputData(input_data_path)
