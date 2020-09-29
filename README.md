@@ -3,6 +3,7 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 
 **Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
+
 ## Requirements
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
@@ -74,6 +75,10 @@ CLI based examples:
 
 API based example:
 - [Single file example](#Single-file-example)
+
+## Motivation
+Well, I couldn't find a simple and cheap way to run my existing code on cloud. And, I wanted to try having my own OS project including documentation and a full automated testing and publishing piepline, so here it is :) 
+Please refer to [this blog post](https://medium.com/@shiftan/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9?postPublishedType=repub).
 
 # Background
 *Simple Sagemaker* is a thin wrapper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
