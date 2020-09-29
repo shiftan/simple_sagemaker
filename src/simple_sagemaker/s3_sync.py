@@ -15,9 +15,7 @@ class S3Sync:
         self.s3_client = boto3_sessions.client("s3")
 
     def syncFolderToS3(self, source: str, dest: str, prefix: str) -> [str]:
-        print (source, dest, prefix)
         paths = self.listFolderFiles(source)
-        print (paths)
         objects = self.listS3Bucket(dest, prefix)
 
         # Getting the keys and ordering to perform binary search
