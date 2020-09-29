@@ -17,7 +17,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
-
+    env:
+      LCOW_SUPPORTED__: 1
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -51,6 +52,11 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
+    - name: Prepare windows environment
+      if : matrix.os == 'windows-latest'
+      run: |
+        powershell "restart-service *docker*" 
+        powershell "&$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine" 
     - name: Smoke tests
       run: |
         tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
