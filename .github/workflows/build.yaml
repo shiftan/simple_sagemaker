@@ -15,11 +15,9 @@ jobs:
     strategy:
       max-parallel: 10
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
-    env:
-      LCOW_SUPPORTED: 1
+
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -47,23 +45,12 @@ jobs:
     - name: Lint
       run: |
         tox -e lint
-    - name: Configure AWS credentials
+    - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-    - name: Prepare windows environment
-      if : matrix.os == 'windows-latest'
-      run: |
-        Install-WindowsFeature Hyper-V
-        Install-WindowsFeature containers
-        restart-service *docker*
-        dir $Env:ProgramFiles\Docker -s
-        &$Env:ProgramFiles\Docker\docker.exe --help
-        [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
-        Restart-Service Docker
-      # &$Env:ProgramFiles\Docker\Docker\DockerCli.exe -SwitchLinuxEngine
     - name: Smoke tests
       run: |
         tox -e single_proc -- --capture=no --log-cli-level=INFO tests/smoke/
