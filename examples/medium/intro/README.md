@@ -1,0 +1,1 @@
+Examples from the Medium blog post [Cloud processing is now easier and cheaper!](https://medium.com/@shiftan/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9)

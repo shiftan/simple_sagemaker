@@ -351,6 +351,18 @@ class SageMakerProject:
         for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
             s3c.delete_object(Bucket=self.bucket_name, Key=file)
 
+    def cleanState(self, task_name):
+        """Clean the task state"""
+        smTask = SageMakerTask(
+            self.boto3_session,
+            task_name,
+            None,
+            self.project_name,
+            self.bucket_name,
+            smSession=self.smSession,
+        )
+        return smTask.clean_state()
+
     def _getOrBindTask(self, task_name):
         if task_name in self.tasks:
             smTask = self.tasks[task_name]

@@ -70,7 +70,7 @@ class S3Sync:
         """
         folder_path = folder_path.rstrip("/")
         files = [
-            str(x)[len(folder_path) + 1 :]
+            str(x.relative_to(folder_path))
             for x in Path(folder_path).rglob("*")
             if not x.is_dir()
         ]

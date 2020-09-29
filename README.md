@@ -194,6 +194,7 @@ The files and directories structure is as follows:
 SageMaker offers partial ["local mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) support in order to test locally. The basic mode runs just the docker locally, while keep using S3 for input/output, and there's the `local_code` mode that does everything locally.
 To use the basic mode with *Simple Sagemaker*, `local` or `local_gpu` as instance type and `local_mode = True` for `SageMakerProject` constructor (this is done automatically with `ssm` CLI).
 Notes:
+- sagemaker[local] is required: `pip install sagemaker[local]`
 - Local mode doesn't support all features, e.g. state isn't supported. More notes and exclusions can be seen on the [documentation](["local_mode"](https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode) )
 - `local_code` mode isn't currently supported by *Simple Sagemaker*
 
