@@ -369,7 +369,13 @@ def dataArguments(data_parser):
         "-b",
         help="S3 bucket name (a default one is used if not given).",
     )
-
+    data_parser.add_argument(
+        "--clean_state",
+        "--cs",
+        default=False,
+        action="store_true",
+        help="Clean the task state.",
+    )
     data_parser.set_defaults(func=dataHandler)
     addDownloadArgs(data_parser)
 
@@ -557,6 +563,8 @@ def dataHandler(args, rest):
             },
         )
     )
+    if args.clean_state:
+        sm_project.cleanState(args.task_name)
     if args.output_path:
         sm_project.downloadResults(
             args.task_name,
