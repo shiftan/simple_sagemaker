@@ -119,7 +119,7 @@ The **runner** is used to configure **tasks** and **projects**:
 ![High level flow diagram](https://github.com/shiftan/simple_sagemaker/blob/master/docs/high_level_flow.svg?raw=true "High level flow")
 
 # Worker environment
-The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), 
+The worker entry point (`entry_point` parameter), directory (`source_dir` for python code / .sh script, `dir_files` for shell script), 
 along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, 
 and the entry point is then executed. 
 On top of the above, for python code tasks, the `task_toolkit` library is also added as a dependency in this folder.
@@ -206,11 +206,11 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 
 # CLI
 The `ssm` CLI supports 3 commands:
-- run - to run a python based task
+- run - to run a python / .sh script based task
 - shell - to run a shell based task
 - data - to manage (download/clear state) the data of an existing task
 ```bash
-$ ssm -h
+$ ssm run -h
 usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
                --entry_point ENTRY_POINT
@@ -250,9 +250,10 @@ Code:
                         SageMaker.
   --entry_point ENTRY_POINT, -e ENTRY_POINT
                         Path (absolute or relative) to the local Python source
-                        file which should be executed as the entry point. If
-                        source_dir is specified, then entry_point must point
-                        to a file located at the root of source_dir.
+                        file or a .sh script which should be executed as the
+                        entry point. If source_dir is specified, then
+                        entry_point must point to a file located at the root
+                        of source_dir.
   --dependencies DEPENDENCIES [DEPENDENCIES ...], -d DEPENDENCIES [DEPENDENCIES ...]
                         A list of paths to directories (absolute or relative)
                         with any additional libraries that will be exported to
@@ -303,7 +304,7 @@ Image:
                         The python version
 
 Running:
-  --force_running       Force running the task even if it's already completed.
+  --force_running       Force running the task even if its already completed.
   --distribution DISTRIBUTION
                         Tensorflows distribution policy, see https://sagemake
                         r.readthedocs.io/en/stable/frameworks/tensorflow/using
@@ -329,7 +330,7 @@ I/O:
                         INPUT_S3: INPUT_NAME S3_URI [distribution] Additional
                         S3 input sources (a few can be given).
   --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
-                        INPUTTASK: INPUT_NAME TASK_NAME TYPE [distribution]
+                        INPUT_TASK: INPUT_NAME TASK_NAME TYPE [distribution]
                         Use an output of a completed task in the same project
                         as an input source (a few can be given). Type should
                         be one of ['state', 'model', 'source', 'output'].
@@ -484,7 +485,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line in assumed to be an additional command line argument / hyperparameter, and is accessible for the **worker** by the `hps` dictionary within the environment configuration.
+Any extra argument passed to the command line and / or anything after "--" in assumed to be an additional command line argument / hyperparameter, and is accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
 For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib
