@@ -470,9 +470,9 @@ def shellHandler(args, hyperparameters):
 
     # set the command to launch
     hyperparameters["SSM_SHELL_CMD_LINE"] = args.cmd_line
-    assert (
-        "external_hps" not in hyperparameters
-    ), "Shell command can't accept extra command line arguments"
+    assert not hyperparameters[
+        "external_hps"
+    ], f"Shell command can't accept extra command line arguments, got {hyperparameters['external_hps']}"
 
     # make sure the dir_files are added as a dependencies
     if args.dir_files:
