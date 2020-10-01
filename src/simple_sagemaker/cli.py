@@ -466,8 +466,8 @@ def runHandler(args, hyperparameters):
         # command line is going to be computed from entry point and rest of hyperparams
         hyperparameters["SSM_CMD_LINE"] = [
             "./" + os.path.basename(args.entry_point)
-        ] + hyperparameters[""]
-        hyperparameters[""] = list()
+        ] + hyperparameters["external_hps"]
+        hyperparameters["external_hps"] = list()
 
         # make sure the entry_point / source_dir is added as a depencency
         if not args.dependencies:
@@ -556,8 +556,10 @@ def runHandler(args, hyperparameters):
         else {k: v for (k, v) in args.metric_definitions}
     )
 
-    if not hyperparameters[""]:
-        del hyperparameters[""]
+    if hyperparameters["external_hps"]:
+        hyperparameters[""] = hyperparameters["external_hps"]
+    del hyperparameters["external_hps"]
+    
     sm_project.runTask(
         args.task_name,
         image_uri,
@@ -614,8 +616,8 @@ def main():
     )
     logger.info(f"Running ssm cli, args:{sys.argv}")
     args, rest = parseArgs()
-    # "" is for the additional hyperparameters
-    hyperparameters = {"": rest}
+    # "external_hps" is for the additional hyperparameters
+    hyperparameters = {"external_hps": rest}
     args.func(args, hyperparameters)
 
 
