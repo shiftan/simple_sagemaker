@@ -390,9 +390,9 @@ def parseArgs():
         "run",
         help="Run a python / .sh script task",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        epilog = """
+        epilog="""
         Anything after "--" will be passed as-is to the executed script command line
-        """
+        """,
     )
     shell_parser = subparsers.add_parser(
         "shell",
