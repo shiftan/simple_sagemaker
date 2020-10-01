@@ -599,7 +599,8 @@ def runHandler(args, hyperparameters):
             if not second_on_cmd:
                 second_on_cmd = None
             hyperparameters[shell_args[0].lstrip("-")] = second_on_cmd
-    # del hyperparameters["external_hps"]
+    else:
+        del hyperparameters["external_hps"]
 
     sm_project.runTask(
         args.task_name,
