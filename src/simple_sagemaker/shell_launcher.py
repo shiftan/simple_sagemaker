@@ -23,11 +23,15 @@ def worker():
     os.remove(__file__)
     shutil.rmtree("./worker_toolkit")
 
-    # Run the shell command
-    cmd_line = worker_config.hps["SSM_CMD_LINE"]
-    logger.info(f"Launching: {cmd_line}")
-    shell_cmd = subprocess.run(cmd_line, shell=True)
-
+    # Run the shell / cmd line command
+    if "SSM_CMD_LINE" in worker_config.hps:
+        cmd_line = worker_config.hps["SSM_CMD_LINE"]
+        logger.info(f"Launching: {cmd_line}")
+        shell_cmd = subprocess.run(cmd_line)
+    elif "SSM_SHELL_CMD_LINE" in worker_config.hps:
+        cmd_line = worker_config.hps["SSM_SHELL_CMD_LINE"]
+        logger.info(f"Launching a shell: {cmd_line}")
+        shell_cmd = subprocess.run(cmd_line, shell=True)
     # Mark the job as completed if exit code is 0
     if shell_cmd.returncode == 0:
         # mark the task as completed
@@ -38,4 +42,5 @@ def worker():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     worker()

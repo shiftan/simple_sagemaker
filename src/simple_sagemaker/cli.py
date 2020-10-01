@@ -158,7 +158,7 @@ def runArguments(run_parser, shell=False):
         code_group.add_argument(
             "--dir_files",
             help="""Path to a directory with files that are expected to be in root folder where cmd_line is executed.
-            Note: this is intended to be used for shell script / small files. Input data should be given with relevant
+            Note: this is intended to be used for shell scripts / small files. Input data should be given with relevant
             other parameters).""",
         )
     else:
@@ -176,7 +176,7 @@ def runArguments(run_parser, shell=False):
             "-e",
             required=True,
             # type=lambda x: fileValidation(parser, x),
-            help="""Path (absolute or relative) to the local Python source file which should be executed as the entry point.
+            help="""Path (absolute or relative) to the local Python source file or a .sh script which should be executed as the entry point.
             If source_dir is specified, then entry_point must point to a file located at the root of source_dir.""",
         )
     code_group.add_argument(
@@ -386,16 +386,48 @@ def parseArgs():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     subparsers = parser.add_subparsers()
-    run_parser = subparsers.add_parser("run", help="Run a task")
-    shell_parser = subparsers.add_parser("shell", help="Run a command line task")
-    data_parser = subparsers.add_parser("data", help="Manage task data")
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run a python / .sh script task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog="""
+        Anything after "--" will be passed as-is to the executed script command line
+        """,
+    )
+    shell_parser = subparsers.add_parser(
+        "shell",
+        help="Run a shell task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    data_parser = subparsers.add_parser(
+        "data",
+        help="Manage task data",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     runArguments(run_parser)
     runArguments(shell_parser, True)
     dataArguments(data_parser)
 
-    args, rest = parser.parse_known_args()
-    return args, rest
+    # Parse the configuration, assume anything extra and / or after "--"
+    #   is a hyperparameter
+    args_to_parse = sys.argv[1:]
+    additional_args = list()
+    if "--" in args_to_parse:
+        additional_args = args_to_parse[args_to_parse.index("--") + 1 :]
+        args_to_parse = args_to_parse[: args_to_parse.index("--")]
+    args, rest = parser.parse_known_args(args_to_parse)
+
+    # "external_hps" is for the additional hyperparameters
+    hyperparameters = {"external_hps": additional_args}
+    assert (
+        len(rest) % 2 == 0
+    ), f"Hyperparameters has to be of the form --[KEY_NAME] [VALUE] (multiple keys can be given), found: {rest}"
+    for i in range(0, len(rest), 2):
+        key = rest[i]
+        assert key.startswith("--"), "Hyperparameter key has to start with --"
+        hyperparameters[key[2:]] = rest[i + 1]
+    return args, hyperparameters
 
 
 def addParam(args, argName, paramName, params):
@@ -433,28 +465,51 @@ def parseInputsAndAllowAccess(args, sm_project):
     return input_data_path, distribution, inputs
 
 
-def parseHyperparams(rest):
-    res = dict()
-    for i in range(0, len(rest), 2):
-        res[rest[i].strip("-")] = rest[i + 1]
-    return res
+def shellHandler(args, hyperparameters):
+    # Running a shell command
 
+    # set the command to launch
+    hyperparameters["SSM_SHELL_CMD_LINE"] = args.cmd_line
+    assert not hyperparameters[
+        "external_hps"
+    ], f"Shell command can't accept extra command line arguments, got {hyperparameters['external_hps']}"
 
-def shellHandler(args, rest):
-    shell_launcher = Path(__file__).parent / "shell_launcher.py"
-    rest.extend(["--SSM_CMD_LINE", args.cmd_line])
-
+    # make sure the dir_files are added as a dependencies
     if args.dir_files:
         if not args.dependencies:
             args.dependencies = list()
         files = [str(x) for x in Path(args.dir_files).glob("*")]
         args.dependencies.extend(files)
 
+    # execute shell_launcher.py
+    shell_launcher = Path(__file__).parent / "shell_launcher.py"
     args.entry_point = str(shell_launcher)
-    runHandler(args, rest)
+    runHandler(args, hyperparameters)
 
 
-def runHandler(args, rest):
+def runHandler(args, hyperparameters):
+    if args.entry_point and os.path.splitext(args.entry_point)[-1] == ".sh":
+        # Running a shell script
+
+        # command line is going to be computed from entry point and rest of hyperparams
+        hyperparameters["SSM_CMD_LINE"] = [
+            "./" + os.path.basename(args.entry_point)
+        ] + hyperparameters["external_hps"]
+        hyperparameters["external_hps"] = list()
+
+        # make sure the entry_point / source_dir is added as a depencency
+        if not args.dependencies:
+            args.dependencies = list()
+        if args.source_dir:
+            files = [str(x) for x in Path(args.source_dir).glob("*")]
+            args.dependencies.extend(files)
+        else:
+            args.dependencies.append(args.entry_point)
+
+        # execute shell_launcher.py
+        shell_launcher = Path(__file__).parent / "shell_launcher.py"
+        args.entry_point = str(shell_launcher)
+
     code_params = getAllParams(
         args,
         {
@@ -522,13 +577,21 @@ def runHandler(args, rest):
     input_data_path, input_distribution, inputs = parseInputsAndAllowAccess(
         args, sm_project
     )
-    hyperparameters = parseHyperparams(rest)
     tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
     metric_definitions = (
         {}
         if args.metric_definitions is None
         else {k: v for (k, v) in args.metric_definitions}
     )
+
+    # encode external args to be parse correctly by SM
+    if hyperparameters["external_hps"]:
+        import shlex
+
+        shell_args = hyperparameters["external_hps"]
+        second_on_cmd = " ".join(shlex.quote(arg) for arg in shell_args[1:])
+        hyperparameters[shell_args[0]] = second_on_cmd
+    del hyperparameters["external_hps"]
 
     sm_project.runTask(
         args.task_name,
@@ -553,7 +616,7 @@ def runHandler(args, rest):
         )
 
 
-def dataHandler(args, rest):
+def dataHandler(args, hyperparameters):
     sm_project = SageMakerProject(
         **getAllParams(
             args,
@@ -585,8 +648,8 @@ def main():
         format=format,
     )
     logger.info(f"Running ssm cli, args:{sys.argv}")
-    args, rest = parseArgs()
-    args.func(args, rest)
+    args, hyperparameters = parseArgs()
+    args.func(args, hyperparameters)
 
 
 if __name__ == "__main__":

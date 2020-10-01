@@ -119,7 +119,7 @@ The **runner** is used to configure **tasks** and **projects**:
 ![High level flow diagram](https://github.com/shiftan/simple_sagemaker/blob/master/docs/high_level_flow.svg?raw=true "High level flow")
 
 # Worker environment
-The worker entry point (`entry_point` parameter), directory (`source_dir` for python code, `dir_files` for shell script), 
+The worker entry point (`entry_point` parameter), directory (`source_dir` for python code / .sh script, `dir_files` for shell script), 
 along with all dependencies (`dependencies` parameter) are getting copied to a single directory (`/opt/ml/code`) on each instance, 
 and the entry point is then executed. 
 On top of the above, for python code tasks, the `task_toolkit` library is also added as a dependency in this folder.
@@ -206,11 +206,11 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 
 # CLI
 The `ssm` CLI supports 3 commands:
-- run - to run a python based task
+- run - to run a python / .sh script based task
 - shell - to run a shell based task
 - data - to manage (download/clear state) the data of an existing task
 ```bash
-$ ssm -h
+$ ssm run -h
 usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
                --entry_point ENTRY_POINT
@@ -236,9 +236,9 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
 optional arguments:
   -h, --help            show this help message and exit
   --project_name PROJECT_NAME, -p PROJECT_NAME
-                        Project name.
+                        Project name. (default: None)
   --task_name TASK_NAME, -t TASK_NAME
-                        Task name.
+                        Task name. (default: None)
 
 Code:
   --source_dir SOURCE_DIR, -s SOURCE_DIR
@@ -247,113 +247,126 @@ Code:
                         entry point file. If source_dir is an S3 URI, it must
                         point to a tar.gz file. Structure within this
                         directory are preserved when running on Amazon
-                        SageMaker.
+                        SageMaker. (default: None)
   --entry_point ENTRY_POINT, -e ENTRY_POINT
                         Path (absolute or relative) to the local Python source
-                        file which should be executed as the entry point. If
-                        source_dir is specified, then entry_point must point
-                        to a file located at the root of source_dir.
+                        file or a .sh script which should be executed as the
+                        entry point. If source_dir is specified, then
+                        entry_point must point to a file located at the root
+                        of source_dir. (default: None)
   --dependencies DEPENDENCIES [DEPENDENCIES ...], -d DEPENDENCIES [DEPENDENCIES ...]
                         A list of paths to directories (absolute or relative)
                         with any additional libraries that will be exported to
                         the container The library folders will be copied to
                         SageMaker in the same folder where the entrypoint is
-                        copied.
+                        copied. (default: None)
 
 Instance:
   --instance_type INSTANCE_TYPE, --it INSTANCE_TYPE
-                        Type of EC2 instance to use.
+                        Type of EC2 instance to use. (default: ml.m5.large)
   --instance_count INSTANCE_COUNT, --ic INSTANCE_COUNT
-                        Number of EC2 instances to use.
+                        Number of EC2 instances to use. (default: 1)
   --volume_size VOLUME_SIZE, -v VOLUME_SIZE
                         Size in GB of the EBS volume to use for storing input
                         data. Must be large enough to store input data.
-  --no_spot             Use on demand instances
+                        (default: 30)
+  --no_spot             Use on demand instances (default: True)
   --use_spot_instances  Specifies whether to use SageMaker Managed Spot
-                        instances.
+                        instances. (default: True)
   --max_wait_mins MAX_WAIT_MINS
                         Timeout in minutes waiting for spot instances. After
                         this amount of time Amazon SageMaker will stop waiting
                         for Spot instances to become available. If 0 is
                         specified and spot instances are used, its set to
-                        max_run_mins
+                        max_run_mins (default: 0)
   --max_run_mins MAX_RUN_MINS
                         Timeout in minutes for running. After this amount of
                         time Amazon SageMaker terminates the job regardless of
-                        its current status.
+                        its current status. (default: 1440)
 
 Image:
   --aws_repo_name AWS_REPO_NAME, --ar AWS_REPO_NAME
-                        Name of ECS repository.
+                        Name of ECS repository. (default: None)
   --repo_name REPO_NAME, --rn REPO_NAME
-                        Name of local repository.
+                        Name of local repository. (default: None)
   --image_tag IMAGE_TAG
-                        Image tag.
+                        Image tag. (default: latest)
   --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
                         Path to a directory containing the DockerFile. The
                         base image should be set to `__BASE_IMAGE__` within
                         the Dockerfile, and is automatically replaced with the
-                        correct base image.
+                        correct base image. (default: None)
   --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
                         The framework to use, see https://github.com/aws/deep-
                         learning-containers/blob/master/available_images.md
+                        (default: pytorch)
   --framework_version FRAMEWORK_VERSION, --fv FRAMEWORK_VERSION
-                        The framework version
+                        The framework version (default: None)
   --py_version PY_VERSION, --pv PY_VERSION
-                        The python version
+                        The python version (default: None)
 
 Running:
-  --force_running       Force running the task even if it's already completed.
+  --force_running       Force running the task even if its already completed.
+                        (default: False)
   --distribution DISTRIBUTION
                         Tensorflows distribution policy, see https://sagemake
                         r.readthedocs.io/en/stable/frameworks/tensorflow/using
-                        _tf.html#distributed-training.
+                        _tf.html#distributed-training. (default: None)
   --tag key value       Tag to be attached to the jobs executed for this task.
+                        (default: None)
 
 I/O:
   --bucket_name BUCKET_NAME, -b BUCKET_NAME
                         S3 bucket name (a default one is used if not given).
+                        (default: None)
   --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
                         INPUT: PATH [distribution] Local/s3 path for the input
                         data. If a local path is given, it will be synced to
                         the task folder on the selected S3 bucket before
-                        launching the task.
+                        launching the task. (default: None)
   --model_uri MODEL_URI
                         URI where a pre-trained model is stored, either
                         locally or in S3. If specified, the estimator will
                         create a channel pointing to the model so the training
                         job can download it. This model can be a
                         ‘model.tar.gz’ from a previous training job, or other
-                        artifacts coming from a different source.
+                        artifacts coming from a different source. (default:
+                        None)
   --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
                         INPUT_S3: INPUT_NAME S3_URI [distribution] Additional
-                        S3 input sources (a few can be given).
+                        S3 input sources (a few can be given). (default: None)
   --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
-                        INPUTTASK: INPUT_NAME TASK_NAME TYPE [distribution]
+                        INPUT_TASK: INPUT_NAME TASK_NAME TYPE [distribution]
                         Use an output of a completed task in the same project
                         as an input source (a few can be given). Type should
                         be one of ['state', 'model', 'source', 'output'].
+                        (default: None)
   --clean_state, --cs   Clear the task state before running it. The task will
                         be running again even if it was already completed
-                        before.
+                        before. (default: False)
   --keep_state, --ks    Keep the current task state. If the task is already
                         completed, its current output will be taken without
-                        running it again.
+                        running it again. (default: True)
   --metric_definitions name regexp, --md name regexp
                         Name and regexp for a metric definition, a few can be
                         given. See https://docs.aws.amazon.com/sagemaker/lates
-                        t/dg/training-metrics.html.
+                        t/dg/training-metrics.html. (default: None)
   --enable_sagemaker_metrics, -m
                         Enables SageMaker Metrics Time Series. See https://doc
                         s.aws.amazon.com/sagemaker/latest/dg/training-
-                        metrics.html.
+                        metrics.html. (default: False)
 
 Download:
   --output_path OUTPUT_PATH, -o OUTPUT_PATH
-                        Local path to download the outputs to.
-  --download_state      Download the state once task is finished
-  --download_model      Download the model once task is finished
-  --download_output     Download the output once task is finished
+                        Local path to download the outputs to. (default: None)
+  --download_state      Download the state once task is finished (default:
+                        False)
+  --download_model      Download the model once task is finished (default:
+                        False)
+  --download_output     Download the output once task is finished (default:
+                        False)
+
+Anything after "--" will be passed as-is to the executed script command line
 ```
 Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by
 `dir_files` and `cmd_line`, respectively. Run `ssm shell -h` for more details.
@@ -484,7 +497,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line in assumed to be an additional command line argument / hyperparameter, and is accessible for the **worker** by the `hps` dictionary within the environment configuration.
+Any extra argument passed to the command line in the form of --[KEY_NAME] [VALUE] is passed as an hyperparameter, and anything after "--" in passed as-is to the executed script command line. hyperparameters are accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
 For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib

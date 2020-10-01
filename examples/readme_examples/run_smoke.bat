@@ -8,6 +8,6 @@ echo %dirname%
 
 :: Example 7 - local mode
 ::   --ks is used to avoid messing with state (not supported in local mode)
-tox -e ssm -- shell -p %2simple-sagemaker-example-cli%3 -t shell-cli-local ^
+ssm shell -p %2simple-sagemaker-example-cli%3 -t shell-cli-local ^
     --cmd_line "ps -elf >> \$SM_OUTPUT_DATA_DIR/ps__elf" ^
     -o %1/example7 --it 'local' --no_spot --download_output %4 %5 %6 %7 %8 %9 --ks
