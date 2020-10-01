@@ -152,11 +152,13 @@ The complete list of configuration parameters:
 | Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
 | Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
 | The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
+| The number of instance running for this **job** | SSM_WORLD_SIZE | world_size | 'eth0'
+| The rank of the current instance | SSM_HOST_RANK | host_rank | 'eth0'
 
 ## State
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
 The local path is available in `worker_config.state`. 
-When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `init_multi_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
+When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `per_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
 1. To skip it next time (unless enforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
@@ -366,7 +368,8 @@ Download:
   --download_output     Download the output once task is finished (default:
                         False)
 
-Anything after "--" will be passed as-is to the executed script command line
+Anything after "--" (followed by a space) will be passed as-is to the executed 
+script command line
 ```
 Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by
 `dir_files` and `cmd_line`, respectively. Run `ssm shell -h` for more details.
@@ -497,7 +500,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line in the form of --[KEY_NAME] [VALUE] is passed as an hyperparameter, and anything after "--" in passed as-is to the executed script command line. hyperparameters are accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
+Any extra argument passed to the command line in the form of --[KEY_NAME] [VALUE] is passed as an hyperparameter, and anything after "--" (followed by a space) in passed as-is to the executed script command line. hyperparameters are accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
 For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib
@@ -879,9 +882,10 @@ tox -e report
 
 # Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
-2. Handling spot instance / timeout termination / signals
-3. Full documentation of the APIs (Readme / Read the docs + CLI?)
-4. Add support for additional SageMaker features:
+2. Bug: If arguments after "--" (followed by a space) are used, please initialize `WorkerConfig` object with `update_argv=True` (the default) before parsing the command line arguments, e.g before calling `parser.parse_args()`.
+3. Handling spot instance / timeout termination / signals
+4. Full documentation of the APIs (Readme / Read the docs + CLI?)
+5. Add support for additional SageMaker features:
     - [Built in algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
     - More [frameworks](https://sagemaker.readthedocs.io/en/stable/frameworks/index.html)
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)

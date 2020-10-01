@@ -3,7 +3,9 @@ import json
 import logging
 import multiprocessing
 import os
+import shlex
 import shutil
+import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -19,20 +21,24 @@ def _bind(instance, func, as_name):
 
 
 class WorkerConfig:
-    def __init__(self, init_multi_instance_state=True, set_debug_level=True):
+    def __init__(self, per_instance_state=True, set_debug_level=True, update_argv=True):
         """Initialize the WorkerConfig object.
 
-        :param init_multi_instance_state: whether to call :func:`initMultiWorkersState` on initialization, defaults to True
-        :type init_multi_instance_state: bool, optional
-        :param set_debug_level: whether to call :func:`setDebugLevel` on initialization, defaults to True
+        :param per_instance_state: Whether to call :func:`_initMultiWorkersState` on initialization, defaults to True
+        :type per_instance_state: bool, optional
+        :param set_debug_level: Whether to call :func:`setDebugLevel` on initialization, defaults to True
         :type set_debug_level: bool, optional
         """
         if set_debug_level:
             self.setDebugLevel()
         self._otherInstanceStateDeleted = False
         self.config = self.parseArgs()
-        if init_multi_instance_state:
-            self.config.instance_state = self.initMultiWorkersState()
+        self.per_instance_state = per_instance_state
+        if per_instance_state:
+            self.config.instance_state = self._initMultiWorkersState()
+
+        if update_argv:
+            self._updateArgv()
 
         logger.info(f"Worker config: {self.config}")
 
@@ -139,10 +145,6 @@ class WorkerConfig:
             "--resource-config", type=str, envVarName="SM_RESOURCE_CONFIG", default=""
         )
 
-        parser.add_argument(
-            "--state", type=str, default="/state"
-        )  # TODO: parse dynamically
-
         args, rest = parser.parse_known_args()
 
         for channel_name in args.channels:
@@ -150,12 +152,37 @@ class WorkerConfig:
             if env_name in os.environ:
                 args.__setattr__(f"channel_{channel_name}", os.environ[env_name])
 
+        # The arguments are set on top of the environment variables
+        args.state = "/state"  # TODO: parse dynamically
+        args.world_size = len(args.hosts)
+        args.host_rank = args.hosts.index(args.current_host)
+
         return args
 
+    def _updateArgv(self):
+        if "--external_hps" in sys.argv:
+            idx = sys.argv.index("--external_hps")
+            # parse the arguments, removing the leading and trailing "
+            parsed_external_arguments = shlex.split(sys.argv[idx + 1][1:-1])
+            # make sure external args are given first
+            sys.argv = (
+                sys.argv[:1]
+                + parsed_external_arguments
+                + sys.argv[1:idx]
+                + sys.argv[idx + 2 :]
+            )
+            logger.info(f"sys.argv was updated to: {sys.argv}")
+            return True
+        return False
+
     def _getInstanceStatePath(self):
-        path = Path(self.config.state) / self.config.current_host
+        if self.per_instance_state:
+            path = Path(self.config.state) / self.config.current_host
+        else:
+            path = Path(self.config.state)
+
         if not path.is_dir():
-            logger.info("Creating instance specific state dir")
+            logger.info("Creating state dir")
             path.mkdir(parents=True, exist_ok=True)
         return str(path)
 
@@ -172,7 +199,20 @@ class WorkerConfig:
                 shutil.rmtree(str(path), ignore_errors=True)
         self._otherInstanceStateDeleted = True
 
-    def initMultiWorkersState(self):
+    def updateNamespace(self, namespace, fields_mapping):
+        """Update a :class:`Namespace` objects with fields from the configuration
+
+        :param namespace: the name space to be updated
+        :type namespace: Namespace
+        :param fields_mapping: A dictionary mapping  field names in the configuration to fields name in the namespace
+            e.g. {"num_cpus": "num_workers"} will update the `num_workers` fields in namespace with the number of CPU
+            from the configuration.
+        :type fields_mapping: dict
+        """
+        for config_field, ns_field in fields_mapping.items():
+            namespace.__setattr__(ns_field, self.config.__getattribute__(config_field))
+
+    def _initMultiWorkersState(self):
         """Initialize the multi worker state.
         Creates a per instance state sub-directory and deletes other instances ones, as all instances
         state is merged after running.
@@ -190,5 +230,5 @@ class WorkerConfig:
 
         """
         logger.info(f"Marking instance {self.config.current_host} completion")
-        path = Path(self.initMultiWorkersState()) / "__COMPLETED__"
+        path = Path(self._getInstanceStatePath()) / "__COMPLETED__"
         path.write_text(self.config.job_name)

@@ -391,7 +391,7 @@ def parseArgs():
         help="Run a python / .sh script task",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog="""
-        Anything after "--" will be passed as-is to the executed script command line
+        Anything after "--" (followed by a space) will be passed as-is to the executed script command line
         """,
     )
     shell_parser = subparsers.add_parser(
@@ -589,9 +589,17 @@ def runHandler(args, hyperparameters):
         import shlex
 
         shell_args = hyperparameters["external_hps"]
-        second_on_cmd = " ".join(shlex.quote(arg) for arg in shell_args[1:])
-        hyperparameters[shell_args[0]] = second_on_cmd
-    del hyperparameters["external_hps"]
+
+        if True:
+            hyperparameters["external_hps"] = (
+                '"' + " ".join(shlex.quote(arg) for arg in shell_args) + '"'
+            )
+        else:
+            second_on_cmd = " ".join(shlex.quote(arg) for arg in shell_args[1:])
+            if not second_on_cmd:
+                second_on_cmd = None
+            hyperparameters[shell_args[0].lstrip("-")] = second_on_cmd
+    # del hyperparameters["external_hps"]
 
     sm_project.runTask(
         args.task_name,

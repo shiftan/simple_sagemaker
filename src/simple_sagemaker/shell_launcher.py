@@ -18,6 +18,8 @@ def worker():
     # Fill the environment varaible with missing parameters
     os.environ["SSM_STATE"] = worker_config.state
     os.environ["SSM_INSTANCE_STATE"] = worker_config.instance_state
+    os.environ["SSM_WORLD_SIZE"] = worker_config.world_size
+    os.environ["SSM_HOST_RANK"] = worker_config.host_rank
 
     # Delete the current file + toolkit as both got injected
     os.remove(__file__)

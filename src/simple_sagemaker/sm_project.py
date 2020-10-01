@@ -452,8 +452,15 @@ class SageMakerProject:
             self.bucket_name, self.project_name, task_name
         )
         (bucket, key) = sagemaker.s3.parse_s3_url(taskS3Uri)
+
+        # Check first if __COMPLETED__ marker exists on the root state folder
+        if self.smSession.list_s3_files(bucket, key + "/__COMPLETED__"):
+            return {"root": self.smSession.read_s3_file(bucket, key + "/__COMPLETED__")}
+
+        # Check if it presents on all subdirs
         subdirs = self._getS3Subdirs(bucket, key)
         results = dict.fromkeys(subdirs)
+
         for subdir in subdirs:
             try:
                 completedContent = self.smSession.read_s3_file(
