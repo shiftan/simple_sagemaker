@@ -557,9 +557,12 @@ def runHandler(args, hyperparameters):
     )
 
     if hyperparameters["external_hps"]:
-        hyperparameters[""] = hyperparameters["external_hps"]
+        import shlex
+
+        shell_args = hyperparameters["external_hps"]
+        hyperparameters[shell_args[0]] = shlex.join(shell_args[1:])
     del hyperparameters["external_hps"]
-    
+
     sm_project.runTask(
         args.task_name,
         image_uri,

@@ -165,24 +165,11 @@ if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     aa = Path(__file__)
     examplesDir = aa.parent.parent.parent / "examples"
-    if False:
-        outs = [
-            "test_single_task0",
-            "test_single_file_tasks0",
-            "test_multiple_tasks0",
-            "test_readme_examples0",
-            "test_cli_multi0",
-        ]
-        exps = [
-            "single_task",
-            "single_file",
-            "multiple_tasks",
-            "readme_examples",
-            "cli_multi",
-        ]
-        for exp, out in zip(exps, outs):
-            exp = examplesDir / exp / "expected_output"
-            out = examplesDir / "out" / out / "output"
+    if True:
+        paths = [x.name for x in (examplesDir / "out").glob("*") if x.is_dir()]
+        for path in paths:
+            exp = examplesDir / path / "expected_output"
+            out = examplesDir / "out" / path / "output"
             print(exp, out, isAsExpected(out, exp))
     else:
         exp = examplesDir / "readme_examples" / "expected_output"
