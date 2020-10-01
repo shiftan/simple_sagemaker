@@ -485,7 +485,7 @@ API based example:
 - [Single file example](#Single-file-example)
 
 ## Passing command line arguments
-Any extra argument passed to the command line and / or anything after "--" in assumed to be an additional command line argument / hyperparameter, and is accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
+Any extra argument passed to the command line in the form of --[KEY_NAME] [VALUE] is passed as an hyperparameter, and anything after "--" in passed as is in the command line. hyperparameters are accessible for the **worker** by the `hps` dictionary within the environment configuration or just by parsing the command time argument of the running script (e.g. sys.argv).
 For example, see the following worker code `worker2.py`:
 ```python
 from worker_toolkit import worker_lib

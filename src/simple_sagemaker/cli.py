@@ -402,7 +402,17 @@ def parseArgs():
         additional_args = args_to_parse[args_to_parse.index("--") + 1 :]
         args_to_parse = args_to_parse[: args_to_parse.index("--")]
     args, rest = parser.parse_known_args(args_to_parse)
-    return args, rest + additional_args
+
+    # "external_hps" is for the additional hyperparameters
+    hyperparameters = {"external_hps": additional_args}
+    assert (
+        len(rest) % 2 == 0
+    ), f"Hyperparameters has to be of the form --[KEY_NAME] [VALUE] (multiple keys can be given), found: {rest}"
+    for i in range(0, len(rest), 2):
+        key = rest[i]
+        assert key.startswith("--"), "Hyperparameter key has to start with --"
+        hyperparameters[key[2:]] = rest[i + 1]
+    return args, hyperparameters
 
 
 def addParam(args, argName, paramName, params):
@@ -619,9 +629,7 @@ def main():
         format=format,
     )
     logger.info(f"Running ssm cli, args:{sys.argv}")
-    args, rest = parseArgs()
-    # "external_hps" is for the additional hyperparameters
-    hyperparameters = {"external_hps": rest}
+    args, hyperparameters = parseArgs()
     args.func(args, hyperparameters)
 
 
