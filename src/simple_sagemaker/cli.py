@@ -386,9 +386,24 @@ def parseArgs():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     subparsers = parser.add_subparsers()
-    run_parser = subparsers.add_parser("run", help="Run a python / .sh script task")
-    shell_parser = subparsers.add_parser("shell", help="Run a shell task")
-    data_parser = subparsers.add_parser("data", help="Manage task data")
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run a python / .sh script task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog = """
+        Anything after "--" will be passed as-is to the executed script command line
+        """
+    )
+    shell_parser = subparsers.add_parser(
+        "shell",
+        help="Run a shell task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    data_parser = subparsers.add_parser(
+        "data",
+        help="Manage task data",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     runArguments(run_parser)
     runArguments(shell_parser, True)
@@ -455,8 +470,11 @@ def shellHandler(args, hyperparameters):
 
     # set the command to launch
     hyperparameters["SSM_SHELL_CMD_LINE"] = args.cmd_line
+    assert (
+        "external_hps" not in hyperparameters
+    ), "Shell command can't accept extra command line arguments"
 
-    # make sure the dir_files are added as a depencencies
+    # make sure the dir_files are added as a dependencies
     if args.dir_files:
         if not args.dependencies:
             args.dependencies = list()
@@ -566,6 +584,7 @@ def runHandler(args, hyperparameters):
         else {k: v for (k, v) in args.metric_definitions}
     )
 
+    # encode external args to be parse correctly by SM
     if hyperparameters["external_hps"]:
         import shlex
 
