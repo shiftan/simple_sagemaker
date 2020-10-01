@@ -467,7 +467,7 @@ def runHandler(args, hyperparameters):
         hyperparameters["SSM_CMD_LINE"] = [
             "./" + os.path.basename(args.entry_point)
         ] + hyperparameters[""]
-        del hyperparameters[""]
+        hyperparameters[""] = list()
 
         # make sure the entry_point / source_dir is added as a depencency
         if not args.dependencies:
@@ -556,6 +556,8 @@ def runHandler(args, hyperparameters):
         else {k: v for (k, v) in args.metric_definitions}
     )
 
+    if not hyperparameters[""]:
+        del hyperparameters[""]
     sm_project.runTask(
         args.task_name,
         image_uri,
