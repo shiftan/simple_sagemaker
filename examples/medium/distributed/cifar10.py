@@ -241,7 +241,7 @@ def parseArgs():
     # Distribution
     parser.add_argument("--backend", default="")
     parser.add_argument("--distributed", action="store_true", default=False)
-    parser.add_argument("--world_size", type=int, default=1)
+    parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--host_rank", type=int, default=0)
 
     # Paths
@@ -287,7 +287,7 @@ def main():
         args.data_path = worker_config.channel_cifar_data
         args.model_path = worker_config.model_dir
         # Update distribution parameters
-        args.world_size = worker_config.world_size
+        args.num_nodes = worker_config.num_nodes
         args.host_rank = worker_config.host_rank
 
     os.makedirs(args.data_path, exist_ok=True)
@@ -303,7 +303,7 @@ def main():
             os.environ["MASTER_ADDR"] = "localhost"
             os.environ["MASTER_PORT"] = "7777"
 
-        os.environ["WORLD_SIZE"] = str(args.world_size)
+        os.environ["WORLD_SIZE"] = str(args.num_nodes)
         dist.init_process_group(backend=args.backend, rank=args.host_rank)
 
     else:

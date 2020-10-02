@@ -1,3 +1,9 @@
+A very good [blog post](https://yangkky.github.io/2019/07/08/distributed-pytorch-tutorial.html) about distributed pytorch training.
+
+# Examples
+- [PyTorch's DDP example](https://github.com/pytorch/examples/tree/master/distributed/ddp)
+- [PyTorch's imagenet example](https://github.com/pytorch/examples/tree/master/distributed/ddp)
+
 # Development flow
 
 ## Part one - local development
@@ -31,3 +37,6 @@
     - Make sure to remove "--no_spot"
 9. Hyperparameters tuning
 10. Debugging
+
+# Optimizations
+1. Mixed precision - it is now [built in with PyTorch 1.6](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/)

@@ -31,7 +31,7 @@ class WorkerConfig:
         """
         if set_debug_level:
             self.setDebugLevel()
-        self.config = self.parseArgs()
+        self.parseArgs()
         self.per_instance_state = False
         if per_instance_state:
             self.initMultiWorkersState()
@@ -58,8 +58,6 @@ class WorkerConfig:
 
     def parseArgs(self):
         """Extracting the environment configuration, i.e. input/output/state paths and running parameters
-
-        return: the parsed environment
         """
 
         # Sagemaker training env vars -
@@ -156,10 +154,15 @@ class WorkerConfig:
 
         # The arguments are set on top of the environment variables
         args.state = "/state"  # TODO: parse dynamically
-        args.world_size = len(args.hosts)
+        args.num_nodes = len(args.hosts)
         args.host_rank = args.hosts.index(args.current_host)
+            # Fill the environment varaible with missing parameters
 
-        return args
+        os.environ["SSM_STATE"] = worker_config.state
+        os.environ["SSM_NUM_NODES"] = str(args.num_nodes)
+        os.environ["SSM_HOST_RANK"] = str(args.host_rank)
+
+        self.config = args
 
     def _updateArgv(self):
         if "--external_hps" in sys.argv:
@@ -220,6 +223,8 @@ class WorkerConfig:
         self.per_instance_state = True
         self._deleteOtherInstancesState()
         self.config.instance_state = self._getInstanceStatePath()
+        os.environ["SSM_INSTANCE_STATE"] = self.config.instance_state
+
 
     def markCompleted(self):
         """Mark the task as completed.

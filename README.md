@@ -152,7 +152,7 @@ The complete list of configuration parameters:
 | Name of the current host | SM_CURRENT_HOST | current_host | 'algo-1'
 | Names of all other hosts that are running on this **job** | SM_HOSTS | hosts | ['algo-1', 'algo-2']
 | The name of the network interface | SM_NETWORK_INTERFACE_NAME | network_interface_name | 'eth0'
-| The number of instance running for this **job** | SSM_WORLD_SIZE | world_size | 'eth0'
+| The number of instance running for this **job** | SSM_NUM_NODES | num_nodes | 'eth0'
 | The rank of the current instance | SSM_HOST_RANK | host_rank | 'eth0'
 
 ## State
