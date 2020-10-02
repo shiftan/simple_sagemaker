@@ -24,22 +24,24 @@ class WorkerConfig:
     def __init__(self, per_instance_state=True, set_debug_level=True, update_argv=True):
         """Initialize the WorkerConfig object.
 
-        :param per_instance_state: Whether to call :func:`_initMultiWorkersState` on initialization, defaults to True
+        :param per_instance_state: Whether to call :func:`initMultiWorkersState` on initialization, defaults to True
         :type per_instance_state: bool, optional
         :param set_debug_level: Whether to call :func:`setDebugLevel` on initialization, defaults to True
         :type set_debug_level: bool, optional
         """
         if set_debug_level:
             self.setDebugLevel()
-        self._otherInstanceStateDeleted = False
         self.config = self.parseArgs()
-        self.per_instance_state = per_instance_state
+        self.per_instance_state = False
         if per_instance_state:
-            self.config.instance_state = self._initMultiWorkersState()
+            self.initMultiWorkersState()
 
         if update_argv:
             self._updateArgv()
 
+        # A workaround as it hides evrything...
+        #   see https://github.com/awslabs/sagemaker-debugger/blob/master/smdebug/core/logger.py
+        os.environ["SMDEBUG_LOG_LEVEL"] = "warning"
         logger.info(f"Worker config: {self.config}")
 
     def __getattr__(self, item):
@@ -187,9 +189,6 @@ class WorkerConfig:
         return str(path)
 
     def _deleteOtherInstancesState(self):
-        if self._otherInstanceStateDeleted:
-            return
-
         logger.info("Deleting other instances' state")
         statePaths = [
             path for path in Path(self.config.state).glob("*") if path.is_dir()
@@ -197,7 +196,6 @@ class WorkerConfig:
         for path in statePaths:
             if path.parts[-1] != self.config.current_host:
                 shutil.rmtree(str(path), ignore_errors=True)
-        self._otherInstanceStateDeleted = True
 
     def updateNamespace(self, namespace, fields_mapping):
         """Update a :class:`Namespace` objects with fields from the configuration
@@ -212,15 +210,16 @@ class WorkerConfig:
         for config_field, ns_field in fields_mapping.items():
             namespace.__setattr__(ns_field, self.config.__getattribute__(config_field))
 
-    def _initMultiWorkersState(self):
+    def initMultiWorkersState(self):
         """Initialize the multi worker state.
         Creates a per instance state sub-directory and deletes other instances ones, as all instances
         state is merged after running.
-
-        return: the path to the instance specific instance state
         """
+        if self.per_instance_state:
+            return
+        self.per_instance_state = True
         self._deleteOtherInstancesState()
-        return self._getInstanceStatePath()
+        self.config.instance_state = self._getInstanceStatePath()
 
     def markCompleted(self):
         """Mark the task as completed.
