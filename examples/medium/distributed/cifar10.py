@@ -36,7 +36,7 @@ def imshow(img, fn):
     plt.clf()
     img = img / 2 + 0.5  # unnormalize
     npimg = img.numpy()
-    #plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.savefig(fn)
 
 
@@ -45,7 +45,15 @@ def download_data(data_path):
     os.remove(os.path.join(data_path, CIFAR10.filename))
 
 
-def train(data_path, state_path, model_path, num_workers=2, train_batch_size=40, test_batch_size=4, epochs=5):
+def train(
+    data_path,
+    state_path,
+    model_path,
+    num_workers=2,
+    train_batch_size=40,
+    test_batch_size=4,
+    epochs=5,
+):
     # ##################### 1. Loading and normalizing CIFAR10
 
     transform = transforms.Compose(
@@ -53,9 +61,13 @@ def train(data_path, state_path, model_path, num_workers=2, train_batch_size=40,
     )
 
     trainset = CIFAR10(root=data_path, train=True, download=False, transform=transform)
-    #trainset = torch.utils.data.ConcatDataset([trainset]*5)
+    # trainset = torch.utils.data.ConcatDataset([trainset]*5)
     trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=train_batch_size, shuffle=True, num_workers=num_workers, pin_memory=True
+        trainset,
+        batch_size=train_batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True,
     )
 
     if False:
@@ -76,13 +88,15 @@ def train(data_path, state_path, model_path, num_workers=2, train_batch_size=40,
     # ##################### 3. Define a Loss function and optimizer
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001*train_batch_size/40, momentum=0.9)
+    optimizer = optim.SGD(
+        net.parameters(), lr=0.001 * train_batch_size / 40, momentum=0.9
+    )
 
     # ##################### 4. Train the network
 
-    print_frq = 2000*40//train_batch_size
+    print_frq = 2000 * 40 // train_batch_size
     num_batches = len(trainloader)
-    print (f"Num batches:{num_batches}")
+    print(f"Num batches:{num_batches}")
     torch.save(net.state_dict(), os.path.join(state_path, "cifar_net.pth"))
 
     for epoch in range(epochs):  # loop over the dataset multiple times
@@ -103,13 +117,17 @@ def train(data_path, state_path, model_path, num_workers=2, train_batch_size=40,
 
             # print statistics
             running_loss += loss.item()
-            if i % print_frq == (print_frq-1) or i == num_batches-1:  # print every 10 mini-batches
+            if (
+                i % print_frq == (print_frq - 1) or i == num_batches - 1
+            ):  # print every 10 mini-batches
                 torch.save(net.state_dict(), os.path.join(state_path, "cifar_net.pth"))
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
-        test(data_path, state_path, num_workers, test_batch_size, net=net, device=device)
-    
+        test(
+            data_path, state_path, num_workers, test_batch_size, net=net, device=device
+        )
+
     print("Finished Training")
     # save the model
     torch.save(net.state_dict(), os.path.join(model_path, "cifar_net.pth"))
@@ -137,14 +155,26 @@ class Net(nn.Module):
 
 
 # ##################### 5. Test the network on the test data
-def test(data_path, state_path, num_workers=2, test_batch_size=4, net = None, test_classes = False, device = None):
+def test(
+    data_path,
+    state_path,
+    num_workers=2,
+    test_batch_size=4,
+    net=None,
+    test_classes=False,
+    device=None,
+):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
 
     testset = CIFAR10(root=data_path, train=False, download=False, transform=transform)
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=test_batch_size, shuffle=False, num_workers=num_workers, pin_memory=True
+        testset,
+        batch_size=test_batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True,
     )
 
     if not device:
@@ -155,7 +185,6 @@ def test(data_path, state_path, num_workers=2, test_batch_size=4, net = None, te
         net.to(device)
         PATH = os.path.join(state_path, "cifar_net.pth")
         net.load_state_dict(torch.load(PATH))
-
 
     if test_classes:
         dataiter = iter(testloader)
@@ -235,6 +264,7 @@ def main():
     worker_config = None
     if "SAGEMAKER_JOB_NAME" in os.environ:
         from worker_toolkit import worker_lib
+
         worker_config = worker_lib.WorkerConfig(per_instance_state=False)
 
     args = parseArgs()
@@ -268,7 +298,8 @@ def main():
         # Initialize the distributed environment.
         if not worker_config:
             # 3b. The are set automatically when using a PyTorch framework
-            #   see https://github.com/aws/sagemaker-pytorch-training-toolkit/blob/master/src/sagemaker_pytorch_container/training.py
+            #   see https://github.com/aws/sagemaker-pytorch-training-toolkit/blob/
+            #           master/src/sagemaker_pytorch_container/training.py
             os.environ["MASTER_ADDR"] = "localhost"
             os.environ["MASTER_PORT"] = "7777"
 
