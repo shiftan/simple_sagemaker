@@ -39,4 +39,4 @@ def worker():
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    worker()
+    sys.exit(worker())

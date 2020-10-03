@@ -158,7 +158,7 @@ class WorkerConfig:
         args.host_rank = args.hosts.index(args.current_host)
             # Fill the environment varaible with missing parameters
 
-        os.environ["SSM_STATE"] = worker_config.state
+        os.environ["SSM_STATE"] = args.state
         os.environ["SSM_NUM_NODES"] = str(args.num_nodes)
         os.environ["SSM_HOST_RANK"] = str(args.host_rank)
 
