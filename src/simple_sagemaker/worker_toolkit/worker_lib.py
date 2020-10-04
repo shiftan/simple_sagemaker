@@ -193,7 +193,7 @@ class WorkerConfig:
     def _deleteOtherInstancesState(self):
         logger.info("Deleting other instances' state")
         statePaths = [
-            path for path in Path(self.config.state).glob("*") if path.is_dir()
+            path for path in Path(self.config.state).glob("algo-*") if path.is_dir()
         ]
         for path in statePaths:
             if path.parts[-1] != self.config.current_host:
