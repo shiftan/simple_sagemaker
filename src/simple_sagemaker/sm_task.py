@@ -108,7 +108,7 @@ class SageMakerTask:
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
     ):
-        logger.info(f"Running a processing job...")
+        logger.info("Running a processing job...")
         job_name = self._getJobName()
 
         tags["SimpleSagemakerTask"] = self.task_name

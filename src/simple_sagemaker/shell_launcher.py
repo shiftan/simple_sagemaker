@@ -37,7 +37,7 @@ def worker():
 
     logger.info(f"finished with {shell_cmd.returncode} return code!")
 
-    #wait_for_state_sync(worker_config)
+    # wait_for_state_sync(worker_config)
     return shell_cmd.returncode
 
 
