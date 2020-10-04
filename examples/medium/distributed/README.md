@@ -2,7 +2,16 @@ A very good [blog post](https://yangkky.github.io/2019/07/08/distributed-pytorch
 
 # Examples
 - [PyTorch's DDP example](https://github.com/pytorch/examples/tree/master/distributed/ddp)
-- [PyTorch's imagenet example](https://github.com/pytorch/examples/tree/master/distributed/ddp)
+- [PyTorch's imagenet example](https://github.com/pytorch/examples/tree/master/imagenet)
+- [SageMaker's MNIST](https://github.com/aws/sagemaker-pytorch-training-toolkit/blob/master/test/resources/mnist/mnist.py)
+
+# Imagenet 
+from https://cloud.google.com/tpu/docs/imagenet-setup:
+1. Register to [http://image-net.org/](http://image-net.org/) and request access permission
+2. nohup wget http://image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_train.tar
+3. wget http://www.image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_train_t3.tar
+4. wget http://www.image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_val.tar
+
 
 # Development flow
 
@@ -40,3 +49,7 @@ A very good [blog post](https://yangkky.github.io/2019/07/08/distributed-pytorch
 
 # Optimizations
 1. Mixed precision - it is now [built in with PyTorch 1.6](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/)
+
+Notes:
+1. Make sure to save checkpoints to the state folder
+2. TensorBoard is active, save logs to /opt/ml/output/tensorboard/, e.g. writer = SummaryWriter('/opt/ml/output/tensorboard/') and writer.add_scalar('Loss/test', np.random.random(), n_iter)

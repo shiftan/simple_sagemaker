@@ -329,7 +329,7 @@ class SageMakerProject:
 
         job_name = None if force_running else self._getCompletionJobName(task_name)
         if job_name:
-            logger.info(f"Task {task_name} is already completed by {job_name}")
+            logger.info(f"===== Task {task_name} is already completed by {job_name}")
             smTask.bindToJob(job_name)
         else:
             job_name = smTask.runTrainingJob(
