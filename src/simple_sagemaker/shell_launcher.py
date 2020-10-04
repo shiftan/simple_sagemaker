@@ -37,21 +37,24 @@ def worker():
 
     logger.info(f"finished with {shell_cmd.returncode} return code!")
 
-    wait_for_state_sync(worker_config)
+    #wait_for_state_sync(worker_config)
     return shell_cmd.returncode
+
 
 def wait_for_state_sync(worker_config):
     max_secs = 60 * 5  # 5 mins max
     wait_secs = 5
     state_path = Path(worker_config.state)
     max_change_time = max(map(os.path.getmtime, state_path.rglob("*")))
-    for i in range(max_secs//wait_secs):
+    for i in range(max_secs // wait_secs):
         time.sleep(wait_secs)
         new_max = max(map(os.path.getmtime, state_path.rglob("*")))
         if new_max == max_change_time:
             return
         max_change_time = new_max
-    logger.warning(f"It seems like sage maker is still uploading after {max_secs} secs...")
+    logger.warning(
+        f"It seems like sage maker is still uploading after {max_secs} secs..."
+    )
 
 
 if __name__ == "__main__":

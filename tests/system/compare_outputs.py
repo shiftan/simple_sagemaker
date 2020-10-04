@@ -55,13 +55,17 @@ def compareLog(expected_content, output_content):
     expected_blocks = getRelevantLogBlocks(expected_content)
     output_blocks = getRelevantLogBlocks(output_content)
     if len(output_blocks) != len(expected_blocks):
-        res.append(f"len(output_blocks) and len(expected_blocks) doesn't match, {len(output_blocks)} {len(expected_blocks)}")
+        res.append(
+            f"len(output_blocks) and len(expected_blocks) doesn't match, {len(output_blocks)} {len(expected_blocks)}"
+        )
     for (block_exp, block_out) in zip(expected_blocks, output_blocks):
         lines_exp = block_exp.splitlines()
         lines_out = block_out.splitlines()
         if block_exp.startswith("listing files in "):
             if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
-                res.append(f"Output of file listing doen't match, {len(lines_exp)} {len(lines_exp)} {lines_exp[0]} {lines_out[0]}")
+                res.append(
+                    f"Output of file listing doen't match, {len(lines_exp)} {len(lines_exp)} {lines_exp[0]} {lines_out[0]}"
+                )
             for (line_exp, line_out) in zip(lines_exp[1:], lines_out[1:]):
                 # 'ls -la' output
                 if re.match("[drwx\\-]{10}", line_exp):
@@ -108,7 +112,9 @@ def compareFileContent(expectedfile_path, outputfile_path, file_name):
     if expectedfile_path.is_dir():
         pass
     if "logs/" in file_name or "_stdout" in file_name:
-        compare_logs_res = compareLog(expectedfile_path.read_text(), outputfile_path.read_text())
+        compare_logs_res = compareLog(
+            expectedfile_path.read_text(), outputfile_path.read_text()
+        )
         if compare_logs_res:
             differences.append(f"{file_name} doesn't match")
             differences_info.extend(compare_logs_res)
@@ -155,7 +161,9 @@ def isAsExpected(output_path, expected_path):
     for file_name in expectedFiles & outputFiles:
         expectedfile_path = Path(expected_path) / file_name
         outputfile_path = Path(output_path) / file_name
-        differences, diff_info = compareFileContent(expectedfile_path, outputfile_path, file_name)
+        differences, diff_info = compareFileContent(
+            expectedfile_path, outputfile_path, file_name
+        )
         res.extend(differences)
         if diff_info:
             logs_diff_info[file_name] = diff_info
@@ -163,7 +171,7 @@ def isAsExpected(output_path, expected_path):
     # log differences
     for line in res:
         logger.error(line)
-    for key,lines in logs_diff_info.items():
+    for key, lines in logs_diff_info.items():
         logger.warning(f"**** Difference for {key}")
         for line in lines:
             logger.warning(line)
@@ -188,5 +196,7 @@ if __name__ == "__main__":
             print(exp, out, isAsExpected(out, exp))
     else:
         exp = examplesDir / "single_task" / "expected_output"
-        out = Path("/home/user/proj/simple_sagemaker/.tox/single_proc/tmp/test_single_task0/single_task/output")
+        out = Path(
+            "/home/user/proj/simple_sagemaker/.tox/single_proc/tmp/test_single_task0/single_task/output"
+        )
         print(exp, out, isAsExpected(out, exp))

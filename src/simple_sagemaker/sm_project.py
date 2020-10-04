@@ -399,15 +399,15 @@ class SageMakerProject:
         :type task_name: str
         """
         # state is global for the task
-        if ("state" == output_type):
+        if "state" == output_type:
             smTask = SageMakerTask(
-            self.boto3_session,
-            task_name,
-            None,
-            self.project_name,
-            self.bucket_name,
-            smSession=self.smSession,
-        )
+                self.boto3_session,
+                task_name,
+                None,
+                self.project_name,
+                self.bucket_name,
+                smSession=self.smSession,
+            )
         else:
             smTask = self._getOrBindTask(task_name)
         return smTask.getInputConfig(output_type, distribution, subdir)
@@ -468,7 +468,11 @@ class SageMakerProject:
         completion_key = sagemaker.s3.s3_path_join(key, "__COMPLETION__")
         # Check first if __COMPLETED__ marker exists on the root state folder
         if self.smSession.list_s3_files(bucket, completion_key + "/__COMPLETED__"):
-            return {"root": self.smSession.read_s3_file(bucket, completion_key + "/__COMPLETED__")}
+            return {
+                "root": self.smSession.read_s3_file(
+                    bucket, completion_key + "/__COMPLETED__"
+                )
+            }
 
         # Check if it presents on all subdirs
         subdirs = self._getS3Subdirs(bucket, completion_key)
@@ -477,7 +481,8 @@ class SageMakerProject:
         for subdir in subdirs:
             try:
                 completedContent = self.smSession.read_s3_file(
-                    bucket, sagemaker.s3.s3_path_join(completion_key, subdir, "__COMPLETED__")
+                    bucket,
+                    sagemaker.s3.s3_path_join(completion_key, subdir, "__COMPLETED__"),
                 )
                 results[subdir] = completedContent
             except:  # noqa: E722

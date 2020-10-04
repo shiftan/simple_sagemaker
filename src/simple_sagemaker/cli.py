@@ -427,7 +427,9 @@ def parseArgs():
     ), f"Hyperparameters has to be of the form --[KEY_NAME] [VALUE] (multiple keys can be given), found: {rest}"
     for i in range(0, len(rest), 2):
         key = rest[i]
-        assert key.startswith("--"), f"Hyperparameter key has to start with '--' but got {key}"
+        assert key.startswith(
+            "--"
+        ), f"Hyperparameter key has to start with '--' but got {key}"
         hyperparameters[key[2:]] = rest[i + 1]
     return args, hyperparameters
 
@@ -455,7 +457,6 @@ def parseInputsAndAllowAccess(args, sm_project):
             input_data_path = sagemaker.s3.s3_path_join(input_data_path, subdir)
         else:
             input_data_path = os.path.join(input_data_path, subdir)
-        
 
     inputs = dict()
     if args.input_task:

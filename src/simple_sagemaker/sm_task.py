@@ -7,9 +7,9 @@ from time import gmtime, strftime
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
+from sagemaker.processing import ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
 from sagemaker.tensorflow.estimator import TensorFlow
-from sagemaker.processing import ScriptProcessor
 
 from . import VERSION, constants
 from .s3_sync import S3Sync
@@ -108,18 +108,15 @@ class SageMakerTask:
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
     ):
-        logger.info(
-            f"Running a processing job..."
-        )
+        logger.info(f"Running a processing job...")
         job_name = self._getJobName()
 
         tags["SimpleSagemakerTask"] = self.task_name
         tags["SimpleSagemakerVersion"] = VERSION
         tags = [{"Key": k, "Value": v} for k, v in tags.items()]
 
-        role, image_uri, entrypoint=None, 
-
-        script_processor = ScriptProcessor(role=role_name,
+        script_processor = ScriptProcessor(
+            role=role_name,
             image_uri=self.image_uri,
             entrypoint=entrypoint,
             command=command,
@@ -128,8 +125,11 @@ class SageMakerTask:
             volume_size_in_gb=volume_size,
             max_runtime_in_seconds=max_run_mins * 60,
             sagemaker_session=self.smSession,
-            tags=tags)
-        script_processor.run(code=code, inputs=inputs, outputs=outputs, arguments=arguments)
+            tags=tags,
+        )
+        script_processor.run(
+            code=code, inputs=inputs, outputs=outputs, arguments=arguments
+        )
 
         proecessing_job_description = self.smSession.describe_processing_job(job_name)
 
@@ -137,12 +137,11 @@ class SageMakerTask:
         self.jobNames.append(job_name)
         self.descriptions.append(proecessing_job_description)
         print(proecessing_job_description)
-        #if "Completed" != proecessing_job_description["TrainingJobStatus"]:
+        # if "Completed" != proecessing_job_description["TrainingJobStatus"]:
         #    logger.error(
         #        f"Task failed with status: {proecessing_job_description['TrainingJobStatus']}"
         #    )
         return job_name
-
 
     def runTrainingJob(
         self,
