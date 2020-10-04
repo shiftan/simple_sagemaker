@@ -234,5 +234,7 @@ class WorkerConfig:
 
         """
         logger.info(f"Marking instance {self.config.current_host} completion")
-        path = Path(self._getInstanceStatePath()) / "__COMPLETED__"
+        completion_dir = Path(self.config.state) / "__COMPLETION__" / self.config.current_host
+        completion_dir.mkdir(parents=True, exist_ok=True)
+        path = completion_dir / "__COMPLETED__"
         path.write_text(self.config.job_name)

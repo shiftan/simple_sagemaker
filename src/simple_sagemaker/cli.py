@@ -27,18 +27,18 @@ def fileOrS3Validation(parser, arg):
     return arg
 
 
-InputTuple = collections.namedtuple("Input", ("path", "distribution"))
+InputTuple = collections.namedtuple("Input", ("path", "distribution", "subdir"))
 Input_S3Tuple = collections.namedtuple(
-    "Input_S3", ("input_name", "s3_uri", "distribution")
+    "Input_S3", ("input_name", "s3_uri", "distribution", "subdir")
 )
 Input_Task_Tuple = collections.namedtuple(
-    "Input_Task", ("input_name", "task_name", "type", "distribution")
+    "Input_Task", ("input_name", "task_name", "type", "distribution", "subdir")
 )
 
 
 def help_for_input_type(tuple, additional_text=""):
-    field_names = " ".join([x.upper() for x in tuple._fields[:-1]])
-    res = f"{tuple.__name__.upper()}: {field_names} [distribution]"
+    field_names = " ".join([x.upper() for x in tuple._fields[:-2]])
+    res = f"{tuple.__name__.upper()}: {field_names} [DISTRIBUTION] [SUBDIR]"
     if additional_text:
         res += "\n" + additional_text
     return res
@@ -53,12 +53,14 @@ class InputActionBase(argparse.Action):
     def __append__(self, args, values):
         dist_options = ["FullyReplicated", "ShardedByS3Key"]
         default_dist = "FullyReplicated"
-        if len(values) == self.__nargs - 1:
+        if len(values) == self.__nargs - 2:
             values.append(default_dist)
+        if len(values) == self.__nargs - 1:
+            values.append("")
         elif len(values) == self.__nargs:
-            if values[-1] not in dist_options:
+            if values[-2] not in dist_options:
                 raise argparse.ArgumentTypeError(
-                    f"distribution has to be one of {dist_options}"
+                    f"distribution has to be one of {dist_options}, got {values[-2]}"
                 )
         else:
             raise argparse.ArgumentTypeError(
@@ -425,7 +427,7 @@ def parseArgs():
     ), f"Hyperparameters has to be of the form --[KEY_NAME] [VALUE] (multiple keys can be given), found: {rest}"
     for i in range(0, len(rest), 2):
         key = rest[i]
-        assert key.startswith("--"), "Hyperparameter key has to start with --"
+        assert key.startswith("--"), f"Hyperparameter key has to start with '--' but got {key}"
         hyperparameters[key[2:]] = rest[i + 1]
     return args, hyperparameters
 
@@ -448,16 +450,22 @@ def parseInputsAndAllowAccess(args, sm_project):
     input_data_path = None
     distribution = "FullyReplicated"
     if args.input_path:
-        input_data_path, distribution = args.input_path[0]
+        input_data_path, distribution, subdir = args.input_path[0]
+        if input_data_path.lower().startswith("s3://"):
+            input_data_path = sagemaker.s3.s3_path_join(input_data_path, subdir)
+        else:
+            input_data_path = os.path.join(input_data_path, subdir)
+        
 
     inputs = dict()
     if args.input_task:
-        for (input_name, task_name, ttype, distribution) in args.input_task:
+        for (input_name, task_name, ttype, distribution, subdir) in args.input_task:
             inputs[input_name] = sm_project.getInputConfig(
-                task_name, ttype, distribution=distribution
+                task_name, ttype, distribution=distribution, subdir=subdir
             )
     if args.input_s3:
-        for (input_name, s3_uri, distribution) in args.input_s3:
+        for (input_name, s3_uri, distribution, subdir) in args.input_s3:
+            s3_uri = sagemaker.s3.s3_path_join(s3_uri, subdir)
             bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
             sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)

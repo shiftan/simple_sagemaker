@@ -386,6 +386,7 @@ class SageMakerProject:
         task_name,
         output_type,
         distribution="FullyReplicated",
+        subdir="",
     ):
         """Get the class:`sagemaker.inputs.TrainingInput` configuration for an output of a task from this
         project to be used as an input for another task.
@@ -397,8 +398,19 @@ class SageMakerProject:
         :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
         :type task_name: str
         """
-        smTask = self._getOrBindTask(task_name)
-        return smTask.getInputConfig(output_type, distribution)
+        # state is global for the task
+        if ("state" == output_type):
+            smTask = SageMakerTask(
+            self.boto3_session,
+            task_name,
+            None,
+            self.project_name,
+            self.bucket_name,
+            smSession=self.smSession,
+        )
+        else:
+            smTask = self._getOrBindTask(task_name)
+        return smTask.getInputConfig(output_type, distribution, subdir)
 
     def downloadResults(
         self,
@@ -453,18 +465,19 @@ class SageMakerProject:
         )
         (bucket, key) = sagemaker.s3.parse_s3_url(taskS3Uri)
 
+        completion_key = sagemaker.s3.s3_path_join(key, "__COMPLETION__")
         # Check first if __COMPLETED__ marker exists on the root state folder
-        if self.smSession.list_s3_files(bucket, key + "/__COMPLETED__"):
-            return {"root": self.smSession.read_s3_file(bucket, key + "/__COMPLETED__")}
+        if self.smSession.list_s3_files(bucket, completion_key + "/__COMPLETED__"):
+            return {"root": self.smSession.read_s3_file(bucket, completion_key + "/__COMPLETED__")}
 
         # Check if it presents on all subdirs
-        subdirs = self._getS3Subdirs(bucket, key)
+        subdirs = self._getS3Subdirs(bucket, completion_key)
         results = dict.fromkeys(subdirs)
 
         for subdir in subdirs:
             try:
                 completedContent = self.smSession.read_s3_file(
-                    bucket, sagemaker.s3.s3_path_join(key, subdir, "__COMPLETED__")
+                    bucket, sagemaker.s3.s3_path_join(completion_key, subdir, "__COMPLETED__")
                 )
                 results[subdir] = completedContent
             except:  # noqa: E722

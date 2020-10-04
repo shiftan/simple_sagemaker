@@ -883,9 +883,10 @@ tox -e report
 # Open issues
 1. S3_sync doesn't delete remote files if deleted locally + optimization
 2. Bug: If arguments after "--" (followed by a space) are used, please initialize `WorkerConfig` object with `update_argv=True` (the default) before parsing the command line arguments, e.g before calling `parser.parse_args()`.
-3. Handling spot instance / timeout termination / signals
-4. Full documentation of the APIs (Readme / Read the docs + CLI?)
-5. Add support for additional SageMaker features:
+3. State directory can't have too many files (seems to be a SageMaker bug. TBD: open a bug)
+4. Handling spot instance / timeout termination / signals (seems to be opened bug [a bug in deep-learning-containers](https://github.com/aws/deep-learning-containers/issues/632))
+5. Full documentation of the APIs (Readme / Read the docs + CLI?)
+6. Add support for additional SageMaker features:
     - [Built in algorithms](https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html)
     - More [frameworks](https://sagemaker.readthedocs.io/en/stable/frameworks/index.html)
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)
