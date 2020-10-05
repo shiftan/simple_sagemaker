@@ -64,23 +64,23 @@ def compareLog(expected_content, output_content):
         if block_exp.startswith("listing files in "):
             if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
                 res.append(
-                    f"Output of file listing doen't match, {len(lines_exp)} {len(lines_exp)} {lines_exp[0]} {lines_out[0]}"
+                    f"Output of file listing doen't match, {len(lines_exp)} {len(lines_exp)} *{lines_exp[0]}* *{lines_out[0]}*"
                 )
             for (line_exp, line_out) in zip(lines_exp[1:], lines_out[1:]):
                 # 'ls -la' output
                 if re.match("[drwx\\-]{10}", line_exp):
                     if line_exp.split(" ")[-1] != line_out.split(" ")[-1]:
-                        res.append(f"different file, {line_exp} {line_out}")
+                        res.append(f"different file, *{line_exp}* *{line_out}*")
                 else:
                     if line_exp != line_out:
-                        res.append(f"different line, {line_exp} {line_out}")
+                        res.append(f"different line, *{line_exp}* *{line_out}*")
         elif block_exp.startswith("Worker config: Namespace"):
             pass  # TBD: add RE to compare
         elif block_exp.startswith("Env: environ"):
             pass  # TBD: add RE to compare
         else:
             if lines_exp != lines_out:
-                res.append(f"different lines, {lines_exp} {lines_out}")
+                res.append(f"different lines, *{lines_exp}* *{lines_out}*")
 
     return res
 
