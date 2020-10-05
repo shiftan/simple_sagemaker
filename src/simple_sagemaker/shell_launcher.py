@@ -29,7 +29,7 @@ def worker():
     elif "SSM_SHELL_CMD_LINE" in worker_config.hps:
         cmd_line = worker_config.hps["SSM_SHELL_CMD_LINE"]
         logger.info(f"Launching a shell: {cmd_line}")
-        shell_cmd = subprocess.run(cmd_line, shell=True)
+        shell_cmd = subprocess.run(cmd_line, shell=True, executable="/bin/bash")
     # Mark the job as completed if exit code is 0
     if shell_cmd.returncode == 0:
         # mark the task as completed
