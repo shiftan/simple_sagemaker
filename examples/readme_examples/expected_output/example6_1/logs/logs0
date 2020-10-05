@@ -1,48 +1,48 @@
 bash: cannot set terminal process group (-1): Inappropriate ioctl for device
 bash: no job control in this shell
-2020-10-04 09:21:49,962 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
-2020-10-04 09:21:49,964 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-10-04 09:21:49,973 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
-2020-10-04 09:21:56,207 sagemaker_pytorch_container.training INFO     Invoking user training script.
-2020-10-04 09:21:56,483 sagemaker-training-toolkit INFO     Installing dependencies from requirements.txt:
+2020-10-05 09:21:22,133 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-10-05 09:21:22,136 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-05 09:21:22,146 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-10-05 09:21:22,763 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-10-05 09:21:23,031 sagemaker-training-toolkit INFO     Installing dependencies from requirements.txt:
 /opt/conda/bin/python -m pip install -r requirements.txt
 Collecting transformers==3.0.2
   Downloading transformers-3.0.2-py3-none-any.whl (769 kB)
+Requirement already satisfied: requests in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (2.24.0)
+Collecting tokenizers==0.8.1.rc1
+  Downloading tokenizers-0.8.1rc1-cp36-cp36m-manylinux1_x86_64.whl (3.0 MB)
+Requirement already satisfied: packaging in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (20.4)
+Collecting sacremoses
+  Downloading sacremoses-0.0.43.tar.gz (883 kB)
+Collecting regex!=2019.12.17
+  Downloading regex-2020.9.27-cp36-cp36m-manylinux2010_x86_64.whl (662 kB)
 Requirement already satisfied: dataclasses; python_version < "3.7" in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (0.7)
 Requirement already satisfied: tqdm>=4.27 in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (4.46.0)
-Requirement already satisfied: packaging in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (20.4)
-Requirement already satisfied: requests in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (2.24.0)
 Collecting sentencepiece!=0.1.92
   Downloading sentencepiece-0.1.91-cp36-cp36m-manylinux1_x86_64.whl (1.1 MB)
 Requirement already satisfied: numpy in /opt/conda/lib/python3.6/site-packages (from transformers==3.0.2->-r requirements.txt (line 1)) (1.19.1)
-Collecting tokenizers==0.8.1.rc1
-  Downloading tokenizers-0.8.1rc1-cp36-cp36m-manylinux1_x86_64.whl (3.0 MB)
-Collecting regex!=2019.12.17
-  Downloading regex-2020.9.27-cp36-cp36m-manylinux2010_x86_64.whl (662 kB)
 Collecting filelock
   Downloading filelock-3.0.12-py3-none-any.whl (7.6 kB)
-Collecting sacremoses
-  Downloading sacremoses-0.0.43.tar.gz (883 kB)
-Requirement already satisfied: six in /opt/conda/lib/python3.6/site-packages (from packaging->transformers==3.0.2->-r requirements.txt (line 1)) (1.15.0)
-Requirement already satisfied: pyparsing>=2.0.2 in /opt/conda/lib/python3.6/site-packages (from packaging->transformers==3.0.2->-r requirements.txt (line 1)) (2.4.7)
-Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (1.25.10)
 Requirement already satisfied: chardet<4,>=3.0.2 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (3.0.4)
-Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (2020.6.20)
+Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (1.25.10)
 Requirement already satisfied: idna<3,>=2.5 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (2.9)
+Requirement already satisfied: certifi>=2017.4.17 in /opt/conda/lib/python3.6/site-packages (from requests->transformers==3.0.2->-r requirements.txt (line 1)) (2020.6.20)
+Requirement already satisfied: pyparsing>=2.0.2 in /opt/conda/lib/python3.6/site-packages (from packaging->transformers==3.0.2->-r requirements.txt (line 1)) (2.4.7)
+Requirement already satisfied: six in /opt/conda/lib/python3.6/site-packages (from packaging->transformers==3.0.2->-r requirements.txt (line 1)) (1.15.0)
 Requirement already satisfied: click in /opt/conda/lib/python3.6/site-packages (from sacremoses->transformers==3.0.2->-r requirements.txt (line 1)) (7.1.2)
 Requirement already satisfied: joblib in /opt/conda/lib/python3.6/site-packages (from sacremoses->transformers==3.0.2->-r requirements.txt (line 1)) (0.16.0)
 Building wheels for collected packages: sacremoses
   Building wheel for sacremoses (setup.py): started
   Building wheel for sacremoses (setup.py): finished with status 'done'
-  Created wheel for sacremoses: filename=sacremoses-0.0.43-py3-none-any.whl size=893259 sha256=f7e90e2950d084e526be84a487280011baf116e2f8baba5bd36e6151d1415c85
+  Created wheel for sacremoses: filename=sacremoses-0.0.43-py3-none-any.whl size=893259 sha256=d9dc341a7c798584390131007817d99cc5970fd488b23532ac8e7e8676e3ba85
   Stored in directory: /root/.cache/pip/wheels/49/25/98/cdea9c79b2d9a22ccc59540b1784b67f06b633378e97f58da2
 Successfully built sacremoses
-Installing collected packages: sentencepiece, tokenizers, regex, filelock, sacremoses, transformers
+Installing collected packages: tokenizers, regex, sacremoses, sentencepiece, filelock, transformers
 Successfully installed filelock-3.0.12 regex-2020.9.27 sacremoses-0.0.43 sentencepiece-0.1.91 tokenizers-0.8.1rc1 transformers-3.0.2
-2020-10-04 09:22:00,466 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-10-04 09:22:00,478 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-10-04 09:22:00,489 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
-2020-10-04 09:22:00,498 sagemaker-training-toolkit INFO     Invoking user script
+2020-10-05 09:21:27,093 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-05 09:21:27,104 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-05 09:21:27,116 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-05 09:21:27,126 sagemaker-training-toolkit INFO     Invoking user script
 
 Training Env:
 
@@ -76,11 +76,11 @@ Training Env:
     },
     "input_dir": "/opt/ml/input",
     "is_master": true,
-    "job_name": "cli-task6-1-2020-10-04-09-17-37-eb2wbRmm",
+    "job_name": "cli-task6-1-2020-10-05-09-17-25-wrbfZcNY",
     "log_level": 20,
     "master_hostname": "algo-1",
     "model_dir": "/opt/ml/model",
-    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-04-09-16-49_py37/cli-task6-1/cli-task6-1-2020-10-04-09-17-37-eb2wbRmm/source/sourcedir.tar.gz",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-05-09-16-31_py37/cli-task6-1/cli-task6-1-2020-10-05-09-17-25-wrbfZcNY/source/sourcedir.tar.gz",
     "module_name": "worker6",
     "network_interface_name": "eth0",
     "num_cpus": 2,
@@ -120,8 +120,8 @@ SM_OUTPUT_DIR=/opt/ml/output
 SM_NUM_CPUS=2
 SM_NUM_GPUS=0
 SM_MODEL_DIR=/opt/ml/model
-SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-04-09-16-49_py37/cli-task6-1/cli-task6-1-2020-10-04-09-17-37-eb2wbRmm/source/sourcedir.tar.gz
-SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data","persons":"/opt/ml/input/data/persons"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"task_type":"1"},"input_config_dir":"/opt/ml/input/config","input_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"persons":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"cli-task6-1-2020-10-04-09-17-37-eb2wbRmm","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-04-09-16-49_py37/cli-task6-1/cli-task6-1-2020-10-04-09-17-37-eb2wbRmm/source/sourcedir.tar.gz","module_name":"worker6","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"worker6.py"}
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-05-09-16-31_py37/cli-task6-1/cli-task6-1-2020-10-05-09-17-25-wrbfZcNY/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"data":"/opt/ml/input/data/data","persons":"/opt/ml/input/data/persons"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"task_type":"1"},"input_config_dir":"/opt/ml/input/config","input_data_config":{"data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"persons":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"cli-task6-1-2020-10-05-09-17-25-wrbfZcNY","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-05-09-16-31_py37/cli-task6-1/cli-task6-1-2020-10-05-09-17-25-wrbfZcNY/source/sourcedir.tar.gz","module_name":"worker6","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"worker6.py"}
 SM_USER_ARGS=["--task_type","1"]
 SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
 SM_CHANNEL_PERSONS=/opt/ml/input/data/persons
@@ -137,7 +137,7 @@ Invoking script with the following command:
 -- Internal Lib2 imported!
 INFO:worker_toolkit.worker_lib:Deleting other instances' state
 INFO:worker_toolkit.worker_lib:Creating state dir
-INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_data='/opt/ml/input/data/data', channel_model='', channel_persons='/opt/ml/input/data/persons', channels=['data', 'persons'], current_host='algo-1', host_rank=0, hosts=['algo-1', 'algo-2'], hps={'task_type': '1'}, input_config_dir='/opt/ml/input/config', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"persons":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', instance_state='/state/algo-1', job_name='cli-task6-1-2020-10-04-09-17-37-eb2wbRmm', model_dir='/opt/ml/model', network_interface_name='eth0', num_cpus=2, num_gpus=0, num_nodes=2, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state')
+INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_data='/opt/ml/input/data/data', channel_model='', channel_persons='/opt/ml/input/data/persons', channels=['data', 'persons'], current_host='algo-1', host_rank=0, hosts=['algo-1', 'algo-2'], hps={'task_type': '1'}, input_config_dir='/opt/ml/input/config', input_data_config='{"data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"persons":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', instance_state='/state/algo-1', job_name='cli-task6-1-2020-10-05-09-17-25-wrbfZcNY', model_dir='/opt/ml/model', network_interface_name='eth0', num_cpus=2, num_gpus=0, num_nodes=2, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"}', state='/state')
 INFO:__main__:input channel data is at /opt/ml/input/data/data
 INFO:__main__:input channel persons is at /opt/ml/input/data/persons
 INFO:__main__:*** START listing files in /opt/ml
@@ -152,12 +152,12 @@ INFO:__main__:[Dir ] /opt/ml/code/worker_toolkit/worker_lib.py
 INFO:__main__:[File] /opt/ml/input
 INFO:__main__:[File] /opt/ml/input/config
 INFO:__main__:[Dir ] /opt/ml/input/config/checkpointconfig.json
-INFO:__main__:[Dir ] /opt/ml/input/config/debughookconfig.json
 INFO:__main__:[Dir ] /opt/ml/input/config/hyperparameters.json
 INFO:__main__:[Dir ] /opt/ml/input/config/init-config.json
 INFO:__main__:[Dir ] /opt/ml/input/config/inputdataconfig.json
 INFO:__main__:[Dir ] /opt/ml/input/config/metric-definition-regex.json
 INFO:__main__:[Dir ] /opt/ml/input/config/resourceconfig.json
+INFO:__main__:[Dir ] /opt/ml/input/config/tensorboardoutputconfig.json
 INFO:__main__:[Dir ] /opt/ml/input/config/trainingjobconfig.json
 INFO:__main__:[Dir ] /opt/ml/input/config/upstreamoutputdataconfig.json
 INFO:__main__:[File] /opt/ml/input/data
@@ -175,7 +175,7 @@ INFO:__main__:[File] /opt/ml/output/data
 INFO:__main__:[File] /opt/ml/output/metrics
 INFO:__main__:[File] /opt/ml/output/metrics/sagemaker
 INFO:__main__:[File] /opt/ml/output/profiler
-INFO:__main__:[File] /opt/ml/output/tensors
+INFO:__main__:[File] /opt/ml/output/tensorboard
 INFO:__main__:*** END file listing /opt/ml
 INFO:__main__:*** START listing files in /state
 INFO:__main__:[File] /state/algo-1
@@ -193,7 +193,7 @@ INFO:__main__:[Dir ] /opt/ml/output/data/output_algo-1
 INFO:__main__:[File] /opt/ml/output/metrics
 INFO:__main__:[File] /opt/ml/output/metrics/sagemaker
 INFO:__main__:[File] /opt/ml/output/profiler
-INFO:__main__:[File] /opt/ml/output/tensors
+INFO:__main__:[File] /opt/ml/output/tensorboard
 INFO:__main__:*** END file listing /opt/ml
 INFO:__main__:*** START listing files in /state
 INFO:__main__:[File] /state/__COMPLETION__
@@ -203,4 +203,4 @@ INFO:__main__:[File] /state/algo-1
 INFO:__main__:[Dir ] /state/algo-1/algo-1
 INFO:__main__:*** END file listing /state
 INFO:__main__:finished!
-2020-10-04 09:22:03,544 sagemaker-training-toolkit INFO     Reporting training SUCCESS
+2020-10-05 09:21:30,214 sagemaker-training-toolkit INFO     Reporting training SUCCESS
