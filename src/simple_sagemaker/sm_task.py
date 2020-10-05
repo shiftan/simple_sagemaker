@@ -6,6 +6,7 @@ import tarfile
 from time import gmtime, strftime
 
 import sagemaker
+from sagemaker.debugger import TensorBoardOutputConfig
 from sagemaker.inputs import TrainingInput
 from sagemaker.processing import ScriptProcessor
 from sagemaker.pytorch.estimator import PyTorch
@@ -209,6 +210,12 @@ class SageMakerTask:
         }
         estimator_class = classes[framework]
 
+        # Configure TensorBoard
+        tensorboard_output_config = TensorBoardOutputConfig(
+            s3_output_path=self.baseTaskS3Uri,
+            container_local_output_path="/opt/ml/output/tensorboard/",
+        )
+
         estimator = estimator_class(
             entry_point=entry_point,
             source_dir=source_dir,
@@ -232,6 +239,8 @@ class SageMakerTask:
             tags=tags,
             metric_definitions=metric_definitions,
             enable_sagemaker_metrics=enable_sagemaker_metrics,
+            tensorboard_output_config=tensorboard_output_config,
+            debugger_hook_config=False,
             **additionalEstimatorArgs,
         )
         inputs = dict()
