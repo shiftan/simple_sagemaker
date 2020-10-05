@@ -46,7 +46,7 @@ class ECRSync:
         if framework_version is None or py_version is None:
             framework_version, py_version = defaults[framework]
 
-        logger.info(
+        logger.debug(
             f"Getting the image for {framework}, framework_version {framework_version}, python version {py_version}"
         )
 
@@ -79,7 +79,7 @@ class ECRSync:
         )
 
         if not docker_file_path_or_content:
-            logger.info(f"Using a pre-built image {baseimage_uri}...")
+            logger.debug(f"Using a pre-built image {baseimage_uri}...")
             return baseimage_uri
 
         repo_uri = self.getOrCreateRepo(aws_repo_name)

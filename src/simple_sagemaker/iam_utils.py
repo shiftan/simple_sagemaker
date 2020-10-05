@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 def createSageMakerIAMRole(boto3_session, role_name):
-    logger.info(
+    logger.debug(
         f"Creating SageMaker IAM Role: {role_name} with an attached AmazonSageMakerFullAccess policy..."
     )
 
@@ -80,7 +80,7 @@ def getOrCreatePolicy(iam_client, boto3_session, policy_name, policyString):
 
 
 def allowAccessToS3Bucket(boto3_session, role_name, policy_name, bucket_name):
-    logger.info(
+    logger.debug(
         f"Allowing access for {role_name} to {bucket_name} using the {policy_name} policy..."
     )
 
