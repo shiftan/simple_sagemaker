@@ -21,8 +21,9 @@ run_training () { # args: task_name, instance_type, additional_command_params, [
         --download_model --download_output \
         --it $2 $ADDITIONAL_ARGS \
         --cmd_line  "./extract.sh \$SM_CHANNEL_TRAIN/.. && \ 
-                    CODE_DIR=\`pwd\` && cd \$SSM_INSTANCE_STATE &&
-                    time python \$CODE_DIR/main.py --epochs $EPOCHS \$SM_CHANNEL_TRAIN/.. $3"
+                    CODE_DIR=\`pwd\` && cd \$SSM_INSTANCE_STATE && START=\$SECONDS \
+                    python \$CODE_DIR/main.py --epochs $EPOCHS \$SM_CHANNEL_TRAIN/.. $3 2>&1 \
+                    echo Total time: \$(( SECONDS - START )) seconds"
 }
 
 DESC="a single GPU"

@@ -126,8 +126,9 @@ def compareFileContent(expectedfile_path, outputfile_path, file_name):
         "debughookconfig.json" in file_name
         or "hyperparameters.json" in file_name
         or "trainingjobconfig.json" in file_name
+        or "tensorboardoutputconfig.json" in file_name
     ):
-        pass
+        pass  # TBD: check these as well
     elif "__COMPLETED__" in file_name:
         if (
             expectedfile_path.read_text().split("-")[0]
