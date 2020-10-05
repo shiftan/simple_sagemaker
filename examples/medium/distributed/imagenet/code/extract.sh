@@ -10,3 +10,5 @@ for filename in train/*.tar; do
     tar -xf $filename --xform="s|^|$OUTDIR/|S"
     rm $filename
 done
+
+# https://github.com/facebookarchive/fb.resnet.torch/blob/master/INSTALL.md

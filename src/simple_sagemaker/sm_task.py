@@ -182,7 +182,8 @@ class SageMakerTask:
         Returns estimator object
         """
         logger.info(
-            f"Running a training job source_dir={source_dir} entry_point={entry_point} hyperparameters={hyperparameters}..."
+            f"===== Running a training job source_dir={source_dir} "
+            f"entry_point={entry_point} hyperparameters={hyperparameters}... ====="
         )
         job_name = self._getJobName()
 
