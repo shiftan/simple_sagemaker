@@ -38,7 +38,7 @@ class SageMakerTask:
         bucket_name=None,
         smSession=None,
         local_mode=False,
-        task_type=constants.TASK_TYPE_TRAINING,
+        task_type=None,
     ):
         """
         Initializes a task
@@ -52,6 +52,7 @@ class SageMakerTask:
         Data is maintained on [bucket_name]/[task_name]
         """
         self.boto3_session = boto3_session
+        self.sm_client = boto3_session.client("sagemaker")
         self.task_name = task_name
         self.image_uri = image_uri
         self.estimators = list()
@@ -370,7 +371,46 @@ class SageMakerTask:
             )
         return job_name
 
+    def _getJobByName(self, name_contains):
+        funcs_type = (
+            (
+                self.sm_client.list_training_jobs,
+                constants.TASK_TYPE_TRAINING,
+                "TrainingJobSummaries",
+            ),
+            (
+                self.sm_client.list_processing_jobs,
+                constants.TASK_TYPE_PROCESSING,
+                "ProcessingJobSummaries",
+            ),
+        )
+        for (list_func, task_type, results_field_name) in funcs_type:
+            extra_args = {}
+            while True:
+                resp = list_func(
+                    NameContains=name_contains, MaxResults=100, **extra_args
+                )
+
+                if resp.get(results_field_name, None):
+                    assert (
+                        len(resp[results_field_name]) == 1
+                    ), f"More than one options for {name_contains}"
+                    return resp[results_field_name][0], task_type
+
+                if "NextToken" in resp:
+                    extra_args["NextToken"] = resp["NextToken"]
+                else:
+                    break
+        return None, None
+
     def bindToJob(self, job_name):
+        # jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime", SortOrder='Descending', MaxResults=100)
+        # while job.get("NextToken", None):
+        #    jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime", SortOrder='Descending', MaxResults=100, NextToken=jobs["NextToken"])
+        # smc.list_tags(ResourceArn=)["Tags"]
+        job, task_type = self._getJobByName(job_name)
+        assert task_type, f"Couldn't bind to job {job_name}"
+        self.task_type = task_type
         self.jobNames.append(job_name)
 
     def clean_state(self):

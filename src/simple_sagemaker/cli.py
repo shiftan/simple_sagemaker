@@ -667,12 +667,14 @@ def parseIOAndAllowAccess(args, env, sm_project):
             inputs.append(
                 ProcessingInput(
                     s3_uri,
-                    f"/opt/ml/input/data/{input_name}",
+                    f"/opt/ml/processing/input/data/{input_name}",
                     input_name,
                     s3_data_distribution_type=distribution,
                 )
             )
-            env[f"SM_CHANNEL_{input_name.upper()}"] = f"/opt/ml/input/data/{input_name}"
+            env[
+                f"SM_CHANNEL_{input_name.upper()}"
+            ] = f"/opt/ml/processing/input/data/{input_name}"
     if args.input_s3:
         for (input_name, s3_uri, distribution, subdir) in args.input_s3:
             s3_uri = sagemaker.s3.s3_path_join(s3_uri, subdir)
@@ -681,12 +683,14 @@ def parseIOAndAllowAccess(args, env, sm_project):
             inputs.append(
                 ProcessingInput(
                     s3_uri,
-                    f"/opt/ml/input/data/{input_name}",
+                    f"/opt/ml/processing/processing/input/data/{input_name}",
                     input_name,
                     s3_data_distribution_type=distribution,
                 )
             )
-            env[f"SM_CHANNEL_{input_name.upper()}"] = f"/opt/ml/input/data/{input_name}"
+            env[
+                f"SM_CHANNEL_{input_name.upper()}"
+            ] = f"/opt/ml/processing/input/data/{input_name}"
 
     outputs = list()
     # TBD: support outputs
@@ -788,7 +792,9 @@ def processingHandler(args, hyperparameters):
     running_params["tags"] = tags
 
     input_data_path, input_distribution, inputs, outputs = parseIOAndAllowAccess(
-        args, sm_project, running_params["env"]
+        args,
+        running_params["env"],
+        sm_project,
     )
 
     sm_project.runTask(
