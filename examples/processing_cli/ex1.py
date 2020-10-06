@@ -3,8 +3,8 @@ import os
 import subprocess
 import sys
 
+from dep import ex1_dep  # noqa: F401
 from worker_toolkit import worker_lib
-from dep import ex1_dep
 
 logger = logging.getLogger(__name__)
 

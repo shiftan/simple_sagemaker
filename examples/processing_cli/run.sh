@@ -14,7 +14,7 @@ ssm process -p ssm-example-processing -t cli-code -o ./output/output1 \
 # Example 2 - raw entrypoint with arguments
 ssm process -p ssm-example-processing -t cli-shell -o ./output/output2 \
     --download_state --download_output --max_run_mins 15 \
-    --entrypoint "/bin/bash" \
+    --entrypoint "/bin/bash" --dependencies ./dep \
     -- -c 'pwd && ls -laR /opt && env && cp -r /opt/ml/config $SSM_OUTPUT/config && echo "output" > $SSM_OUTPUT/output && echo "state" > $SSM_STATE/state' &
 
 

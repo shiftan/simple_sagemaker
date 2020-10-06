@@ -63,7 +63,7 @@ class WorkerConfig:
         os.environ["SAGEMAKER_JOB_NAME"] = proc_conf["ProcessingJobName"]
         os.environ["SM_HOSTS"] = json.dumps(res_conf["hosts"])
         os.environ["SM_CURRENT_HOST"] = res_conf["current_host"]
-        
+
     def parseArgs(self):
         """Extracting the environment configuration, i.e. input/output/state paths and running parameters"""
 

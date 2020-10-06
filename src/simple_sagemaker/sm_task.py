@@ -119,7 +119,10 @@ class SageMakerTask:
         input_distribution="FullyReplicated",
         dependencies=list(),
     ):
-        logger.info("Running a processing job...")
+        logger.info(
+            f"===== Running a processing job entrypoint={entrypoint} "
+            f"command={command} code={code} arguments={arguments}... ====="
+        )
         job_name = self._getJobName()
 
         # ## Outputs
@@ -168,10 +171,11 @@ class SageMakerTask:
                 ProcessingInput(
                     dep,
                     local_path,
-                    "DEP_"+basename,
+                    "DEP_" + basename,
                     s3_data_distribution_type="FullyReplicated",
                 )
             )
+
         # input data
         if self.inputS3Uri:
             data_path = "/opt/ml/processing/data"

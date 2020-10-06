@@ -743,7 +743,7 @@ def processingHandler(args, hyperparameters):
             "entrypoint": "entrypoint",
             "code": "code",
             "command": "command",
-            "dependencies":"dependencies"
+            "dependencies": "dependencies",
         },
     )
     sm_project.setDefaultInstanceParams(
