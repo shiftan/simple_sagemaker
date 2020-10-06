@@ -85,3 +85,6 @@ def skip_test_cli_multi(caplog, tmp_path):
 
 def test_readme_examples(caplog, tmp_path):
     _internalTestCli("readme_examples", caplog, tmp_path)
+
+def test_processing_cli_examples(caplog, tmp_path):
+    _internalTestCli("processing_cli", caplog, tmp_path)

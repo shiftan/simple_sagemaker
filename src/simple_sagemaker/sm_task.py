@@ -121,7 +121,7 @@ class SageMakerTask:
         dependencies=list(),
     ):
         logger.info(
-            f"===== Running a processing job entrypoint={entrypoint} "
+            f"===== Running a processing job {self.task_name} entrypoint={entrypoint} "
             f"command={command} code={code} arguments={arguments}... ====="
         )
         job_name = self._getJobName()
@@ -283,7 +283,7 @@ class SageMakerTask:
         Returns estimator object
         """
         logger.info(
-            f"===== Running a training job source_dir={source_dir} "
+            f"===== Running a training job {self.task_name} source_dir={source_dir} "
             f"entry_point={entry_point} hyperparameters={hyperparameters}... ====="
         )
         job_name = self._getJobName()

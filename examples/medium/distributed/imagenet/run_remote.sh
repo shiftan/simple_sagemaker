@@ -1,6 +1,11 @@
 #! /bin/bash
+# Arguments [PARTIAL_DATA]
+
 set -e # stop and fail if anything stops
 cd `dirname "$0"`
+PARTIAL_DATA=$1
+data_source=$( [ "$PARTIAL_DATA" == true ] &&  echo download || echo download-all )
+echo "*** Using data source: $data_source"
 
 # Download the code from PyTorch's examples repository
 [ -f code/main.py ] || wget -O code/main.py https://raw.githubusercontent.com/pytorch/examples/master/imagenet/main.py
@@ -15,14 +20,15 @@ ssm shell -p ex-imagenet -t download-all -v 400 \
     --dir_files ./code -o ./output/download --no_spot \
     --cmd_line './download_all.sh $SSM_STATE/data'
 
+
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
     EPOCHS=${5:-20}  # 20 epochs by default
     ADDITIONAL_ARGS=${6:-"--no_spot"} # --force_running
 
     echo ===== Training $EPOCHS epochs, $4...
     ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 150 \
-        --iit train download-all state FullyReplicated data/train \
-        --iit val download state FullyReplicated data/val \
+        --iit train $data_source state FullyReplicated data/train \
+        --iit val $data_source state FullyReplicated data/val \
         --download_model --download_output \
         --it $2 $ADDITIONAL_ARGS \
         --cmd_line  "./extract.sh \$SM_CHANNEL_TRAIN/.. && \ 
