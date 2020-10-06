@@ -8,7 +8,12 @@ from time import gmtime, strftime
 import sagemaker
 from sagemaker.debugger import TensorBoardOutputConfig
 from sagemaker.inputs import TrainingInput
-from sagemaker.processing import ScriptProcessor
+from sagemaker.processing import (
+    ProcessingInput,
+    ProcessingOutput,
+    Processor,
+    ScriptProcessor,
+)
 from sagemaker.pytorch.estimator import PyTorch
 from sagemaker.tensorflow.estimator import TensorFlow
 
@@ -33,6 +38,7 @@ class SageMakerTask:
         bucket_name=None,
         smSession=None,
         local_mode=False,
+        task_type=constants.TASK_TYPE_TRAINING,
     ):
         """
         Initializes a task
@@ -52,6 +58,8 @@ class SageMakerTask:
         self.jobNames = list()
         self.descriptions = list()
         self.local_mode = local_mode
+        self.task_type = task_type
+        self.prefix = prefix
 
         if smSession is None:
             smSession = sagemaker.Session(boto_session=boto3_session)
@@ -95,46 +103,130 @@ class SageMakerTask:
 
     def runProcessing(
         self,
-        entrypoint,
-        command,
-        env,
-        code,
-        arguments,
-        inputs,
-        outputs,
+        entrypoint=None,
+        command=None,
+        env=None,
+        code=None,
+        arguments=None,
+        inputs=list(),
+        outputs=list(),
         instance_type=constants.DEFAULT_INSTANCE_TYPE,
         instance_count=constants.DEFAULT_INSTANCE_COUNT,
         role_name=constants.DEFAULT_IAM_ROLE,
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
+        input_distribution="FullyReplicated",
     ):
         logger.info("Running a processing job...")
         job_name = self._getJobName()
+
+        # ## Outputs
+
+        # state - continuesly updated
+        state_path = "/opt/ml/processing/state"
+        outputs.append(
+            ProcessingOutput(state_path, self.stateS3Uri, "state", "Continuous")
+        )
+        env[f"SSM_STATE"] = state_path
+
+        # output - copied by end of job
+        output_path = "/opt/ml/processing/output"
+        baseTaskS3Uri = SageMakerTask.getBaseTaskS3Uri(
+            self.bucket_name, self.prefix, self.task_name
+        )
+        output_s3_uri = sagemaker.s3.s3_path_join(baseTaskS3Uri, "output")
+        outputs.append(
+            ProcessingOutput(output_path, output_s3_uri, "output", "EndOfJob")
+        )
+        env[f"SSM_OUTPUT"] = output_path
+
+        # ## Inputs
+
+        # prev state
+        prev_state_path = "/opt/ml/processing/state_prev"
+        inputs.append(
+            ProcessingInput(
+                self.stateS3Uri,
+                prev_state_path,
+                "state_prev",
+                s3_data_distribution_type="FullyReplicated",
+            )
+        )
+        bucket, prefix = sagemaker.s3.parse_s3_url(self.stateS3Uri)
+        self.smSession.upload_string_as_file_body("", bucket, prefix + "/")
+
+        # worker toolkit
+        code_path = "/opt/ml/processing/input/code/worker_toolkit"
+        inputs.append(
+            ProcessingInput(
+                self.internalDependencies[0],
+                code_path,
+                "worker_toolkit",
+                s3_data_distribution_type="FullyReplicated",
+            )
+        )
+
+        # input data
+        if self.inputS3Uri:
+            data_path = "/opt/ml/processing/data"
+            inputs.append(
+                ProcessingInput(
+                    self.inputS3Uri,
+                    data_path,
+                    "data",
+                    s3_data_distribution_type=input_distribution,
+                )
+            )
+            env[f"SM_CHANNEL_DATA"] = data_path
 
         tags["SimpleSagemakerTask"] = self.task_name
         tags["SimpleSagemakerVersion"] = VERSION
         tags = [{"Key": k, "Value": v} for k, v in tags.items()]
 
-        script_processor = ScriptProcessor(
+        additional_args = dict()
+        if code:
+            processor_class = ScriptProcessor
+            additional_args["command"] = command
+        else:
+            assert (
+                not command
+            ), "Command can't be given where code isn't given (for the `Processor` class)"
+            processor_class = Processor
+            additional_args["entrypoint"] = entrypoint
+
+        processor = processor_class(
             role=role_name,
             image_uri=self.image_uri,
-            entrypoint=entrypoint,
-            command=command,
             instance_count=instance_count,
             instance_type=instance_type,
             volume_size_in_gb=volume_size,
             max_runtime_in_seconds=max_run_mins * 60,
             sagemaker_session=self.smSession,
             tags=tags,
+            env=env,
+            **additional_args,
         )
-        script_processor.run(
-            code=code, inputs=inputs, outputs=outputs, arguments=arguments
-        )
+        job_name = f"{self.prefix}--{job_name}"
+        if code:
+            processor.run(
+                code=code,
+                inputs=inputs,
+                outputs=outputs,
+                arguments=arguments,
+                job_name=job_name,
+            )
+        else:
+            processor.run(
+                inputs=inputs,
+                outputs=outputs,
+                arguments=arguments,
+                job_name=job_name,
+            )
 
         proecessing_job_description = self.smSession.describe_processing_job(job_name)
 
-        self.estimators.append(script_processor)
+        self.estimators.append(processor)
         self.jobNames.append(job_name)
         self.descriptions.append(proecessing_job_description)
         print(proecessing_job_description)
@@ -351,10 +443,14 @@ class SageMakerTask:
             )
         return uri
 
-    def getInputConfig(self, output_type, distribution="FullyReplicated", subdir=""):
+    def getInputConfig(
+        self, output_type, distribution="FullyReplicated", subdir="", return_s3uri=False
+    ):
         uri = self.getOutputTargetUri(**{output_type: True})
         if subdir:
             uri = sagemaker.s3.s3_path_join(uri, subdir)
+        if return_s3uri:
+            return uri
         return TrainingInput(uri, distribution=distribution)
 
     def downloadResults(
@@ -418,7 +514,10 @@ class SageMakerTask:
             def getLogsForChannel(self, channel):
                 return self.logsChannels[channel]
 
-        description = self.smSession.describe_training_job(job_name)
+        if self.task_type == constants.TASK_TYPE_TRAINING:
+            description = self.smSession.describe_training_job(job_name)
+        elif self.task_type == constants.TASK_TYPE_PROCESSING:
+            description = self.smSession.describe_processing_job(job_name)
         (
             instance_count,
             stream_names,
@@ -427,10 +526,12 @@ class SageMakerTask:
             log_group,
             dot,
             color_wrap,
-        ) = sagemaker.session._logs_init(self.smSession, description, job="Training")
+        ) = sagemaker.session._logs_init(
+            self.smSession, description, job=self.task_type
+        )
         lw = logsWrapper()  # raplace with our own class
         state = sagemaker.session._get_initial_job_state(  # noqa: F841
-            description, "TrainingJobStatus", wait
+            description, f"{self.task_type}JobStatus", wait
         )
         sagemaker.session._flush_log_streams(
             stream_names,

@@ -119,7 +119,7 @@ class WorkerConfig:
             "--hosts",
             type=lambda x: json.loads(x),
             envVarName="SM_HOSTS",
-            default="",
+            default="[]",
         )
         parser.add_argument_default_env_or_other(
             "--num_gpus", type=int, envVarName="SM_NUM_GPUS", default=-1
@@ -152,14 +152,21 @@ class WorkerConfig:
                 args.__setattr__(f"channel_{channel_name}", os.environ[env_name])
 
         # The arguments are set on top of the environment variables
-        args.state = "/state"  # TODO: parse dynamically
-        args.num_nodes = len(args.hosts)
-        args.host_rank = args.hosts.index(args.current_host)
+        if args.hosts:
+            args.num_nodes = len(args.hosts)
+            args.host_rank = args.hosts.index(args.current_host)
+        else:
+            args.num_nodes = -1
+            args.host_rank = -1
         # Fill the environment varaible with missing parameters
-
-        os.environ["SSM_STATE"] = args.state
         os.environ["SSM_NUM_NODES"] = str(args.num_nodes)
         os.environ["SSM_HOST_RANK"] = str(args.host_rank)
+
+        if "SSM_STATE" in os.environ:
+            args.state = os.environ["SSM_STATE"]
+        else:
+            args.state = "/state"  # TODO: parse dynamically
+            os.environ["SSM_STATE"] = args.state
 
         self.config = args
 

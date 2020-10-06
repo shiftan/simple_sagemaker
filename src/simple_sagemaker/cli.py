@@ -8,6 +8,7 @@ from pathlib import Path
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
+from sagemaker.processing import ProcessingInput, ProcessingOutput
 
 from . import constants
 from .sm_project import SageMakerProject
@@ -140,16 +141,6 @@ def runArguments(run_parser, shell=False):
     running_params = run_parser.add_argument_group("Running")
     IO_params = run_parser.add_argument_group("I/O")
     download_params = run_parser.add_argument_group("Download")
-
-    # general
-    # parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
-    run_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
-    run_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
-    IO_params.add_argument(
-        "--bucket_name",
-        "-b",
-        help="S3 bucket name (a default one is used if not given).",
-    )
 
     if shell:
         code_group.add_argument(
@@ -361,16 +352,166 @@ def runArguments(run_parser, shell=False):
     addDownloadArgs(download_params)
 
 
+def processingArguments(processing_parser):
+    processing_parser.set_defaults(func=processingHandler)
+
+    code_group = processing_parser.add_argument_group("Code")
+    instance_group = processing_parser.add_argument_group("Instance")
+    image_group = processing_parser.add_argument_group("Image")
+    running_params = processing_parser.add_argument_group("Running")
+    IO_params = processing_parser.add_argument_group("I/O")
+    download_params = processing_parser.add_argument_group("Download")
+
+    # coding params
+    code_group.add_argument(
+        "--code",
+        type=lambda x: fileValidation(processing_parser, x),
+        help="""An S3 URI or a local path to a file with the framework script to run.""",
+    )
+    code_group.add_argument(
+        "--entrypoint",
+        "-e",
+        nargs="+",
+        # type=lambda x: fileValidation(parser, x),
+        help="""The entrypoint for the processing job (default: None). 
+                This is in the form of a list of strings that make a command""",
+    )
+    code_group.add_argument(
+        "--command",
+        nargs="+",
+        help="""The command to run, along with any command-line flags.""",
+    )
+
+    # instance params
+    instance_group.add_argument(
+        "--instance_type",
+        "--it",
+        default=constants.DEFAULT_INSTANCE_TYPE,
+        help="Type of EC2 instance to use.",
+    )
+    instance_group.add_argument(
+        "--instance_count",
+        "--ic",
+        type=int,
+        default=constants.DEFAULT_INSTANCE_COUNT,
+        help="Number of EC2 instances to use.",
+    )
+    instance_group.add_argument(
+        "--volume_size",
+        "-v",
+        type=int,
+        default=constants.DEFAULT_VOLUME_SIZE,
+        help="""Size in GB of the EBS volume to use for storing input data.
+        Must be large enough to store input data.""",
+    )
+    instance_group.add_argument(
+        "--max_run_mins",
+        type=int,
+        default=constants.DEFAULT_MAX_RUN,
+        help="""Timeout in minutes for running.
+        After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
+    )
+    # image params
+    image_group.add_argument("--aws_repo_name", "--ar", help="Name of ECS repository.")
+    image_group.add_argument("--repo_name", "--rn", help="Name of local repository.")
+    image_group.add_argument(
+        "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+    )
+    image_group.add_argument(
+        "--docker_file_path_or_content",
+        "--df",
+        help="""Path to a directory containing the DockerFile. The base image should be set to
+        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
+    )
+    image_group.add_argument(
+        "--framework",
+        "-f",
+        help="The framework to use, see https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
+        default="sklearn",
+    )
+    image_group.add_argument(
+        "--framework_version",
+        "--fv",
+        help="The framework version",
+        default="0.20.0",
+    )
+    # run params
+    IO_params.add_argument(
+        "--input_path",
+        "-i",
+        action=InputAction,
+        help=help_for_input_type(
+            InputTuple,
+            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task
+            folder on the selected S3 bucket before launching the task.""",
+        ),
+        tuple=InputTuple,
+    )
+    IO_params.add_argument(
+        "--input_s3",
+        "--iis",
+        action=Input_S3Action,
+        help=help_for_input_type(
+            Input_S3Tuple, "Additional S3 input sources (a few can be given)."
+        ),
+        tuple=Input_S3Tuple,
+    )
+    IO_params.add_argument(
+        "--input_task",
+        "--iit",
+        action=Input_Task_Action,
+        help=help_for_input_type(
+            Input_Task_Tuple,
+            f"""Use an output of a completed task in the same project as an input source (a few can be given).
+            Type should be one of {Input_Task_Types}.""",
+        ),
+        tuple=Input_Task_Tuple,
+    )
+    running_params.add_argument(
+        "--force_running",
+        default=False,
+        action="store_true",
+        help="Force running the task even if it's already completed.",
+    )
+    IO_params.add_argument(
+        "--clean_state",
+        "--cs",
+        default=False,
+        action="store_true",
+        help="Clear the task state before running it. The task will be running again even if it was already completed before.",
+    )
+    IO_params.add_argument(
+        "--keep_state",
+        "--ks",
+        action="store_false",
+        dest="clean_state",
+        help="Keep the current task state. If the task is already completed, its current output will \
+             be taken without running it again.",
+    )
+    running_params.add_argument(
+        "--tag",
+        nargs=2,
+        metavar=("key", "value"),
+        action="append",
+        help="Tag to be attached to the jobs executed for this task.",
+    )
+    running_params.add_argument(
+        "--env",
+        nargs=2,
+        metavar=("key", "value"),
+        action="append",
+        help="Environment variables for the running task.",
+    )
+    running_params.add_argument(
+        "--arguments",
+        nargs="+",
+        help="""A list of string arguments to be passed to a processing job.""",
+    )
+
+    addDownloadArgs(download_params)
+
+
 def dataArguments(data_parser):
-    data_parser.add_argument(
-        "--project_name", "-p", required=True, help="Project name."
-    )
-    data_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
-    data_parser.add_argument(
-        "--bucket_name",
-        "-b",
-        help="S3 bucket name (a default one is used if not given).",
-    )
     data_parser.add_argument(
         "--clean_state",
         "--cs",
@@ -406,10 +547,29 @@ def parseArgs():
         help="Manage task data",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    processing_parser = subparsers.add_parser(
+        "process",
+        help="Run a processing task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    for specific_parser in (run_parser, shell_parser, data_parser, processing_parser):
+        specific_parser.add_argument(
+            "--project_name", "-p", required=True, help="Project name."
+        )
+        specific_parser.add_argument(
+            "--task_name", "-t", required=True, help="Task name."
+        )
+        specific_parser.add_argument(
+            "--bucket_name",
+            "-b",
+            help="S3 bucket name (a default one is used if not given).",
+        )
 
     runArguments(run_parser)
     runArguments(shell_parser, True)
     dataArguments(data_parser)
+    processingArguments(processing_parser)
 
     # Parse the configuration, assume anything extra and / or after "--"
     #   is a hyperparameter
@@ -474,6 +634,56 @@ def parseInputsAndAllowAccess(args, sm_project):
     return input_data_path, distribution, inputs
 
 
+def parseIOAndAllowAccess(args, env, sm_project):
+    input_data_path = None
+    distribution = "FullyReplicated"
+    if args.input_path:
+        input_data_path, distribution, subdir = args.input_path[0]
+        if input_data_path.lower().startswith("s3://"):
+            input_data_path = sagemaker.s3.s3_path_join(input_data_path, subdir)
+        else:
+            input_data_path = os.path.join(input_data_path, subdir)
+
+    inputs = list()
+    if args.input_task:
+        for (input_name, task_name, ttype, distribution, subdir) in args.input_task:
+            s3_uri = sm_project.getInputConfig(
+                task_name,
+                ttype,
+                distribution=distribution,
+                subdir=subdir,
+                return_s3uri=True,
+            )
+            inputs.append(
+                ProcessingInput(
+                    s3_uri,
+                    f"/opt/ml/input/data/{input_name}",
+                    input_name,
+                    s3_data_distribution_type=distribution,
+                )
+            )
+            env[f"SM_CHANNEL_{input_name.upper()}"] = f"/opt/ml/input/data/{input_name}"
+    if args.input_s3:
+        for (input_name, s3_uri, distribution, subdir) in args.input_s3:
+            s3_uri = sagemaker.s3.s3_path_join(s3_uri, subdir)
+            bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
+            sm_project.allowAccessToS3Bucket(bucket)
+            inputs.append(
+                ProcessingInput(
+                    s3_uri,
+                    f"/opt/ml/input/data/{input_name}",
+                    input_name,
+                    s3_data_distribution_type=distribution,
+                )
+            )
+            env[f"SM_CHANNEL_{input_name.upper()}"] = f"/opt/ml/input/data/{input_name}"
+
+    outputs = list()
+    # TBD: support outputs
+
+    return input_data_path, distribution, inputs, outputs
+
+
 def shellHandler(args, hyperparameters):
     # Running a shell command
 
@@ -494,6 +704,95 @@ def shellHandler(args, hyperparameters):
     shell_launcher = Path(__file__).parent / "shell_launcher.py"
     args.entry_point = str(shell_launcher)
     runHandler(args, hyperparameters)
+
+
+def processingHandler(args, hyperparameters):
+    general_params = getAllParams(
+        args,
+        {
+            "project_name": "project_name",
+            "bucket_name": "bucket_name",
+        },
+    )
+    if "local" in args.instance_type:
+        general_params["local_mode"] = True
+    sm_project = SageMakerProject(**general_params)
+
+    code_params = getAllParams(
+        args,
+        {
+            "entrypoint": "entrypoint",
+            "code": "code",
+            "command": "command",
+        },
+    )
+    sm_project.setDefaultInstanceParams(
+        **getAllParams(
+            args,
+            {
+                "instance_count": "instance_count",
+                "instance_type": "instance_type",
+                "volume_size": "volume_size",
+                "max_run_mins": "max_run_mins",
+            },
+        )
+    )
+    sm_project.setDefaultImageParams(
+        **getAllParams(
+            args,
+            {
+                "aws_repo_name": "aws_repo_name",
+                "repo_name": "repo_name",
+                "image_tag": "image_tag",
+                "docker_file_path_or_content": "docker_file_path_or_content",
+                "framework": "framework",
+                "framework_version": "framework_version",
+            },
+        )
+    )
+
+    image_uri = sm_project.buildOrGetImage(
+        instance_type=sm_project.defaultInstanceParams.instance_type
+    )
+
+    running_params = getAllParams(
+        args,
+        {
+            "arguments": "arguments",
+            "force_running": "force_running",
+        },
+    )
+    tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
+    env = {} if args.env is None else {k: v for (k, v) in args.env}
+    running_params["env"] = env
+    running_params["tags"] = tags
+
+    input_data_path, input_distribution, inputs, outputs = parseIOAndAllowAccess(
+        args, sm_project, running_params["env"]
+    )
+
+    sm_project.runTask(
+        args.task_name,
+        image_uri,
+        hyperparameters=None,
+        input_data_path=input_data_path,
+        input_distribution=input_distribution,
+        inputs=inputs,
+        outputs=outputs,
+        clean_state=args.clean_state,
+        task_type=constants.TASK_TYPE_PROCESSING,
+        **{**code_params, **running_params},
+    )
+
+    if args.output_path:
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
 
 
 def runHandler(args, hyperparameters):
@@ -519,7 +818,7 @@ def runHandler(args, hyperparameters):
         shell_launcher = Path(__file__).parent / "shell_launcher.py"
         args.entry_point = str(shell_launcher)
 
-    code_params = getAllParams(
+    general_params = getAllParams(
         args,
         {
             "project_name": "project_name",
@@ -527,8 +826,8 @@ def runHandler(args, hyperparameters):
         },
     )
     if "local" in args.instance_type:
-        code_params["local_mode"] = True
-    sm_project = SageMakerProject(**code_params)
+        general_params["local_mode"] = True
+    sm_project = SageMakerProject(**general_params)
 
     sm_project.setDefaultCodeParams(
         **getAllParams(

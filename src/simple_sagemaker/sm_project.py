@@ -72,6 +72,7 @@ class SageMakerProject:
         self.role_created = False
         self.tasks = {}
         self.local_mode = local_mode
+        self.defaultCodeParams = None
 
         if boto3_session is None:
             boto3_session = boto3.Session()
@@ -263,6 +264,7 @@ class SageMakerProject:
         tags=dict(),
         metric_definitions=dict(),
         enable_sagemaker_metrics=False,
+        task_type=constants.TASK_TYPE_TRAINING,
         **kwargs,
     ):
         """Run a new task for this project.
@@ -311,10 +313,13 @@ class SageMakerProject:
             self.bucket_name,
             smSession=self.smSession,
             local_mode=self.local_mode,
+            task_type=task_type,
         )
         if input_data_path:
             smTask.uploadOrSetInputData(input_data_path)
-        args = self.defaultCodeParams._asdict()
+        args = (
+            dict() if not self.defaultCodeParams else self.defaultCodeParams._asdict()
+        )
         args.update(self.defaultInstanceParams._asdict())
 
         args.update(kwargs)
@@ -334,15 +339,24 @@ class SageMakerProject:
             )
             smTask.bindToJob(job_name)
         else:
-            job_name = smTask.runTrainingJob(
-                self.defaultImageParams.framework,
-                role_name=self.role_name,
-                hyperparameters=hyperparameters,
-                tags=tags,
-                metric_definitions=metric_definitions,
-                enable_sagemaker_metrics=enable_sagemaker_metrics,
-                **args,
-            )
+            if task_type == constants.TASK_TYPE_TRAINING:
+                job_name = smTask.runTrainingJob(
+                    self.defaultImageParams.framework,
+                    role_name=self.role_name,
+                    hyperparameters=hyperparameters,
+                    tags=tags,
+                    metric_definitions=metric_definitions,
+                    enable_sagemaker_metrics=enable_sagemaker_metrics,
+                    **args,
+                )
+            elif task_type == constants.TASK_TYPE_PROCESSING:
+                args.pop("use_spot_instances", None)
+                args.pop("max_wait_mins", None)
+                job_name = smTask.runProcessing(
+                    role_name=self.role_name,
+                    tags=tags,
+                    **args,
+                )
 
         self.addTask(task_name, smTask)
         return smTask, job_name
@@ -389,6 +403,7 @@ class SageMakerProject:
         output_type,
         distribution="FullyReplicated",
         subdir="",
+        return_s3uri=False,
     ):
         """Get the class:`sagemaker.inputs.TrainingInput` configuration for an output of a task from this
         project to be used as an input for another task.
@@ -400,6 +415,9 @@ class SageMakerProject:
         :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
         :type task_name: str
         """
+        assert (
+            self.task_type == constants.TASK_TYPE_TRAINING
+        ), "input config is only supported for training tasks "
         # state is global for the task
         if "state" == output_type:
             smTask = SageMakerTask(
@@ -412,7 +430,9 @@ class SageMakerProject:
             )
         else:
             smTask = self._getOrBindTask(task_name)
-        return smTask.getInputConfig(output_type, distribution, subdir)
+        return smTask.getInputConfig(
+            output_type, distribution, subdir, return_s3uri=return_s3uri
+        )
 
     def downloadResults(
         self,

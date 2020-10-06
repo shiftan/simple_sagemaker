@@ -6,6 +6,8 @@ from io import BytesIO
 import docker
 from sagemaker import image_uris
 
+from . import constants
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,10 +43,12 @@ class ECRSync:
         defaults = {
             "pytorch": ("1.6.0", "py3"),
             "tensorflow": ("2.3.0", "py37"),
+            "sklearn": ("0.20.0", None),
         }
 
-        if framework_version is None or py_version is None:
-            framework_version, py_version = defaults[framework]
+        if framework in defaults:
+            if framework_version is None or py_version is None:
+                framework_version, py_version = defaults[framework]
 
         logger.debug(
             f"Getting the image for {framework}, framework_version {framework_version}, python version {py_version}"
