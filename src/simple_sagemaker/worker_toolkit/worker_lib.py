@@ -56,11 +56,22 @@ class WorkerConfig:
         # Set root logger level
         logging.getLogger().setLevel(int(os.environ.get("SM_LOG_LEVEL", logging.INFO)))
 
+    def _initProcessingEnvVars(self):
+        """Initializae part of the environmenr variables for processing tasks"""
+        proc_conf = json.load(open("/opt/ml/config/processingjobconfig.json"))
+        res_conf = json.load(open("/opt/ml/config/resourceconfig.json"))
+        os.environ["SAGEMAKER_JOB_NAME"] = proc_conf["ProcessingJobName"]
+        os.environ["SM_HOSTS"] = json.dumps(res_conf["hosts"])
+        os.environ["SM_CURRENT_HOST"] = res_conf["current_host"]
+        
     def parseArgs(self):
         """Extracting the environment configuration, i.e. input/output/state paths and running parameters"""
 
         # Sagemaker training env vars -
         #   see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
+
+        if Path("/opt/ml/config/processingjobconfig.json").is_file():
+            self._initProcessingEnvVars()
 
         parser = argparse.ArgumentParser()
         _bind(

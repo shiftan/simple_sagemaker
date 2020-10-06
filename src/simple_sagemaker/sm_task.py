@@ -227,7 +227,7 @@ class SageMakerTask:
         self.estimators.append(processor)
         self.jobNames.append(job_name)
         self.descriptions.append(proecessing_job_description)
-        print(proecessing_job_description)
+        # print(proecessing_job_description)
         # if "Completed" != proecessing_job_description["TrainingJobStatus"]:
         #    logger.error(
         #        f"Task failed with status: {proecessing_job_description['TrainingJobStatus']}"
