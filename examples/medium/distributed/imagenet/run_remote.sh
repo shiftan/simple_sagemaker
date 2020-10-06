@@ -5,12 +5,13 @@ cd `dirname "$0"`
 # Download the code from PyTorch's examples repository
 [ -f code/main.py ] || wget -O code/main.py https://raw.githubusercontent.com/pytorch/examples/master/imagenet/main.py
 
-# Download the data
+# Download the subset data
 ssm shell -p ex-imagenet -t download \
     --dir_files ./code -o ./output/download --no_spot \
     --cmd_line './download.sh $SSM_STATE/data'
 
-ssm shell -p ex-imagenet -t download-all -v 350 \
+# Download the complete data set
+ssm shell -p ex-imagenet -t download-all -v 400 \
     --dir_files ./code -o ./output/download --no_spot \
     --cmd_line './download_all.sh $SSM_STATE/data'
 
@@ -20,7 +21,7 @@ run_training () { # args: task_name, instance_type, additional_command_params, [
 
     echo ===== Training $EPOCHS epochs, $4...
     ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 150 \
-        --iit train download state FullyReplicated data/train \
+        --iit train download-all state FullyReplicated data/train \
         --iit val download state FullyReplicated data/val \
         --download_model --download_output \
         --it $2 $ADDITIONAL_ARGS \
