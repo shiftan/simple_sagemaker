@@ -404,9 +404,12 @@ class SageMakerTask:
         return None, None
 
     def bindToJob(self, job_name):
-        # jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime", SortOrder='Descending', MaxResults=100)
+        # Code to iterate training jobs
+        # jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime",
+        #       SortOrder='Descending', MaxResults=100)
         # while job.get("NextToken", None):
-        #    jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime", SortOrder='Descending', MaxResults=100, NextToken=jobs["NextToken"])
+        #    jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime",
+        #       SortOrder='Descending', MaxResults=100, NextToken=jobs["NextToken"])
         # smc.list_tags(ResourceArn=)["Tags"]
         job, task_type = self._getJobByName(job_name)
         assert task_type, f"Couldn't bind to job {job_name}"
