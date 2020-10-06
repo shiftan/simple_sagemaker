@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 from worker_toolkit import worker_lib
-from code import ex1_dep
+from dep import ex1_dep
 
 logger = logging.getLogger(__name__)
 
