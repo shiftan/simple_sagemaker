@@ -8,7 +8,7 @@ from pathlib import Path
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
-from sagemaker.processing import ProcessingInput, ProcessingOutput
+from sagemaker.processing import ProcessingInput  # ProcessingOutput
 
 from . import constants
 from .sm_project import SageMakerProject
@@ -373,7 +373,7 @@ def processingArguments(processing_parser):
         "-e",
         nargs="+",
         # type=lambda x: fileValidation(parser, x),
-        help="""The entrypoint for the processing job (default: None). 
+        help="""The entrypoint for the processing job (default: None).
                 This is in the form of a list of strings that make a command""",
     )
     code_group.add_argument(

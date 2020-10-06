@@ -6,8 +6,6 @@ from io import BytesIO
 import docker
 from sagemaker import image_uris
 
-from . import constants
-
 logger = logging.getLogger(__name__)
 
 

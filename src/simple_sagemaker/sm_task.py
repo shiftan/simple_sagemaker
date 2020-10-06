@@ -128,7 +128,7 @@ class SageMakerTask:
         outputs.append(
             ProcessingOutput(state_path, self.stateS3Uri, "state", "Continuous")
         )
-        env[f"SSM_STATE"] = state_path
+        env["SSM_STATE"] = state_path
 
         # output - copied by end of job
         output_path = "/opt/ml/processing/output"
@@ -139,7 +139,7 @@ class SageMakerTask:
         outputs.append(
             ProcessingOutput(output_path, output_s3_uri, "output", "EndOfJob")
         )
-        env[f"SSM_OUTPUT"] = output_path
+        env["SSM_OUTPUT"] = output_path
 
         # ## Inputs
 
@@ -154,7 +154,7 @@ class SageMakerTask:
             )
         )
         bucket, prefix = sagemaker.s3.parse_s3_url(self.stateS3Uri)
-        self.smSession.upload_string_as_file_body("", bucket, prefix + "/")
+        self.smSession.upload_string_as_file_body("", bucket, prefix + "/_")
 
         # worker toolkit
         code_path = "/opt/ml/processing/input/code/worker_toolkit"
@@ -178,7 +178,7 @@ class SageMakerTask:
                     s3_data_distribution_type=input_distribution,
                 )
             )
-            env[f"SM_CHANNEL_DATA"] = data_path
+            env["SM_CHANNEL_DATA"] = data_path
 
         tags["SimpleSagemakerTask"] = self.task_name
         tags["SimpleSagemakerVersion"] = VERSION
