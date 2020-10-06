@@ -59,11 +59,12 @@ def getOrCreatePolicy(iam_client, boto3_session, policy_name, policyString):
         policy_arn = policy["Arn"]
         iam = boto3_session.resource("iam")
         policy_obj = iam.Policy(policy_arn)
-        if json.dumps(policyString["Statement"]) in json.dumps(
+        if json.dumps(policyString["Statement"][0]) in json.dumps(
             policy_obj.default_version.document["Statement"]
         ):
-            print("statement already exist")
+            logger.debug(f"Statement already exist im {policy_name}")
         else:
+            logger.debug(f"Adding the statement to policy {policy_name}")
             policy_json = policy_obj.default_version.document
             policy_json["Statement"].append(policyString["Statement"][0])
             response = iam_client.create_policy_version(
