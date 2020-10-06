@@ -379,7 +379,7 @@ def processingArguments(processing_parser):
     code_group.add_argument(
         "--command",
         nargs="+",
-        help="""The command to run, along with any command-line flags.""",
+        help="""The command to run, along with any command-line flags (defaults to: "python3").""",
     )
 
     # instance params
@@ -505,7 +505,8 @@ def processingArguments(processing_parser):
     running_params.add_argument(
         "--arguments",
         nargs="+",
-        help="""A list of string arguments to be passed to a processing job.""",
+        help="""A list of string arguments to be passed to a processing job. Arguments can also be
+                provided after "--" (followed by a space), which may be needed for parameters with dashes""",
     )
 
     addDownloadArgs(download_params)
@@ -707,6 +708,15 @@ def shellHandler(args, hyperparameters):
 
 
 def processingHandler(args, hyperparameters):
+    if hyperparameters["external_hps"]:
+        if not args.arguments:
+            args.arguments = list()
+        args.arguments.extend(hyperparameters["external_hps"])
+        del hyperparameters["external_hps"]
+    # set the default command to be python3
+    if not args.entrypoint and not args.command and args.code:
+        args.command = ["python3"]
+
     general_params = getAllParams(
         args,
         {

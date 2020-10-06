@@ -132,10 +132,9 @@ class SageMakerTask:
 
         # output - copied by end of job
         output_path = "/opt/ml/processing/output"
-        baseTaskS3Uri = SageMakerTask.getBaseTaskS3Uri(
-            self.bucket_name, self.prefix, self.task_name
+        output_s3_uri = sagemaker.s3.s3_path_join(
+            self.baseTaskS3Uri, job_name, "output"
         )
-        output_s3_uri = sagemaker.s3.s3_path_join(baseTaskS3Uri, "output")
         outputs.append(
             ProcessingOutput(output_path, output_s3_uri, "output", "EndOfJob")
         )
@@ -144,17 +143,17 @@ class SageMakerTask:
         # ## Inputs
 
         # prev state
-        prev_state_path = "/opt/ml/processing/state_prev"
-        inputs.append(
-            ProcessingInput(
-                self.stateS3Uri,
-                prev_state_path,
-                "state_prev",
-                s3_data_distribution_type="FullyReplicated",
-            )
-        )
         bucket, prefix = sagemaker.s3.parse_s3_url(self.stateS3Uri)
-        self.smSession.upload_string_as_file_body("", bucket, prefix + "/_")
+        if self.smSession.list_s3_files(bucket, prefix):
+            prev_state_path = "/opt/ml/processing/state_prev"
+            inputs.append(
+                ProcessingInput(
+                    self.stateS3Uri,
+                    prev_state_path,
+                    "state_prev",
+                    s3_data_distribution_type="FullyReplicated",
+                )
+            )
 
         # worker toolkit
         code_path = "/opt/ml/processing/input/code/worker_toolkit"
@@ -207,7 +206,6 @@ class SageMakerTask:
             env=env,
             **additional_args,
         )
-        job_name = f"{self.prefix}--{job_name}"
         if code:
             processor.run(
                 code=code,
@@ -432,8 +430,11 @@ class SageMakerTask:
                 self.getOutputUri(), output_dir, "model.tar.gz"
             )
         elif output:
+            additional_path_param = ""
+            if self.task_type == constants.TASK_TYPE_TRAINING:
+                additional_path_param = "output.tar.gz"
             uri = sagemaker.s3.s3_path_join(
-                self.getOutputUri(), output_dir, "output.tar.gz"
+                self.getOutputUri(), output_dir, additional_path_param
             )
         elif state:
             uri = self.stateS3Uri
@@ -487,6 +488,7 @@ class SageMakerTask:
             if shouldDownload:
                 output_path = os.path.join(output_base, argName)
                 uri = self.getOutputTargetUri(**{argName: True})
+                logger.debug(f"Downloading {argName} from {uri} to {output_path}")
                 self._downloadData(output_path, uri, extra_args)
                 if extractTars:
                     if uri.endswith(".tar.gz"):
