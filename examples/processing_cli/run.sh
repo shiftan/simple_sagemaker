@@ -5,18 +5,27 @@ set -e # fail if any test fails
 cd `dirname "$0"`
 echo "Running with", $@
 
-# Example 1 - processing script + dependencies
+# Example 1 - a processing script + dependencies
 ssm process -p ssm-example-processing -t cli-code -o ./output/output1 \
     --download_state --download_output --max_run_mins 15 \
     --code ex1.py --dependencies ./dep --cs \
     -- arg1 -arg2 --arg3 "argument 4" &
 
-# Example 2 - raw entrypoint with arguments
+# Example 2 - a raw entrypoint with arguments
 ssm process -p ssm-example-processing -t cli-shell -o ./output/output2 \
     --download_state --download_output --max_run_mins 15 \
     --entrypoint "/bin/bash" --dependencies ./dep \
-    -- -c 'pwd && ls -laR /opt && env && cp -r /opt/ml/config $SSM_OUTPUT/config && echo "output" > $SSM_OUTPUT/output && echo "state" > $SSM_STATE/state' &
+    -- -c "echo '======= Bash script ...' && \
+        echo 'Args:' $@ && echo Env: \`env\` && pwd && ls -laR /opt && \
+        cp -r /opt/ml/config \$SSM_OUTPUT/config && \
+        echo 'output' > \$SSM_OUTPUT/output && \
+        echo 'state' > \$SSM_STATE/state"
 
+# Example 3 - a bash ecript 
+ssm process -p ssm-example-processing -t cli-bash -o ./output/output3 \
+    --download_state --command bash --download_output --max_run_mins 15 \
+    --code ex3.sh --dependencies ./dep --cs \
+    -- arg1 -arg2 --arg3 "argument 4" &
 
 #  --it ml.t3.medium
 

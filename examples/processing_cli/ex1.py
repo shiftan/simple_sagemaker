@@ -21,7 +21,7 @@ def listDir(path, recursive=True):
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-    logger.info("Starting ...")
+    logger.info("======= Starting python script ...")
 
     worker_config = worker_lib.WorkerConfig()
 
