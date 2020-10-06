@@ -377,6 +377,15 @@ def processingArguments(processing_parser):
                 This is in the form of a list of strings that make a command""",
     )
     code_group.add_argument(
+        "--dependencies",
+        "-d",
+        nargs="+",
+        type=lambda x: fileValidation(processing_parser, x),
+        help="""A list of paths to directories (absolute or relative) with any additional libraries that will be exported to the container
+        The library folders will be copied to SageMaker in the same folder where the entrypoint is copied.""",
+    )
+
+    code_group.add_argument(
         "--command",
         nargs="+",
         help="""The command to run, along with any command-line flags (defaults to: "python3").""",
@@ -734,6 +743,7 @@ def processingHandler(args, hyperparameters):
             "entrypoint": "entrypoint",
             "code": "code",
             "command": "command",
+            "dependencies":"dependencies"
         },
     )
     sm_project.setDefaultInstanceParams(

@@ -117,6 +117,7 @@ class SageMakerTask:
         max_run_mins=constants.DEFAULT_MAX_RUN,
         tags=dict(),
         input_distribution="FullyReplicated",
+        dependencies=list(),
     ):
         logger.info("Running a processing job...")
         job_name = self._getJobName()
@@ -155,17 +156,22 @@ class SageMakerTask:
                 )
             )
 
-        # worker toolkit
-        code_path = "/opt/ml/processing/input/code/worker_toolkit"
-        inputs.append(
-            ProcessingInput(
-                self.internalDependencies[0],
-                code_path,
-                "worker_toolkit",
-                s3_data_distribution_type="FullyReplicated",
-            )
-        )
+        # dependencies
 
+        # append the internal dependencies
+        dependencies.extend(self.internalDependencies)
+        for dep in dependencies:
+            dep = os.path.abspath(dep)
+            basename = os.path.basename(dep)
+            local_path = f"/opt/ml/processing/input/code/{basename}"
+            inputs.append(
+                ProcessingInput(
+                    dep,
+                    local_path,
+                    "DEP_"+basename,
+                    s3_data_distribution_type="FullyReplicated",
+                )
+            )
         # input data
         if self.inputS3Uri:
             data_path = "/opt/ml/processing/data"

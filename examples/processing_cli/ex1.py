@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 from worker_toolkit import worker_lib
+from code import ex1_dep
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ if __name__ == "__main__":
 
     worker_config = worker_lib.WorkerConfig()
 
-    print(os.environ)
+    print("Environ:", os.environ)
+    print("Args:", sys.argv)
 
     listDir("/opt/")
     open(os.environ["SSM_STATE"] + "/state", "wt").write("state")
