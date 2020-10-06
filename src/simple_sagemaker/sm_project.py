@@ -415,9 +415,6 @@ class SageMakerProject:
         :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
         :type task_name: str
         """
-        assert (
-            self.task_type == constants.TASK_TYPE_TRAINING
-        ), "input config is only supported for training tasks "
         # state is global for the task
         if "state" == output_type:
             smTask = SageMakerTask(
