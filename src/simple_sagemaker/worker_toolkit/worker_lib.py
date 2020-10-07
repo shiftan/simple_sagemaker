@@ -241,18 +241,3 @@ class WorkerConfig:
         self._deleteOtherInstancesState()
         self.config.instance_state = self._getInstanceStatePath()
         os.environ["SSM_INSTANCE_STATE"] = self.config.instance_state
-
-    def markCompleted(self):
-        """Mark the task as completed.
-        Once a task is marked as completed it won't run again, and the current output will be used instead,
-        unlesss eforced otherwise. In addition, the output of a completed task can be used as input of
-        other **tasks** in the same project.
-
-        """
-        logger.info(f"Marking instance {self.config.current_host} completion")
-        completion_dir = (
-            Path(self.config.state) / "__COMPLETION__" / self.config.current_host
-        )
-        completion_dir.mkdir(parents=True, exist_ok=True)
-        path = completion_dir / "__COMPLETED__"
-        path.write_text(self.config.job_name)

@@ -30,10 +30,6 @@ def worker():
         cmd_line = worker_config.hps["SSM_SHELL_CMD_LINE"]
         logger.info(f"Launching a shell: {cmd_line}")
         shell_cmd = subprocess.run(cmd_line, shell=True, executable="/bin/bash")
-    # Mark the job as completed if exit code is 0
-    if shell_cmd.returncode == 0:
-        # mark the task as completed
-        worker_config.markCompleted()
 
     logger.info(f"finished with {shell_cmd.returncode} return code!")
 

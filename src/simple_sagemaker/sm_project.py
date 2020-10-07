@@ -332,12 +332,21 @@ class SageMakerProject:
         if clean_state:
             smTask.clean_state()
 
-        job_name = None if force_running else self._getCompletionJobName(task_name)
+        if force_running:
+            job_name = None
+        else:
+            job_name, task_type_last, status = SageMakerTask.getLastJob(
+                self.boto3_session, self.project_name, task_name
+            )
+            assert task_type == task_type_last, "Mismatch task type (new vs. old)"
+            if status != "Completed":
+                job_name = None
+
         if job_name:
             logger.info(
                 f"===== Task {task_name} is already completed by {job_name} ====="
             )
-            smTask.bindToJob(job_name)
+            smTask.bindToJob(job_name, task_type)
         else:
             if task_type == constants.TASK_TYPE_TRAINING:
                 job_name = smTask.runTrainingJob(
@@ -391,9 +400,11 @@ class SageMakerProject:
                 self.bucket_name,
                 smSession=self.smSession,
             )
-            job_name = self._getCompletionJobName(task_name)
-            assert job_name, f"Task {task_name} isn't completed!"
-            smTask.bindToJob(job_name)
+            job_name, task_type, status = SageMakerTask.getLastJob(
+                self.boto3_session, self.project_name, task_name
+            )
+            assert status == "Completed", f"Task {task_name} isn't completed!"
+            smTask.bindToJob(job_name, task_type)
             # self.tasks[task_name] = smTask
         return smTask
 
@@ -467,50 +478,3 @@ class SageMakerProject:
             output=output,
             source=source,
         )
-
-    def _getS3Subdirs(self, bucket, prefix):
-        client = self.boto3_session.client("s3")
-        result = client.list_objects(Bucket=bucket, Prefix=prefix + "/", Delimiter="/")
-        if "CommonPrefixes" not in result:
-            return list()
-        return [
-            commonPreifx["Prefix"].split("/")[-2]
-            for commonPreifx in result["CommonPrefixes"]
-        ]
-
-    def _getCompletionStatus(self, task_name):
-        taskS3Uri = SageMakerTask.getStateS3Uri(
-            self.bucket_name, self.project_name, task_name
-        )
-        (bucket, key) = sagemaker.s3.parse_s3_url(taskS3Uri)
-
-        completion_key = sagemaker.s3.s3_path_join(key, "__COMPLETION__")
-        # Check first if __COMPLETED__ marker exists on the root state folder
-        if self.smSession.list_s3_files(bucket, completion_key + "/__COMPLETED__"):
-            return {
-                "root": self.smSession.read_s3_file(
-                    bucket, completion_key + "/__COMPLETED__"
-                )
-            }
-
-        # Check if it presents on all subdirs
-        subdirs = self._getS3Subdirs(bucket, completion_key)
-        results = dict.fromkeys(subdirs)
-
-        for subdir in subdirs:
-            try:
-                completedContent = self.smSession.read_s3_file(
-                    bucket,
-                    sagemaker.s3.s3_path_join(completion_key, subdir, "__COMPLETED__"),
-                )
-                results[subdir] = completedContent
-            except:  # noqa: E722
-                logger.warning(f"Couldn't get completion status for {subdir}")
-        return results
-
-    def _getCompletionJobName(self, task_name):
-        completionResults = self._getCompletionStatus(task_name)
-        values = list(set(completionResults.values()))
-        if len(values) == 1 and values[0] is not None:
-            return values[0]
-        return False

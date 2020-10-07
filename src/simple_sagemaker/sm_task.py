@@ -5,7 +5,6 @@ import string
 import tarfile
 from time import gmtime, strftime
 
-import boto3
 import sagemaker
 from sagemaker.debugger import TensorBoardOutputConfig
 from sagemaker.inputs import TrainingInput
@@ -404,51 +403,71 @@ class SageMakerTask:
                     break
         return None, None
 
-    def bindToJob(self, job_name):
-        # Code to iterate training jobs
-        # jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime",
-        #       SortOrder='Descending', MaxResults=100)
-        # while job.get("NextToken", None):
-        #    jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime",
-        #       SortOrder='Descending', MaxResults=100, NextToken=jobs["NextToken"])
-        # smc.list_tags(ResourceArn=)["Tags"]
-        account_id = self.boto3_session.client("sts").get_caller_identity()["Account"]
-        region_name = self.boto3_session.region_name
-        task_type = None
-        try:
-            self.sm_client.list_tags(
-                ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:training-job/{job_name}"
-            )
-            task_type = constants.TASK_TYPE_TRAINING
-        except boto3.exceptions.botocore.client.ClientError:
-            pass
-        if not task_type:
-            try:
-                self.sm_client.list_tags(
-                    ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:processing-job/{job_name}"
-                )
-                task_type = constants.TASK_TYPE_PROCESSING
-            except boto3.exceptions.botocore.client.ClientError:
-                pass
+    @staticmethod
+    def getLastJob(boto3_session, project_name, task_name):
+        # Look for training job first and return it if it's there
+        client = boto3_session.client("sagemaker")
+        search_res = client.search(
+            Resource="TrainingJob",
+            SearchExpression={
+                "Filters": [
+                    {
+                        "Name": "Tags.SimpleSagemakerTask",
+                        "Operator": "Equals",
+                        "Value": task_name,
+                    },
+                    {
+                        "Name": "Tags.SimpleSagemakerProject",
+                        "Operator": "Equals",
+                        "Value": project_name,
+                    },
+                ]
+            },
+            SortBy="LastModifiedTime",
+            SortOrder="Descending",
+            MaxResults=1,
+        )
+        if search_res["Results"]:
+            training_job = search_res["Results"][0]["TrainingJob"]
+            status = training_job["TrainingJobStatus"]
+            name = training_job["TrainingJobName"]
+            return name, constants.TASK_TYPE_TRAINING, status
 
-        if not task_type:
-            search_res = self.sm_client.search(
-                Resource="TrainingJob",
-                SearchExpression={
-                    "Filters": [
-                        {
-                            "Name": "TrainingJobName",
-                            "Operator": "Equals",
-                            "Value": job_name,
-                        }
-                    ]
-                },
+        # look for processing jobs
+        extra_args = {}
+        while True:
+            resp = client.list_processing_jobs(
+                NameContains=task_name,
+                MaxResults=100,
+                SortBy="CreationTime",
+                SortOrder="Descending",
+                **extra_args,
             )
-            if search_res["Results"]:
-                task_type = constants.TASK_TYPE_TRAINING
-        if not task_type:
-            _, task_type = self._getJobByName(job_name)
-            assert task_type, f"Couldn't bind to job {job_name}"
+
+            if resp.get("ProcessingJobSummaries", None):
+                for job_summary in resp["ProcessingJobSummaries"]:
+                    tags_list = client.list_tags(
+                        ResourceArn=job_summary["ProcessingJobArn"]
+                    )
+                    tags = {x["Key"]: x["Value"] for x in tags_list["Tags"]}
+                    if (
+                        tags.get("SimpleSagemakerProject", None) == project_name
+                        and tags.get("SimpleSagemakerTask", None) == task_name
+                    ):
+                        return (
+                            job_summary["ProcessingJobName"],
+                            constants.TASK_TYPE_PROCESSING,
+                            job_summary["ProcessingJobStatus"],
+                        )
+
+            if "NextToken" in resp:
+                extra_args["NextToken"] = resp["NextToken"]
+            else:
+                break
+
+        return None, None, None
+
+    def bindToLastJob(self, job_name, task_type):
         self.task_type = task_type
         self.jobNames.append(job_name)
 
