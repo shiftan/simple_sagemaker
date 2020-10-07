@@ -416,13 +416,17 @@ class SageMakerTask:
         region_name = self.boto3_session.region_name
         task_type = None
         try:
-            self.sm_client.list_tags(ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:training-job/{job_name}")
+            self.sm_client.list_tags(
+                ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:training-job/{job_name}"
+            )
             task_type = constants.TASK_TYPE_TRAINING
         except boto3.exceptions.botocore.client.ClientError:
             pass
         if not task_type:
             try:
-                self.sm_client.list_tags(ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:processing-job/{job_name}")
+                self.sm_client.list_tags(
+                    ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:processing-job/{job_name}"
+                )
                 task_type = constants.TASK_TYPE_PROCESSING
             except boto3.exceptions.botocore.client.ClientError:
                 pass
@@ -432,7 +436,11 @@ class SageMakerTask:
                 Resource="TrainingJob",
                 SearchExpression={
                     "Filters": [
-                        {"Name": "TrainingJobName", "Operator": "Equals", "Value": job_name}
+                        {
+                            "Name": "TrainingJobName",
+                            "Operator": "Equals",
+                            "Value": job_name,
+                        }
                     ]
                 },
             )
