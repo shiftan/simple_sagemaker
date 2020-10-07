@@ -332,15 +332,14 @@ class SageMakerProject:
         if clean_state:
             smTask.clean_state()
 
-        if force_running:
-            job_name = None
-        else:
-            job_name, task_type_last, status = SageMakerTask.getLastJob(
+        job_name = None
+        if not force_running:
+            job_name_last, task_type_last, status = SageMakerTask.getLastJob(
                 self.boto3_session, self.project_name, task_name
             )
-            assert task_type == task_type_last, "Mismatch task type (new vs. old)"
-            if status != "Completed":
-                job_name = None
+            if job_name_last and status == "Completed":
+                assert task_type == task_type_last, f"Mismatch task {task_name} type (new {task_type} vs. old {task_type_last}) - {job_name, status}"
+                job_name = job_name_last
 
         if job_name:
             logger.info(
