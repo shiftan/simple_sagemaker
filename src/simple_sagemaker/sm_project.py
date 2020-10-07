@@ -347,7 +347,7 @@ class SageMakerProject:
             logger.info(
                 f"===== Task {task_name} is already completed by {job_name} ====="
             )
-            smTask.bindToJob(job_name, task_type)
+            smTask.bindToLastJob(job_name, task_type)
         else:
             if task_type == constants.TASK_TYPE_TRAINING:
                 job_name = smTask.runTrainingJob(
@@ -405,7 +405,7 @@ class SageMakerProject:
                 self.boto3_session, self.project_name, task_name
             )
             assert status == "Completed", f"Task {task_name} isn't completed!"
-            smTask.bindToJob(job_name, task_type)
+            smTask.bindToLastJob(job_name, task_type)
             # self.tasks[task_name] = smTask
         return smTask
 

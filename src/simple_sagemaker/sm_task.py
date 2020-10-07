@@ -406,7 +406,14 @@ class SageMakerTask:
     @staticmethod
     def getLastJob(boto3_session, project_name, task_name):
         # Look for training job first and return it if it's there
-        client = boto3_session.client("sagemaker")
+        from botocore.config import Config
+        config = Config(
+            retries = {
+                'max_attempts': 10,
+                'mode': 'standard'
+            }
+        )
+        client = boto3_session.client("sagemaker", config=config)
         search_res = client.search(
             Resource="TrainingJob",
             SearchExpression={
@@ -435,6 +442,7 @@ class SageMakerTask:
 
         # look for processing jobs
         extra_args = {}
+        client = boto3.client("sagemaker")
         while True:
             resp = client.list_processing_jobs(
                 NameContains=task_name,
