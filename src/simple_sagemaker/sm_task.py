@@ -404,7 +404,7 @@ class SageMakerTask:
         return None, None
 
     @staticmethod
-    def getLastJob(boto3_session, project_name, task_name):
+    def getLastJob(boto3_session, project_name, task_name, task_type = None):
         # Look for training job first and return it if it's there
         from botocore.config import Config
         config = Config(
@@ -414,64 +414,68 @@ class SageMakerTask:
             }
         )
         client = boto3_session.client("sagemaker", config=config)
-        search_res = client.search(
-            Resource="TrainingJob",
-            SearchExpression={
-                "Filters": [
-                    {
-                        "Name": "Tags.SimpleSagemakerTask",
-                        "Operator": "Equals",
-                        "Value": task_name,
-                    },
-                    {
-                        "Name": "Tags.SimpleSagemakerProject",
-                        "Operator": "Equals",
-                        "Value": project_name,
-                    },
-                ]
-            },
-            SortBy="LastModifiedTime",
-            SortOrder="Descending",
-            MaxResults=1,
-        )
-        if search_res["Results"]:
-            training_job = search_res["Results"][0]["TrainingJob"]
-            status = training_job["TrainingJobStatus"]
-            name = training_job["TrainingJobName"]
-            return name, constants.TASK_TYPE_TRAINING, status
 
-        # look for processing jobs
-        extra_args = {}
-        client = boto3.client("sagemaker")
-        while True:
-            resp = client.list_processing_jobs(
-                NameContains=task_name,
-                MaxResults=100,
-                SortBy="CreationTime",
+        if not task_type or task_type == constants.TASK_TYPE_TRAINING:
+            # look for training jobs
+            search_res = client.search(
+                Resource="TrainingJob",
+                SearchExpression={
+                    "Filters": [
+                        {
+                            "Name": "Tags.SimpleSagemakerTask",
+                            "Operator": "Equals",
+                            "Value": task_name,
+                        },
+                        {
+                            "Name": "Tags.SimpleSagemakerProject",
+                            "Operator": "Equals",
+                            "Value": project_name,
+                        },
+                    ]
+                },
+                SortBy="LastModifiedTime",
                 SortOrder="Descending",
-                **extra_args,
+                MaxResults=1,
             )
+            if search_res["Results"]:
+                training_job = search_res["Results"][0]["TrainingJob"]
+                status = training_job["TrainingJobStatus"]
+                name = training_job["TrainingJobName"]
+                return name, constants.TASK_TYPE_TRAINING, status
 
-            if resp.get("ProcessingJobSummaries", None):
-                for job_summary in resp["ProcessingJobSummaries"]:
-                    tags_list = client.list_tags(
-                        ResourceArn=job_summary["ProcessingJobArn"]
-                    )
-                    tags = {x["Key"]: x["Value"] for x in tags_list["Tags"]}
-                    if (
-                        tags.get("SimpleSagemakerProject", None) == project_name
-                        and tags.get("SimpleSagemakerTask", None) == task_name
-                    ):
-                        return (
-                            job_summary["ProcessingJobName"],
-                            constants.TASK_TYPE_PROCESSING,
-                            job_summary["ProcessingJobStatus"],
+        if not task_type or task_type == constants.TASK_TYPE_PROCESSING:
+            # look for processing jobs
+            extra_args = {}
+            client = boto3.client("sagemaker")
+            while True:
+                resp = client.list_processing_jobs(
+                    NameContains=task_name,
+                    MaxResults=100,
+                    SortBy="CreationTime",
+                    SortOrder="Descending",
+                    **extra_args,
+                )
+
+                if resp.get("ProcessingJobSummaries", None):
+                    for job_summary in resp["ProcessingJobSummaries"]:
+                        tags_list = client.list_tags(
+                            ResourceArn=job_summary["ProcessingJobArn"]
                         )
+                        tags = {x["Key"]: x["Value"] for x in tags_list["Tags"]}
+                        if (
+                            tags.get("SimpleSagemakerProject", None) == project_name
+                            and tags.get("SimpleSagemakerTask", None) == task_name
+                        ):
+                            return (
+                                job_summary["ProcessingJobName"],
+                                constants.TASK_TYPE_PROCESSING,
+                                job_summary["ProcessingJobStatus"],
+                            )
 
-            if "NextToken" in resp:
-                extra_args["NextToken"] = resp["NextToken"]
-            else:
-                break
+                if "NextToken" in resp:
+                    extra_args["NextToken"] = resp["NextToken"]
+                else:
+                    break
 
         return None, None, None
 

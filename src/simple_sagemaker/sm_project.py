@@ -335,7 +335,7 @@ class SageMakerProject:
         job_name = None
         if not force_running:
             job_name_last, task_type_last, status = SageMakerTask.getLastJob(
-                self.boto3_session, self.project_name, task_name
+                self.boto3_session, self.project_name, task_name, task_type,
             )
             if job_name_last and status == "Completed":
                 assert (
