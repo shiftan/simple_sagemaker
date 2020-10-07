@@ -338,7 +338,9 @@ class SageMakerProject:
                 self.boto3_session, self.project_name, task_name
             )
             if job_name_last and status == "Completed":
-                assert task_type == task_type_last, f"Mismatch task {task_name} type (new {task_type} vs. old {task_type_last}) - {job_name, status}"
+                assert (
+                    task_type == task_type_last
+                ), f"Mismatch task {task_name} type (new {task_type} vs. old {task_type_last}) - {job_name, status}"
                 job_name = job_name_last
 
         if job_name:
