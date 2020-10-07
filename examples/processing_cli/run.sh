@@ -1,5 +1,5 @@
 #! /bin/bash
-set -e # fail if any test fails
+set -ex # fail if any test fails
 
 # Params: [output] [prefix] [suffix] [additional ssm params...]
 cd `dirname "$0"`
