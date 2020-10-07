@@ -73,7 +73,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     prefix = "tests/"
 
     run_shell = os.path.join(examples_path, test_path, "run.sh")
-    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
+    subprocess.run([run_shell, output_path, prefix, postfix, "--cs --force_running"], check=True)
 
     expected_path = os.path.join(examples_path, test_path, "expected_output")
     assert isAsExpected(output_path, expected_path)

@@ -85,13 +85,13 @@ Please refer to [this blog post](https://medium.com/@shiftan/a-very-simple-and-c
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
-* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_toolkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`, see [below](#Configuration)), i.e. input/output/state paths, running parameters, and to mark a job as completed. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
+* The **worker** is basically the work (shell/python code) being distributed. Python code may be adapted to use a small `task_toolkit` library (that is automatically injected to the **worker**) for getting the environment configuration (`WorkerConfig`, see [below](#Configuration)), i.e. input/output/state paths, running parameters. Shell command can access the same parameters on the command line, and completion is determined by the exit code (i.e. 0 is a success) etc.
 
 The **runner** is used to configure **tasks** and **projects**: 
 - A **task** is a logical step that runs on a defined input and provide output. It's defined by providing a local code path, entrypoint, and a list of additional local dependencies
 - A SageMaker **job** is a **task** instance, i.e. a single **job** is created each time a **task** is executed
     - State is maintained between consecutive execution of the same **task** (see more [below](#Task-state-and-output))
-    - Task can be marked as completed, to avoid re-running it next time (unless enforced otherwise)
+    - If a **task** was completed, by returnin 0 retcode from all instances, it'll be skipped automatically on the next time (unless enforced otherwise)
 - A **project** is a series of related **tasks**, with possible dependencies
     - The output of a completed task can be consumed as input by a consecutive task
 
@@ -158,8 +158,8 @@ The complete list of configuration parameters:
 ## State
 State is maintained between executions of the same **task**, i.e. between **jobs** that belongs to the same **task**.
 The local path is available in `worker_config.state`. 
-When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `per_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, `WorkerConfig` provides an additional important API to mark the **task** as completed: `worker_config.markCompleted()`. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
-1. To skip it next time (unless enforced otherwise e.g. by using `--force_running` or if the state is cleared using `clean_state`)
+When running multiple instances, the state data is merged into a single directory (post execution).  To avoid collisions, set the `per_instance_state` parameter of `WorkerConfig` constructor to `True` (the default behavior), which initializes a per instance sub directory, and keep it in `worker_config.instance_state`. On top of that, the return value plays an important part: returning 0 means the **job** is completed. If all instances of a **job** marked it as completed, the **task** is assumed to be completed by that **job**, which allows:
+1. To skip it next time (unless enforced otherwise by using `--force_running` or a newer run of the same **task** failed)
 2. To use its output as input for other **tasks** (see below: ["Chaining tasks"](#Chaining-tasks))
 
 ## Output
@@ -205,6 +205,9 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 `framework_version` and `py_version` to use the image that matches your needs ([the full list is here](https://github.com/aws/deep-learning-containers/blob/master/available_images.md)). For TensorFlow you'll need to use the `distribution` parameters. For more details on the built in support see:
 - PyTorch - [Distributed PyTorch Training](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html#distributed-pytorch-training)
 - TensorFlow - [Distributed TensorFlow Training](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training). 
+
+# Processing tasks
+TBD
 
 # CLI
 The `ssm` CLI supports 3 commands:
@@ -343,9 +346,7 @@ I/O:
                         as an input source (a few can be given). Type should
                         be one of ['state', 'model', 'source', 'output'].
                         (default: None)
-  --clean_state, --cs   Clear the task state before running it. The task will
-                        be running again even if it was already completed
-                        before. (default: False)
+  --clean_state, --cs   Clear the task state before running it. (default: False)
   --keep_state, --ks    Keep the current task state. If the task is already
                         completed, its current output will be taken without
                         running it again. (default: True)
@@ -537,9 +538,8 @@ open(os.path.join(worker_config.output_data_dir, "output_data_dir"), "wt").write
 open(os.path.join(worker_config.model_dir, "model_dir"), "wt").write("model_dir file")
 open(os.path.join(worker_config.state, "state_dir"), "wt").write("state_dir file")
 
-# Mark the tasks as completed, to allow other tasks to use its output, 
+# 0 retcode - marks the tasks as completed, to allow other tasks to use its output, 
 # and to avoid re-running it (unless enforced)
-worker_config.markCompleted()
 ```
 Runner CLI:
 ```bash
@@ -782,9 +782,8 @@ def worker():
             f"Input task2_data_dist: {list(Path(worker_config.channel_task2_data_dist).rglob('*'))}"
         )
 
-    # mark the task as completed
-    worker_config.markCompleted()
     logger.info("finished!")
+    # The task is marked as completed
 ```
 
 To pack everything in a single file, we use the command line argument `--worker` (as defined in the `runner` function) to distinguish between **runner** and worker runs
@@ -814,7 +813,6 @@ Running the file, with a sibling directory named `data` with a sample file [as o
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
@@ -823,7 +821,6 @@ INFO:__main__:finished!
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 INFO:__main__:finished!
 ```
@@ -835,7 +832,6 @@ INFO:__main__:Input data files: [PosixPath('worker_toolkit'), PosixPath('example
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
 INFO:__main__:Input task2_data: [PosixPath('/opt/ml/input/data/task2_data/model.tar.gz')]
 INFO:__main__:Input task2_data_dist: [PosixPath('/opt/ml/input/data/task2_data_dist/model.tar.gz')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 ```
 
@@ -843,7 +839,6 @@ INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 INFO:__main__:finished!
 
