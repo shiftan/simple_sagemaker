@@ -112,6 +112,5 @@ INFO:__main__:Input data files: [PosixPath('example.py'), PosixPath('worker_tool
 INFO:__main__:State files: [PosixPath('/state/algo-2')]
 INFO:__main__:Input task2_data: [PosixPath('/opt/ml/input/data/task2_data/model.tar.gz')]
 INFO:__main__:Input task2_data_dist: []
-INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:__main__:finished!
 2020-10-04 09:25:30,575 sagemaker-training-toolkit INFO     Reporting training SUCCESS

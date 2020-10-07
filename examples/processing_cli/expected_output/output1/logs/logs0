@@ -128,5 +128,4 @@ drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
 drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
 
 INFO:__main__:*** END file listing /opt/
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished!

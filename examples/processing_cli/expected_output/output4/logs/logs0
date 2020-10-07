@@ -162,20 +162,7 @@ drwxr-xr-x 4 root root 4096 Oct  6 23:33 ..
 total 16
 drwxr-xr-x 3 root root 4096 Oct  6 23:33 .
 drwxr-xr-x 4 root root 4096 Oct  6 23:33 ..
-drwxr-xr-x 3 root root 4096 Oct  6 23:33 __COMPLETION__
 -rw-r--r-- 1 root root    5 Oct  6 23:33 state
-
-/opt/ml/input/data/cli_code_state/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  6 23:33 .
-drwxr-xr-x 3 root root 4096 Oct  6 23:33 ..
-drwxr-xr-x 2 root root 4096 Oct  6 23:33 algo-1
-
-/opt/ml/input/data/cli_code_state/__COMPLETION__/algo-1:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  6 23:33 .
-drwxr-xr-x 3 root root 4096 Oct  6 23:33 ..
--rw-r--r-- 1 root root   37 Oct  6 23:33 __COMPLETED__
 
 /opt/ml/model:
 total 8
@@ -216,6 +203,5 @@ drwxr-xr-x 6 root root 4096 Oct  6 23:33 ..
 total 8
 drwxr-xr-x 2 root root 4096 Oct  6 23:33 .
 drwxr-xr-x 6 root root 4096 Oct  6 23:33 ..
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished with 0 return code!
 2020-10-06 23:33:52,881 sagemaker-training-toolkit INFO     Reporting training SUCCESS

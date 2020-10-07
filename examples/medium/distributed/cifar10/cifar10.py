@@ -274,9 +274,6 @@ def main():
         if worker_config:
             args.data_path = worker_config.state
         download_data(args.data_path)
-        # 3a. Mark the task as completed
-        if worker_config:
-            worker_config.markCompleted()
         return
 
     # 2b. Update the parsed command line arguments from the configuration
@@ -318,10 +315,6 @@ def main():
         test_batch_size=args.test_batch_size,
         epochs=args.epochs,
     )
-
-    # 4b. Mark the task as completed
-    if worker_config:
-        worker_config.markCompleted()
 
 
 if __name__ == "__main__":

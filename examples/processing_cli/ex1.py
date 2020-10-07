@@ -32,6 +32,6 @@ if __name__ == "__main__":
     open(os.environ["SSM_STATE"] + "/state", "wt").write("state")
     open(os.environ["SSM_OUTPUT"] + "/output", "wt").write("output")
 
-    worker_config.markCompleted()
     # just to show the final directory structue
     logger.info("finished!")
+    # The task is marked as completed

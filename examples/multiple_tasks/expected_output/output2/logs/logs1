@@ -211,28 +211,8 @@ drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state1/__COMPLETION__:
-total 16
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state1/__COMPLETION__/algo-1:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
-
-/opt/ml/input/data/task1_state1/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/input/data/task1_state1/algo-1:
 total 48
@@ -268,21 +248,8 @@ drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state2/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state2/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/input/data/task1_state2/algo-1:
 total 28
@@ -364,7 +331,6 @@ drwxr-xr-x 3 root root 4096 Oct  5 09:25 ..
 
 INFO:__main__:*** END file listing /state
 INFO:__main__:Doing nothing...
-INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:__main__:finished!
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:/opt/ml:
@@ -451,28 +417,8 @@ drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state1/__COMPLETION__:
-total 16
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state1/__COMPLETION__/algo-1:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
-
-/opt/ml/input/data/task1_state1/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/input/data/task1_state1/algo-1:
 total 48
@@ -508,21 +454,8 @@ drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 7 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state2/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/input/data/task1_state2/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/input/data/task1_state2/algo-1:
 total 28
@@ -607,28 +540,8 @@ drwxr-xr-x 3 root root 4096 Oct  5 09:25 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 8 root root 4096 Oct  5 09:25 ..
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/output/data/algo-2/task1_state1_copy/__COMPLETION__:
-total 16
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/output/data/algo-2/task1_state1_copy/__COMPLETION__/algo-1:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
-
-/opt/ml/output/data/algo-2/task1_state1_copy/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/output/data/algo-2/task1_state1_copy/algo-1:
 total 48
@@ -664,21 +577,8 @@ drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
 total 20
 drwxr-xr-x 5 root root 4096 Oct  5 09:23 .
 drwxr-xr-x 8 root root 4096 Oct  5 09:25 ..
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 __COMPLETION__
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-1
 drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/output/data/algo-2/task1_state2_copy/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 5 root root 4096 Oct  5 09:23 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 algo-2
-
-/opt/ml/output/data/algo-2/task1_state2_copy/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:23 .
-drwxr-xr-x 3 root root 4096 Oct  5 09:23 ..
--rw-r--r-- 1 root root   40 Oct  5 09:23 __COMPLETED__
 
 /opt/ml/output/data/algo-2/task1_state2_copy/algo-1:
 total 28
@@ -732,20 +632,7 @@ INFO:__main__:/state:
 total 16
 drwxr-xr-x  4 root root 4096 Oct  5 09:25 .
 drwxr-xr-x 23 root root 4096 Oct  5 09:25 ..
-drwxr-xr-x  3 root root 4096 Oct  5 09:25 __COMPLETION__
 drwxr-xr-x  2 root root 4096 Oct  5 09:25 algo-2
-
-/state/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  5 09:25 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:25 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:25 algo-2
-
-/state/__COMPLETION__/algo-2:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:25 .
-drwxr-xr-x 3 root root 4096 Oct  5 09:25 ..
--rw-r--r-- 1 root root   40 Oct  5 09:25 __COMPLETED__
 
 /state/algo-2:
 total 8

@@ -182,7 +182,6 @@ INFO:__main__:[File] /state/algo-1
 INFO:__main__:*** END file listing /state
 INFO:matplotlib.font_manager:Generating new fontManager, this may take some time...
 INFO:__main__:{pandas} is pre-installed in this image
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:[File] /opt/ml/model
 INFO:__main__:[Dir ] /opt/ml/model/sample_data1.txt_proc_by_algo-1
@@ -196,9 +195,6 @@ INFO:__main__:[File] /opt/ml/output/profiler
 INFO:__main__:[File] /opt/ml/output/tensorboard
 INFO:__main__:*** END file listing /opt/ml
 INFO:__main__:*** START listing files in /state
-INFO:__main__:[File] /state/__COMPLETION__
-INFO:__main__:[File] /state/__COMPLETION__/algo-1
-INFO:__main__:[Dir ] /state/__COMPLETION__/algo-1/__COMPLETED__
 INFO:__main__:[File] /state/algo-1
 INFO:__main__:[Dir ] /state/algo-1/algo-1
 INFO:__main__:*** END file listing /state

@@ -99,6 +99,5 @@ INFO:__main__:Hyperparams: {'task_type': '2'}
 INFO:__main__:Input data files: [PosixPath('worker_toolkit'), PosixPath('worker.py'), PosixPath('worker_toolkit/worker_lib.py'), PosixPath('worker_toolkit/__pycache__'), PosixPath('worker_toolkit/__init__.py'), PosixPath('worker_toolkit/__pycache__/__init__.cpython-37.pyc'), PosixPath('worker_toolkit/__pycache__/worker_lib.cpython-37.pyc')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
 INFO:__main__:Input task2_data: [PosixPath('/opt/ml/input/data/task2_data/model.tar.gz')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished!
 2020-09-13 13:24:11,656 sagemaker-training-toolkit INFO     Reporting training SUCCESS

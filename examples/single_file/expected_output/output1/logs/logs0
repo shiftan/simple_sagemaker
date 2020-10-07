@@ -103,6 +103,5 @@ INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_data='/opt/ml/in
 INFO:__main__:Hyperparams: {'arg': 'hello world!', 'task': 1, 'worker': 1}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished!
 2020-10-04 09:21:16,653 sagemaker-training-toolkit INFO     Reporting training SUCCESS

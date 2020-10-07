@@ -314,6 +314,5 @@ Sun Oct  4 09:26:58 2020
 |=============================================================================|
 |  No running processes found                                                 |
 +-----------------------------------------------------------------------------+
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished with 0 return code!
 2020-10-04 09:26:58,264 sagemaker-training-toolkit INFO     Reporting training SUCCESS

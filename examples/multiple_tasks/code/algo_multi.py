@@ -69,7 +69,6 @@ if __name__ == "__main__":
         shutil.copytree(input_dir, f"{output_data_dir}/{channel_name}_copy")
     shutil.copytree(worker_config.state, f"{output_data_dir}/state_copy")
 
-    worker_config.markCompleted()
-
     logger.info("finished!")
     logAfter(worker_config)
+    # The task is marked as completed

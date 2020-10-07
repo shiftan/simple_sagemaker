@@ -115,9 +115,8 @@ def worker():
             f"Input task2_data_dist: {list(Path(worker_config.channel_task2_data_dist).rglob('*'))}"
         )
 
-    # mark the task as completed
-    worker_config.markCompleted()
     logger.info("finished!")
+    # The task is marked as completed
 
 
 def main():

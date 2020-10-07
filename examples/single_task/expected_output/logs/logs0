@@ -273,7 +273,6 @@ drwxr-xr-x 2 root root 4096 Oct  5 09:20 .
 drwxr-xr-x 3 root root 4096 Oct  5 09:20 ..
 
 INFO:__main__:*** END file listing /state
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished!
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:/opt/ml:
@@ -472,20 +471,7 @@ INFO:__main__:/state:
 total 16
 drwxr-xr-x  4 root root 4096 Oct  5 09:20 .
 drwxr-xr-x 23 root root 4096 Oct  5 09:20 ..
-drwxr-xr-x  3 root root 4096 Oct  5 09:20 __COMPLETION__
 drwxr-xr-x  2 root root 4096 Oct  5 09:20 algo-1
-
-/state/__COMPLETION__:
-total 12
-drwxr-xr-x 3 root root 4096 Oct  5 09:20 .
-drwxr-xr-x 4 root root 4096 Oct  5 09:20 ..
-drwxr-xr-x 2 root root 4096 Oct  5 09:20 algo-1
-
-/state/__COMPLETION__/algo-1:
-total 12
-drwxr-xr-x 2 root root 4096 Oct  5 09:20 .
-drwxr-xr-x 3 root root 4096 Oct  5 09:20 ..
--rw-r--r-- 1 root root   34 Oct  5 09:20 __COMPLETED__
 
 /state/algo-1:
 total 12

@@ -168,9 +168,6 @@ INFO:__main__:[File] /opt/ml/input/data/task_6_1_model
 INFO:__main__:[Dir ] /opt/ml/input/data/task_6_1_model/model.tar.gz
 INFO:__main__:[Dir ] /opt/ml/input/data/task_6_1_model-manifest
 INFO:__main__:[File] /opt/ml/input/data/task_6_1_state
-INFO:__main__:[File] /opt/ml/input/data/task_6_1_state/__COMPLETION__
-INFO:__main__:[File] /opt/ml/input/data/task_6_1_state/__COMPLETION__/algo-2
-INFO:__main__:[Dir ] /opt/ml/input/data/task_6_1_state/__COMPLETION__/algo-2/__COMPLETED__
 INFO:__main__:[File] /opt/ml/input/data/task_6_1_state/algo-2
 INFO:__main__:[Dir ] /opt/ml/input/data/task_6_1_state/algo-2/algo-2
 INFO:__main__:[Dir ] /opt/ml/input/data/task_6_1_state-manifest
@@ -188,7 +185,6 @@ INFO:__main__:*** END file listing /state
 -- External Lib1 imported!
 INFO:__main__:Score=10;
 INFO:__main__:Score=20;
-INFO:worker_toolkit.worker_lib:Marking instance algo-2 completion
 INFO:__main__:*** START listing files in /opt/ml
 INFO:__main__:[File] /opt/ml/errors
 INFO:__main__:[File] /opt/ml/model
@@ -200,9 +196,6 @@ INFO:__main__:[File] /opt/ml/output/profiler
 INFO:__main__:[File] /opt/ml/output/tensorboard
 INFO:__main__:*** END file listing /opt/ml
 INFO:__main__:*** START listing files in /state
-INFO:__main__:[File] /state/__COMPLETION__
-INFO:__main__:[File] /state/__COMPLETION__/algo-2
-INFO:__main__:[Dir ] /state/__COMPLETION__/algo-2/__COMPLETED__
 INFO:__main__:[File] /state/algo-2
 INFO:__main__:*** END file listing /state
 INFO:__main__:finished!
