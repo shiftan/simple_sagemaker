@@ -9,7 +9,8 @@ cd $1
 [ -d ./train ] && rm -r ./train
 [ -d ./val ] && rm -r ./val
 
-sudo apt-get -y install aria2
+apt-get update
+apt-get -y install aria2
 download () {
     aria2c --summary-interval=30 --conditional-get=true -x 16 -s 16 $1
 }

@@ -5,6 +5,7 @@ import string
 import tarfile
 from time import gmtime, strftime
 
+import boto3
 import sagemaker
 from sagemaker.debugger import TensorBoardOutputConfig
 from sagemaker.inputs import TrainingInput
@@ -411,8 +412,35 @@ class SageMakerTask:
         #    jobs = smc.list_training_jobs(StatusEquals="Completed", SortBy="CreationTime",
         #       SortOrder='Descending', MaxResults=100, NextToken=jobs["NextToken"])
         # smc.list_tags(ResourceArn=)["Tags"]
-        job, task_type = self._getJobByName(job_name)
-        assert task_type, f"Couldn't bind to job {job_name}"
+        account_id = self.boto3_session.client("sts").get_caller_identity()["Account"]
+        region_name = self.boto3_session.region_name
+        task_type = None
+        try:
+            self.sm_client.list_tags(ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:training-job/{job_name}")
+            task_type = constants.TASK_TYPE_TRAINING
+        except boto3.exceptions.botocore.client.ClientError:
+            pass
+        if not task_type:
+            try:
+                self.sm_client.list_tags(ResourceArn=f"arn:aws:sagemaker:{region_name}:{account_id}:processing-job/{job_name}")
+                task_type = constants.TASK_TYPE_PROCESSING
+            except boto3.exceptions.botocore.client.ClientError:
+                pass
+
+        if not task_type:
+            search_res = self.sm_client.search(
+                Resource="TrainingJob",
+                SearchExpression={
+                    "Filters": [
+                        {"Name": "TrainingJobName", "Operator": "Equals", "Value": job_name}
+                    ]
+                },
+            )
+            if search_res["Results"]:
+                task_type = constants.TASK_TYPE_TRAINING
+        if not task_type:
+            _, task_type = self._getJobByName(job_name)
+            assert task_type, f"Couldn't bind to job {job_name}"
         self.task_type = task_type
         self.jobNames.append(job_name)
 
