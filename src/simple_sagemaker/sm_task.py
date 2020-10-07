@@ -404,15 +404,11 @@ class SageMakerTask:
         return None, None
 
     @staticmethod
-    def getLastJob(boto3_session, project_name, task_name, task_type = None):
+    def getLastJob(boto3_session, project_name, task_name, task_type=None):
         # Look for training job first and return it if it's there
         from botocore.config import Config
-        config = Config(
-            retries = {
-                'max_attempts': 10,
-                'mode': 'standard'
-            }
-        )
+
+        config = Config(retries={"max_attempts": 10, "mode": "standard"})
         client = boto3_session.client("sagemaker", config=config)
 
         if not task_type or task_type == constants.TASK_TYPE_TRAINING:
@@ -446,7 +442,35 @@ class SageMakerTask:
         if not task_type or task_type == constants.TASK_TYPE_PROCESSING:
             # look for processing jobs
             extra_args = {}
-            client = boto3.client("sagemaker")
+            arn_tags = {}
+            rt_client = boto3_session.client("resourcegroupstaggingapi")
+            while True:
+                resp = rt_client.get_resources(
+                    ResourcesPerPage=100,
+                    TagFilters=[
+                        {
+                            "Key": "SimpleSagemakerProject",
+                            "Values": [project_name],
+                        },
+                        {
+                            "Key": "SimpleSagemakerTask",
+                            "Values": [task_name],
+                        },
+                    ],
+                    ResourceTypeFilters=["sagemaker:processing-job"],
+                    **extra_args,
+                )
+
+                for res_tags in resp["ResourceTagMappingList"]:
+                    tags = {x["Key"]: x["Value"] for x in res_tags["Tags"]}
+                    arn_tags[res_tags["ResourceARN"]] = tags
+
+                if resp.get("PaginationToken", None):
+                    extra_args["PaginationToken"] = resp["PaginationToken"]
+                else:
+                    break
+
+            extra_args = {}
             while True:
                 resp = client.list_processing_jobs(
                     NameContains=task_name,
@@ -458,10 +482,7 @@ class SageMakerTask:
 
                 if resp.get("ProcessingJobSummaries", None):
                     for job_summary in resp["ProcessingJobSummaries"]:
-                        tags_list = client.list_tags(
-                            ResourceArn=job_summary["ProcessingJobArn"]
-                        )
-                        tags = {x["Key"]: x["Value"] for x in tags_list["Tags"]}
+                        tags = arn_tags.get(job_summary["ProcessingJobArn"])
                         if (
                             tags.get("SimpleSagemakerProject", None) == project_name
                             and tags.get("SimpleSagemakerTask", None) == task_name
