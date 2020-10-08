@@ -8,6 +8,7 @@ unzip $1 -d ./output
 cd output
 mv popen*/*0/* .
 rm -r popen*
+find . | grep "\.extracted" | xargs rm
 
 for file in *; do
     echo updating $file ...
