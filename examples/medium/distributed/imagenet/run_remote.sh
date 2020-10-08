@@ -13,13 +13,15 @@ echo "*** Using data source: $data_source"
 # Download the subset data
 ssm shell -p ex-imagenet -t download \
     --dir_files ./code -o ./output/download --no_spot \
-    --cmd_line './download.sh $SSM_STATE/data'
+    --cmd_line './download.sh $SSM_STATE/data' &
 
 # Download the complete data set
-ssm shell -p ex-imagenet -t download-all -v 400 \
-    --dir_files ./code -o ./output/download --no_spot \
-    --cmd_line './download_all.sh $SSM_STATE/data'
+ssm process -p ex-imagenet -t download-all3 -v 400 \
+    --entrypoint "/bin/bash" --dependencies ./code \
+    -o ./output/download-all \
+    -- '/opt/ml/processing/input/code/code/download_all.sh' '$SSM_OUTPUT/data' &
 
+wait
 
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
     EPOCHS=${5:-20}  # 20 epochs by default

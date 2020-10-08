@@ -208,13 +208,29 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 
 # Processing tasks
 TBD
+For now, take a look [on the processing cli examples](https://github.com/shiftan/simple_sagemaker/tree/master/examples/processing_cli/run.sh), and the `ssm process -h` output.
 
 # CLI
-The `ssm` CLI supports 3 commands:
+The `ssm` CLI supports 4 commands:
 - run - to run a python / .sh script based task
 - shell - to run a shell based task
 - data - to manage (download/clear state) the data of an existing task
+- process - to run a processing command, script or generic
 ```bash
+$ ssm -h
+usage: ssm [-h] {run,shell,data,process} ...
+
+positional arguments:
+  {run,shell,data,process}
+    run                 Run a python / .sh script task
+    shell               Run a shell task
+    data                Manage task data
+    process             Run a processing task
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+```bash  
 $ ssm run -h
 usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
@@ -244,6 +260,9 @@ optional arguments:
                         Project name. (default: None)
   --task_name TASK_NAME, -t TASK_NAME
                         Task name. (default: None)
+  --bucket_name BUCKET_NAME, -b BUCKET_NAME
+                        S3 bucket name (a default one is used if not given).
+                        (default: None)
 
 Code:
   --source_dir SOURCE_DIR, -s SOURCE_DIR
@@ -321,14 +340,11 @@ Running:
                         (default: None)
 
 I/O:
-  --bucket_name BUCKET_NAME, -b BUCKET_NAME
-                        S3 bucket name (a default one is used if not given).
-                        (default: None)
   --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
-                        INPUT: PATH [distribution] Local/s3 path for the input
-                        data. If a local path is given, it will be synced to
-                        the task folder on the selected S3 bucket before
-                        launching the task. (default: None)
+                        INPUT: PATH [DISTRIBUTION] [SUBDIR] Local/s3 path for
+                        the input data. If a local path is given, it will be
+                        synced to the task folder on the selected S3 bucket
+                        before launching the task. (default: None)
   --model_uri MODEL_URI
                         URI where a pre-trained model is stored, either
                         locally or in S3. If specified, the estimator will
@@ -338,15 +354,18 @@ I/O:
                         artifacts coming from a different source. (default:
                         None)
   --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
-                        INPUT_S3: INPUT_NAME S3_URI [distribution] Additional
-                        S3 input sources (a few can be given). (default: None)
-  --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
-                        INPUT_TASK: INPUT_NAME TASK_NAME TYPE [distribution]
-                        Use an output of a completed task in the same project
-                        as an input source (a few can be given). Type should
-                        be one of ['state', 'model', 'source', 'output'].
+                        INPUT_S3: INPUT_NAME S3_URI [DISTRIBUTION] [SUBDIR]
+                        Additional S3 input sources (a few can be given).
                         (default: None)
-  --clean_state, --cs   Clear the task state before running it. (default: False)
+  --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
+                        INPUT_TASK: INPUT_NAME TASK_NAME TYPE [DISTRIBUTION]
+                        [SUBDIR] Use an output of a completed task in the same
+                        project as an input source (a few can be given). Type
+                        should be one of ['state', 'model', 'source',
+                        'output']. (default: None)
+  --clean_state, --cs   Clear the task state before running it. The task will
+                        be running again even if it was already completed
+                        before. (default: False)
   --keep_state, --ks    Keep the current task state. If the task is already
                         completed, its current output will be taken without
                         running it again. (default: True)
@@ -369,9 +388,140 @@ Download:
   --download_output     Download the output once task is finished (default:
                         False)
 
-Anything after "--" (followed by a space) will be passed as-is to the executed 
+Anything after "--" (followed by a space) will be passed as-is to the executed
 script command line
 ```
+```bash  
+$ ssm process -h
+usage: ssm process [-h] --project_name PROJECT_NAME --task_name TASK_NAME
+                   [--bucket_name BUCKET_NAME] [--code CODE]
+                   [--entrypoint ENTRYPOINT [ENTRYPOINT ...]]
+                   [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
+                   [--command COMMAND [COMMAND ...]]
+                   [--instance_type INSTANCE_TYPE]
+                   [--instance_count INSTANCE_COUNT]
+                   [--volume_size VOLUME_SIZE] [--max_run_mins MAX_RUN_MINS]
+                   [--aws_repo_name AWS_REPO_NAME] [--repo_name REPO_NAME]
+                   [--image_tag IMAGE_TAG]
+                   [--docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT]
+                   [--framework FRAMEWORK]
+                   [--framework_version FRAMEWORK_VERSION]
+                   [--input_path INPUT_PATH [INPUT_PATH ...]]
+                   [--input_s3 INPUT_S3 [INPUT_S3 ...]]
+                   [--input_task INPUT_TASK [INPUT_TASK ...]]
+                   [--force_running] [--clean_state] [--keep_state]
+                   [--tag key value] [--env key value]
+                   [--arguments ARGUMENTS [ARGUMENTS ...]]
+                   [--output_path OUTPUT_PATH] [--download_state]
+                   [--download_model] [--download_output]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --project_name PROJECT_NAME, -p PROJECT_NAME
+                        Project name. (default: None)
+  --task_name TASK_NAME, -t TASK_NAME
+                        Task name. (default: None)
+  --bucket_name BUCKET_NAME, -b BUCKET_NAME
+                        S3 bucket name (a default one is used if not given).
+                        (default: None)
+
+Code:
+  --code CODE           An S3 URI or a local path to a file with the framework
+                        script to run. (default: None)
+  --entrypoint ENTRYPOINT [ENTRYPOINT ...], -e ENTRYPOINT [ENTRYPOINT ...]
+                        The entrypoint for the processing job (default: None).
+                        This is in the form of a list of strings that make a
+                        command (default: None)
+  --dependencies DEPENDENCIES [DEPENDENCIES ...], -d DEPENDENCIES [DEPENDENCIES ...]
+                        A list of paths to directories (absolute or relative)
+                        with any additional libraries that will be exported to
+                        the container The library folders will be copied to
+                        SageMaker in the same folder where the entrypoint is
+                        copied. (default: None)
+  --command COMMAND [COMMAND ...]
+                        The command to run, along with any command-line flags
+                        (defaults to: "python3"). (default: None)
+
+Instance:
+  --instance_type INSTANCE_TYPE, --it INSTANCE_TYPE
+                        Type of EC2 instance to use. (default: ml.m5.large)
+  --instance_count INSTANCE_COUNT, --ic INSTANCE_COUNT
+                        Number of EC2 instances to use. (default: 1)
+  --volume_size VOLUME_SIZE, -v VOLUME_SIZE
+                        Size in GB of the EBS volume to use for storing input
+                        data. Must be large enough to store input data.
+                        (default: 30)
+  --max_run_mins MAX_RUN_MINS
+                        Timeout in minutes for running. After this amount of
+                        time Amazon SageMaker terminates the job regardless of
+                        its current status. (default: 1440)
+
+Image:
+  --aws_repo_name AWS_REPO_NAME, --ar AWS_REPO_NAME
+                        Name of ECS repository. (default: None)
+  --repo_name REPO_NAME, --rn REPO_NAME
+                        Name of local repository. (default: None)
+  --image_tag IMAGE_TAG
+                        Image tag. (default: latest)
+  --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
+                        Path to a directory containing the DockerFile. The
+                        base image should be set to `__BASE_IMAGE__` within
+                        the Dockerfile, and is automatically replaced with the
+                        correct base image. (default: None)
+  --framework FRAMEWORK, -f FRAMEWORK
+                        The framework to use, see https://github.com/aws/deep-
+                        learning-containers/blob/master/available_images.md
+                        (default: sklearn)
+  --framework_version FRAMEWORK_VERSION, --fv FRAMEWORK_VERSION
+                        The framework version (default: 0.20.0)
+
+Running:
+  --force_running       Force running the task even if its already completed.
+                        (default: False)
+  --tag key value       Tag to be attached to the jobs executed for this task.
+                        (default: None)
+  --env key value       Environment variables for the running task. (default:
+                        None)
+  --arguments ARGUMENTS [ARGUMENTS ...]
+                        A list of string arguments to be passed to a
+                        processing job. Arguments can also be provided after
+                        "--" (followed by a space), which may be needed for
+                        parameters with dashes (default: None)
+
+I/O:
+  --input_path INPUT_PATH [INPUT_PATH ...], -i INPUT_PATH [INPUT_PATH ...]
+                        INPUT: PATH [DISTRIBUTION] [SUBDIR] Local/s3 path for
+                        the input data. If a local path is given, it will be
+                        synced to the task folder on the selected S3 bucket
+                        before launching the task. (default: None)
+  --input_s3 INPUT_S3 [INPUT_S3 ...], --iis INPUT_S3 [INPUT_S3 ...]
+                        INPUT_S3: INPUT_NAME S3_URI [DISTRIBUTION] [SUBDIR]
+                        Additional S3 input sources (a few can be given).
+                        (default: None)
+  --input_task INPUT_TASK [INPUT_TASK ...], --iit INPUT_TASK [INPUT_TASK ...]
+                        INPUT_TASK: INPUT_NAME TASK_NAME TYPE [DISTRIBUTION]
+                        [SUBDIR] Use an output of a completed task in the same
+                        project as an input source (a few can be given). Type
+                        should be one of ['state', 'model', 'source',
+                        'output']. (default: None)
+  --clean_state, --cs   Clear the task state before running it. The task will
+                        be running again even if it was already completed
+                        before. (default: False)
+  --keep_state, --ks    Keep the current task state. If the task is already
+                        completed, its current output will be taken without
+                        running it again. (default: True)
+
+Download:
+  --output_path OUTPUT_PATH, -o OUTPUT_PATH
+                        Local path to download the outputs to. (default: None)
+  --download_state      Download the state once task is finished (default:
+                        False)
+  --download_model      Download the model once task is finished (default:
+                        False)
+  --download_output     Download the output once task is finished (default:
+                        False)
+```
+
 Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by
 `dir_files` and `cmd_line`, respectively. Run `ssm shell -h` for more details.
 
