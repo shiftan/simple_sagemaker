@@ -244,8 +244,7 @@ class OutputComparison:
             logger.error(line)
         for key, lines in logs_diff_info.items():
             logger.warning(f"**** Difference for {key}")
-            for line in lines:
-                logger.warning(line)
+            logger.warning(lines)
         if not res:
             logger.info("**** Output matches expected output")
         return len(res) == 0
@@ -288,6 +287,7 @@ class IgnoreExtractor(Extractor):
             or "hyperparameters.json" in filename
             or "trainingjobconfig.json" in filename
             or "tensorboardoutputconfig.json" in filename
+            or "processingjobconfig.json" in filename
         ):
             return True
         return False
