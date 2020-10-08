@@ -484,7 +484,7 @@ class SageMakerTask:
                     for job_summary in resp["ProcessingJobSummaries"]:
                         tags = arn_tags.get(job_summary["ProcessingJobArn"])
                         if (
-                            tags.get("SimpleSagemakerProject", None) == project_name
+                            tags and tags.get("SimpleSagemakerProject", None) == project_name
                             and tags.get("SimpleSagemakerTask", None) == task_name
                         ):
                             return (

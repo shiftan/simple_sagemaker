@@ -4,22 +4,25 @@
 set -e # stop and fail if anything stops
 cd `dirname "$0"`
 PARTIAL_DATA=$1
-data_source=$( [ "$PARTIAL_DATA" == true ] &&  echo download || echo download-all )
+data_source=$( [ "$PARTIAL_DATA" == true ] &&  echo download || echo download-all3 )
 echo "*** Using data source: $data_source"
 
 # Download the code from PyTorch's examples repository
 [ -f code/main.py ] || wget -O code/main.py https://raw.githubusercontent.com/pytorch/examples/master/imagenet/main.py
 
 # Download the subset data
-ssm shell -p ex-imagenet -t download \
-    --dir_files ./code -o ./output/download --no_spot \
-    --cmd_line './download.sh $SSM_STATE/data' &
-
-# Download the complete data set
-ssm process -p ex-imagenet -t download-all3 -v 400 \
+ssm process -p ex-imagenet -t download \
     --entrypoint "/bin/bash" --dependencies ./code \
     -o ./output/download-all \
-    -- '/opt/ml/processing/input/code/code/download_all.sh' '$SSM_OUTPUT/data' &
+    -- -c 'bash /opt/ml/processing/input/code/code/download.sh $SSM_OUTPUT/data'
+
+exit
+
+# Download the complete data set
+ssm process -p ex-imagenet -t download-all -v 400 \
+    --entrypoint "/bin/bash" --dependencies ./code \
+    -o ./output/download-all \
+    -- -c 'bash /opt/ml/processing/input/code/code/download_all.sh $SSM_OUTPUT/data' &
 
 wait
 

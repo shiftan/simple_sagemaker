@@ -300,6 +300,7 @@ def runArguments(run_parser, shell=False):
     )
     running_params.add_argument(
         "--force_running",
+        "--fr",
         default=False,
         action="store_true",
         help="Force running the task even if it's already completed.",
@@ -478,6 +479,7 @@ def processingArguments(processing_parser):
     )
     running_params.add_argument(
         "--force_running",
+        "--fr",
         default=False,
         action="store_true",
         help="Force running the task even if it's already completed.",

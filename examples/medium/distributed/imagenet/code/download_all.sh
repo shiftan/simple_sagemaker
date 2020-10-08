@@ -1,7 +1,7 @@
 #! /bin/bash
 # Expected to be launched with DATA_DIR as first argument
 
-set -e # stop and fail if anything stops
+set -ex # stop and fail if anything stops
 
 mkdir -p $1
 cd $1
