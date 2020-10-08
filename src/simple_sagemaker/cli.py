@@ -561,6 +561,9 @@ def parseArgs():
         "process",
         help="Run a processing task",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog="""
+        Anything after "--" (followed by a space) will be passed as-is to the executed script command line
+        """,
     )
 
     for specific_parser in (run_parser, shell_parser, data_parser, processing_parser):

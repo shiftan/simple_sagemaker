@@ -16,14 +16,14 @@ pid1=$!
 ssm process -p ${2}ssm-example-processing${3} -t cli-shell -o $1/output2 \
     --download_state --download_output --max_run_mins 15 \
     --entrypoint "/bin/bash" --dependencies ./dep ${@:4} \
-    -- -c "echo '== Bash...'&&\
+    -- -c "echo ==Bash&&\
 echo '-***- Args:'\$@&&echo '-***- Env:'\`env\`&&\ 
 echo '*** START listing files'&&ls -laR /opt&&echo '*** END '&&\
 cp -r /opt/ml/config \$SSM_OUTPUT/config&&\
 echo output>\$SSM_OUTPUT/output&&\
 echo state>\$SSM_STATE/state&"
 
-# Example 3 - a bash ecript that gets the output and state of cli-code as input
+# Example 3 - a bash script that gets the output and state of cli-code as input
 wait $pid1
 ssm process -p ${2}ssm-example-processing${3} -t cli-bash -o $1/output3 \
     --download_state --command bash --download_output --max_run_mins 15 \
