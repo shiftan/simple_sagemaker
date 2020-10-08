@@ -13,15 +13,16 @@ ssm process -p ${2}ssm-example-processing${3} -t cli-code -o $1/output1 \
 pid1=$!
 
 # Example 2 - a raw entrypoint with arguments
-ssm process -p ${2}ssm-example-processing${3} -t cli-shell -o $1/output2 \
+ssm process -p ssm-example-processing -t cli-shell -o ./output2 \
     --download_state --download_output --max_run_mins 15 \
-    --entrypoint "/bin/bash" --dependencies ./dep ${@:4} \
-    -- -c 'echo ==Bash&&\
-echo "-***- Args:"$@ &&echo "-***- Env:"`env`&&\
-echo "*** START listing files"&&ls -laR /opt&&echo "*** END "&&\
-cp -r /opt/ml/config $SSM_OUTPUT/config&&\
-echo output>$SSM_OUTPUT/output&&\
-echo state>$SSM_STATE/state&'
+    --entrypoint "/bin/bash" --dependencies ./dep --force_running \
+    -- -c "echo ==Bash && \
+echo \"-***- Args:\"\$@ &&echo \"-***- Env:\"\`env\`&& \
+echo \"*** START listing files\"&&ls -laR /opt&&echo \"*** END \"&& \
+cp -r /opt/ml/config $SSM_OUTPUT/config&& \
+echo output>$SSM_OUTPUT/output&& \
+echo state>$SSM_STATE/state" &
+
 
 # Example 3 - a bash script that gets the output and state of cli-code as input
 wait $pid1
