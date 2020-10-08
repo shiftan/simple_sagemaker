@@ -177,9 +177,6 @@ def _isAsExpected(output_path, expected_path):
     return len(res) == 0
 
 
-import filecmp
-
-
 class OutputComparison:
     def __init__(self):
         self.extractors = list()
