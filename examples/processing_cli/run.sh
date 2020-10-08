@@ -20,8 +20,8 @@ ssm process -p ${2}ssm-example-processing${3} -t cli-shell -o $1/output2 \
 echo '-***- Args:'\$@&&echo '-***- Env:'\`env\`&&\ 
 echo '*** START listing files'&&ls -laR /opt&&echo '*** END '&&\
 cp -r /opt/ml/config \$SSM_OUTPUT/config&&\
-echo 'output' > \$SSM_OUTPUT/output&&\
-echo 'state' > \$SSM_STATE/state&"
+echo output>\$SSM_OUTPUT/output&&\
+echo state>\$SSM_STATE/state&"
 
 # Example 3 - a bash ecript that gets the output and state of cli-code as input
 wait $pid1
