@@ -227,7 +227,7 @@ class OutputComparison:
                             fromdesc=file_name1,
                             todesc=file_name2,
                         )
-                        Path(str(file_name1) + ".extracted.diff.html").write_text(diff)
+                        Path(str(file_name2) + ".extracted.diff.html").write_text(diff)
                         delta = difflib.unified_diff(
                             extracteds[0].splitlines(),
                             extracteds[1].splitlines(),
@@ -362,7 +362,7 @@ def isAsExpected(output_path, expected_path):
     oc.registerExtractor(IgnoreExtractor())
     oc.registerExtractor(Extractor())
     # oc.compare("/home/user/proj/simple_sagemaker/examples/out2/1", "/home/user/proj/simple_sagemaker/examples/out2/2")
-    return oc.compare(Path(output_path).resolve(), Path(expected_path).resolve())
+    return oc.compare(Path(expected_path).resolve(), Path(output_path).resolve())
 
 
 def main():

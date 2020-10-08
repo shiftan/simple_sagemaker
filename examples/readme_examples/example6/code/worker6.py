@@ -19,7 +19,7 @@ def listDir(path, ignore_patterns=[]):
         if (not ignore_patterns) or all(
             [pattern not in str(file) for pattern in ignore_patterns]
         ):
-            logger.info(f"[{['Dir ', 'File'][file.is_dir()]}] {file}")
+            logger.info(f"[{['Dir ', 'File'][file.is_file()]}] {file}")
     logger.info(f"*** END file listing {path}")
 
 
