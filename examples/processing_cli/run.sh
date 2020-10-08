@@ -16,12 +16,12 @@ pid1=$!
 ssm process -p ${2}ssm-example-processing${3} -t cli-shell -o $1/output2 \
     --download_state --download_output --max_run_mins 15 \
     --entrypoint "/bin/bash" --dependencies ./dep ${@:4} \
-    -- -c "echo '== Bash...' &&" \
-        "echo '-***- Args:' \$@ && echo '-***- Env:' \`env\` && echo '-***- ' \`pwd\` &&" \ 
-        "echo '*** START listing files /opt' && ls -laR /opt && echo '*** END file listing /opt' &&" \
-        "cp -r /opt/ml/config \$SSM_OUTPUT/config &&" \
-        "echo 'output' > \$SSM_OUTPUT/output &&" \
-        "echo 'state' > \$SSM_STATE/state &"
+    -- -c "echo '== Bash...'&&\
+echo '-***- Args:'\$@&&echo '-***- Env:'\`env\`&&\ 
+echo '*** START listing files'&&ls -laR /opt&&echo '*** END '&&\
+cp -r /opt/ml/config \$SSM_OUTPUT/config&&\
+echo 'output' > \$SSM_OUTPUT/output&&\
+echo 'state' > \$SSM_STATE/state&"
 
 # Example 3 - a bash ecript that gets the output and state of cli-code as input
 wait $pid1
@@ -34,7 +34,7 @@ ssm process -p ${2}ssm-example-processing${3} -t cli-bash -o $1/output3 \
 # Example 3 - a shell training ecript that gets the output and state of cli-code as input
 ssm shell -p ${2}ssm-example-processing${3} -t shell-task -o $1/output4 \
     --iit cli_code_output cli-code output --iit cli_code_state cli-code state \
-    --cmd_line "echo '*** START listing files /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'" \
+    --cmd_line "echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'" \
     --max_run_mins 15 ${@:4} &
 
 #  --it ml.t3.medium
