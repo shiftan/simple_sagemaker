@@ -12,7 +12,7 @@ cd $1
 apt-get update
 apt-get -y --allow-unauthenticated install aria2
 download () {
-    aria2c --summary-interval=30 --conditional-get=true -x 32 -s 32 $1
+    aria2c --summary-interval=30 --conditional-get=true -x 16 -s 16 $1
 }
 
 ### Adapted from https://github.com/pytorch/examples/blob/master/run_python_examples.sh
