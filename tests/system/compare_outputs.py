@@ -234,9 +234,7 @@ class OutputComparison:
                             fromfile=str(file_name1),
                             tofile=str(file_name2),
                         )
-                        logs_diff_info[file_name] = logger.info(
-                            "\n" + "\n".join(iter(delta))
-                        )
+                        logs_diff_info[file_name] = "\n" + "\n".join(iter(delta))
 
                     break
             else:
