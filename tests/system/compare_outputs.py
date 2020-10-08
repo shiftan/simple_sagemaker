@@ -338,7 +338,8 @@ class LogExtractor(Extractor):
                 for line in block.splitlines():
                     # 'ls -la' output
                     if re.match("[drwx\\-]{10}", line):
-                        dir_list_output.append(line.split(" ")[-1])
+                        if "sagemaker-uploading" not in line:
+                            dir_list_output.append(line.split(" ")[-1])
                     else:
                         dir_list_output.append(line)
                 output.append("\n".join(dir_list_output))
