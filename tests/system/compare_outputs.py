@@ -204,8 +204,8 @@ class OutputComparison:
                 res.append(f"**** Not in second: {files1-files2}")
 
         for file_name in files1 & files2:
-            file_name1 = Path(root_path1) / file_name
-            file_name2 = Path(root_path2) / file_name
+            file_name1 = root_path1 / file_name
+            file_name2 = root_path2 / file_name
 
             for extractor in self.extractors:
                 if extractor.match(file_name):
@@ -226,7 +226,6 @@ class OutputComparison:
                             extracteds[1].splitlines(),
                             fromdesc=file_name1,
                             todesc=file_name2,
-                            context=True,
                         )
                         Path(str(file_name1) + ".extracted.diff.html").write_text(diff)
                         delta = difflib.unified_diff(
@@ -365,7 +364,7 @@ def isAsExpected(output_path, expected_path):
     oc.registerExtractor(IgnoreExtractor())
     oc.registerExtractor(Extractor())
     # oc.compare("/home/user/proj/simple_sagemaker/examples/out2/1", "/home/user/proj/simple_sagemaker/examples/out2/2")
-    return oc.compare(output_path.resolve(), expected_path.resolve())
+    return oc.compare(Path(output_path).resolve(), Path(expected_path).resolve())
 
 
 def main():
