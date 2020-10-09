@@ -184,7 +184,7 @@ def runArguments(run_parser, shell=False):
     instance_group.add_argument(
         "--instance_type",
         "--it",
-        default=constants.DEFAULT_INSTANCE_TYPE,
+        default=constants.DEFAULT_INSTANCE_TYPE_TRAINING,
         help="Type of EC2 instance to use.",
     )
     instance_group.add_argument(
@@ -396,7 +396,7 @@ def processingArguments(processing_parser):
     instance_group.add_argument(
         "--instance_type",
         "--it",
-        default=constants.DEFAULT_INSTANCE_TYPE,
+        default=constants.DEFAULT_INSTANCE_TYPE_PROCESSING,
         help="Type of EC2 instance to use.",
     )
     instance_group.add_argument(

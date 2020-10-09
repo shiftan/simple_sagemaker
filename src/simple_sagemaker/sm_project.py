@@ -159,7 +159,7 @@ class SageMakerProject:
 
     def setDefaultInstanceParams(
         self,
-        instance_type=constants.DEFAULT_INSTANCE_TYPE,
+        instance_type=constants.DEFAULT_INSTANCE_TYPE_TRAINING,
         instance_count=constants.DEFAULT_INSTANCE_COUNT,
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         use_spot_instances=constants.DEFAULT_USE_SPOT,
@@ -168,7 +168,7 @@ class SageMakerProject:
     ):
         f"""Set the default instance params
 
-        :param instance_type: Type of EC2 instance to use, defaults to {constants.DEFAULT_INSTANCE_TYPE}
+        :param instance_type: Type of EC2 instance to use, defaults to {constants.DEFAULT_INSTANCE_TYPE_TRAINING}
         :type instance_type: str, optional
         :param instance_count: Number of EC2 instances to use, defaults to {constants.DEFAULT_INSTANCE_COUNT}
         :type instance_count: int, optional
