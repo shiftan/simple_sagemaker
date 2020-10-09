@@ -19,9 +19,9 @@ ssm process -p ssm-example-processing -t cli-shell -o ./output2 \
     -- -c "echo ==Bash && \
 echo \"-***- Args:\"\$@ &&echo \"-***- Env:\"\`env\`&& \
 echo \"*** START listing files\"&&ls -laR /opt&&echo \"*** END \"&& \
-cp -r /opt/ml/config $SSM_OUTPUT/config&& \
-echo output>$SSM_OUTPUT/output&& \
-echo state>$SSM_STATE/state" &
+cp -r /opt/ml/config \$SSM_OUTPUT/config&& \
+echo output>\$SSM_OUTPUT/output&& \
+echo state>\$SSM_STATE/state" &
 
 
 # Example 3 - a bash script that gets the output and state of cli-code as input

@@ -13,7 +13,7 @@ echo "*** Using data source: $data_source"
 # Download the subset data
 ssm process -p ex-imagenet -t download \
     --entrypoint "/bin/bash" --dependencies ./code \
-    -o ./output/download-all \
+    -o ./output/download \
     -- -c 'bash /opt/ml/processing/input/code/code/download.sh $SSM_OUTPUT/data'
 
 exit
