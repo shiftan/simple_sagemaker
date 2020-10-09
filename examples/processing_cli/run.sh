@@ -17,7 +17,7 @@ ssm process -p ssm-example-processing -t cli-shell -o $1/output2 \
     --download_state --download_output --max_run_mins 15 \
     --entrypoint "/bin/bash" --dependencies ./dep --force_running \
     -- -c "echo ==Bash && \
-echo \"-***- Args:\"\$@ &&echo \"-***- Env:\"\`env\`&& \
+echo \"-***- Args:\"\$@ &&echo \"-- Env:\"\`env\`&& \
 echo \"*** START listing files\"&&ls -laR /opt&&echo \"*** END \"&& \
 cp -r /opt/ml/config \$SSM_OUTPUT/config&& \
 echo output>\$SSM_OUTPUT/output&& \

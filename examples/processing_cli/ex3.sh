@@ -2,7 +2,7 @@
 
 echo "======= Starting Bash script ..."
 echo "-***- Args:" $@
-echo "-***- Env:", `env`
+echo "-- Env:", `env`
 echo "-***- Pwd:", `pwd`
 echo "*** START listing files in /opt"
 ls -laR /opt
