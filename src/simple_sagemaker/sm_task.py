@@ -484,7 +484,11 @@ class SageMakerTask:
                         and tags.get("SimpleSagemakerProject", None) == project_name
                         and tags.get("SimpleSagemakerTask", None) == task_name
                     ):
-                        return job_summary["ProcessingJobName"], job_summary["ProcessingJobStatus"], job_summary["LastModifiedTime"]
+                        return (
+                            job_summary["ProcessingJobName"],
+                            job_summary["ProcessingJobStatus"],
+                            job_summary["LastModifiedTime"],
+                        )
 
             if "NextToken" in resp:
                 extra_args["NextToken"] = resp["NextToken"]
@@ -503,12 +507,16 @@ class SageMakerTask:
         name, status, job_type = None, None, None
 
         if not task_type or task_type == constants.TASK_TYPE_TRAINING:
-            name, status, time = SageMakerTask.getLastTrainingJob(client, project_name, task_name)
+            name, status, time = SageMakerTask.getLastTrainingJob(
+                client, project_name, task_name
+            )
             job_type = constants.TASK_TYPE_TRAINING
 
         if not task_type or task_type == constants.TASK_TYPE_PROCESSING:
-            name2, status2, time2 = SageMakerTask.getLastProcessingJob(boto3_session, client, project_name, task_name)
-            if time2>time:
+            name2, status2, time2 = SageMakerTask.getLastProcessingJob(
+                boto3_session, client, project_name, task_name
+            )
+            if time2 > time:
                 name, status, time = name2, status2, time2
                 job_type = constants.TASK_TYPE_PROCESSING
 
@@ -705,9 +713,11 @@ class SageMakerTask:
 
 def main():
     import boto3
-    s = boto3.session.Session()
-    job_name, task_type, status = SageMakerTask.getLastJob(s, "ex-imagenet", "download-all")
 
+    s = boto3.session.Session()
+    job_name, task_type, status = SageMakerTask.getLastJob(
+        s, "ex-imagenet", "download-all"
+    )
 
     print("...")
 
