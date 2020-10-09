@@ -510,15 +510,17 @@ class SageMakerTask:
             name, status, time = SageMakerTask.getLastTrainingJob(
                 client, project_name, task_name
             )
-            job_type = constants.TASK_TYPE_TRAINING
+            if name:
+                job_type = constants.TASK_TYPE_TRAINING
 
         if not task_type or task_type == constants.TASK_TYPE_PROCESSING:
             name2, status2, time2 = SageMakerTask.getLastProcessingJob(
                 boto3_session, client, project_name, task_name
             )
-            if not name or (name2 and time2 > time):
-                name, status, time = name2, status2, time2
-                job_type = constants.TASK_TYPE_PROCESSING
+            if name2:
+                if not name or time2 > time:
+                    name, status, time = name2, status2, time2
+                    job_type = constants.TASK_TYPE_PROCESSING
 
         return name, job_type, status
 
@@ -716,7 +718,7 @@ def main():
 
     s = boto3.session.Session()
     job_name, task_type, status = SageMakerTask.getLastJob(
-        s, "ex-imagenet", "download-all"
+        s, "tests/simple-sagemaker-example-cli_2020-10-09-09-39-32_py38", "cli-task6-1"
     )
 
     print("...")
