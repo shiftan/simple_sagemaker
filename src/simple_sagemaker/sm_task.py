@@ -422,7 +422,7 @@ class SageMakerTask:
                     },
                 ]
             },
-            SortBy="LastModifiedTime",
+            SortBy="CreationTime",
             SortOrder="Descending",
             MaxResults=1,
         )
@@ -430,7 +430,7 @@ class SageMakerTask:
             training_job = search_res["Results"][0]["TrainingJob"]
             status = training_job["TrainingJobStatus"]
             name = training_job["TrainingJobName"]
-            time = training_job["LastModifiedTime"]
+            time = training_job["CreationTime"]
             return name, status, time
         return None, None, None
 
@@ -487,7 +487,7 @@ class SageMakerTask:
                         return (
                             job_summary["ProcessingJobName"],
                             job_summary["ProcessingJobStatus"],
-                            job_summary["LastModifiedTime"],
+                            job_summary["CreationTime"],
                         )
 
             if "NextToken" in resp:
@@ -718,7 +718,7 @@ def main():
 
     s = boto3.session.Session()
     job_name, task_type, status = SageMakerTask.getLastJob(
-        s, "tests/simple-sagemaker-example-cli_2020-10-09-09-39-32_py38", "cli-task6-1"
+        s, "tests/ssm-example-processing_2020-10-09-09-47-57_py37", "cli-bash"
     )
 
     print("...")
