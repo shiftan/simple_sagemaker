@@ -586,7 +586,7 @@ class SageMakerTask:
     def getOutputTargetUri(self, model=False, output=False, state=False, source=False):
         assert (
             model + output + state + source == 1
-        ), "Onlt one output type flag should be set"
+        ), "Only one output type flag should be set"
         uri = None
         # Bug? in SageMaker local mode - model and output are saved directly to output dir, not in a sub folder
         output_dir = "" if self.local_mode else "output"

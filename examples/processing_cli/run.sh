@@ -13,7 +13,7 @@ ssm process -p ${2}ssm-example-processing${3} -t cli-code -o $1/output1 \
 pid1=$!
 
 # Example 2 - a raw entrypoint with arguments
-ssm process -p ssm-example-processing -t cli-shell -o ./output2 \
+ssm process -p ssm-example-processing -t cli-shell -o $1/output2 \
     --download_state --download_output --max_run_mins 15 \
     --entrypoint "/bin/bash" --dependencies ./dep --force_running \
     -- -c "echo ==Bash && \
