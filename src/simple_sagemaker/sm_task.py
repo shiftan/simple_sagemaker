@@ -404,6 +404,95 @@ class SageMakerTask:
         return None, None
 
     @staticmethod
+    def getLastTrainingJob(sm_client, project_name, task_name):
+        # look for training jobs
+        search_res = sm_client.search(
+            Resource="TrainingJob",
+            SearchExpression={
+                "Filters": [
+                    {
+                        "Name": "Tags.SimpleSagemakerTask",
+                        "Operator": "Equals",
+                        "Value": task_name,
+                    },
+                    {
+                        "Name": "Tags.SimpleSagemakerProject",
+                        "Operator": "Equals",
+                        "Value": project_name,
+                    },
+                ]
+            },
+            SortBy="LastModifiedTime",
+            SortOrder="Descending",
+            MaxResults=1,
+        )
+        if search_res["Results"]:
+            training_job = search_res["Results"][0]["TrainingJob"]
+            status = training_job["TrainingJobStatus"]
+            name = training_job["TrainingJobName"]
+            time = training_job["LastModifiedTime"]
+            return name, status, time
+        return None, None, None
+
+    @staticmethod
+    def getLastProcessingJob(boto3_session, sm_client, project_name, task_name):
+        # look for processing jobs
+        extra_args = {}
+        arn_tags = {}
+        rt_client = boto3_session.client("resourcegroupstaggingapi")
+        while True:
+            resp = rt_client.get_resources(
+                ResourcesPerPage=100,
+                TagFilters=[
+                    {
+                        "Key": "SimpleSagemakerProject",
+                        "Values": [project_name],
+                    },
+                    {
+                        "Key": "SimpleSagemakerTask",
+                        "Values": [task_name],
+                    },
+                ],
+                ResourceTypeFilters=["sagemaker:processing-job"],
+                **extra_args,
+            )
+
+            for res_tags in resp["ResourceTagMappingList"]:
+                tags = {x["Key"]: x["Value"] for x in res_tags["Tags"]}
+                arn_tags[res_tags["ResourceARN"]] = tags
+
+            if resp.get("PaginationToken", None):
+                extra_args["PaginationToken"] = resp["PaginationToken"]
+            else:
+                break
+
+        extra_args = {}
+        while True:
+            resp = sm_client.list_processing_jobs(
+                NameContains=task_name,
+                MaxResults=100,
+                SortBy="CreationTime",
+                SortOrder="Descending",
+                **extra_args,
+            )
+
+            if resp.get("ProcessingJobSummaries", None):
+                for job_summary in resp["ProcessingJobSummaries"]:
+                    tags = arn_tags.get(job_summary["ProcessingJobArn"])
+                    if (
+                        tags
+                        and tags.get("SimpleSagemakerProject", None) == project_name
+                        and tags.get("SimpleSagemakerTask", None) == task_name
+                    ):
+                        return job_summary["ProcessingJobName"], job_summary["ProcessingJobStatus"], job_summary["LastModifiedTime"]
+
+            if "NextToken" in resp:
+                extra_args["NextToken"] = resp["NextToken"]
+            else:
+                break
+        return None, None, None
+
+    @staticmethod
     def getLastJob(boto3_session, project_name, task_name, task_type=None):
         # Look for training job first and return it if it's there
         from botocore.config import Config
@@ -411,95 +500,19 @@ class SageMakerTask:
         config = Config(retries={"max_attempts": 10, "mode": "standard"})
         client = boto3_session.client("sagemaker", config=config)
 
+        name, status, job_type = None, None, None
+
         if not task_type or task_type == constants.TASK_TYPE_TRAINING:
-            # look for training jobs
-            search_res = client.search(
-                Resource="TrainingJob",
-                SearchExpression={
-                    "Filters": [
-                        {
-                            "Name": "Tags.SimpleSagemakerTask",
-                            "Operator": "Equals",
-                            "Value": task_name,
-                        },
-                        {
-                            "Name": "Tags.SimpleSagemakerProject",
-                            "Operator": "Equals",
-                            "Value": project_name,
-                        },
-                    ]
-                },
-                SortBy="LastModifiedTime",
-                SortOrder="Descending",
-                MaxResults=1,
-            )
-            if search_res["Results"]:
-                training_job = search_res["Results"][0]["TrainingJob"]
-                status = training_job["TrainingJobStatus"]
-                name = training_job["TrainingJobName"]
-                return name, constants.TASK_TYPE_TRAINING, status
+            name, status, time = SageMakerTask.getLastTrainingJob(client, project_name, task_name)
+            job_type = constants.TASK_TYPE_TRAINING
 
         if not task_type or task_type == constants.TASK_TYPE_PROCESSING:
-            # look for processing jobs
-            extra_args = {}
-            arn_tags = {}
-            rt_client = boto3_session.client("resourcegroupstaggingapi")
-            while True:
-                resp = rt_client.get_resources(
-                    ResourcesPerPage=100,
-                    TagFilters=[
-                        {
-                            "Key": "SimpleSagemakerProject",
-                            "Values": [project_name],
-                        },
-                        {
-                            "Key": "SimpleSagemakerTask",
-                            "Values": [task_name],
-                        },
-                    ],
-                    ResourceTypeFilters=["sagemaker:processing-job"],
-                    **extra_args,
-                )
+            name2, status2, time2 = SageMakerTask.getLastProcessingJob(boto3_session, client, project_name, task_name)
+            if time2>time:
+                name, status, time = name2, status2, time2
+                job_type = constants.TASK_TYPE_PROCESSING
 
-                for res_tags in resp["ResourceTagMappingList"]:
-                    tags = {x["Key"]: x["Value"] for x in res_tags["Tags"]}
-                    arn_tags[res_tags["ResourceARN"]] = tags
-
-                if resp.get("PaginationToken", None):
-                    extra_args["PaginationToken"] = resp["PaginationToken"]
-                else:
-                    break
-
-            extra_args = {}
-            while True:
-                resp = client.list_processing_jobs(
-                    NameContains=task_name,
-                    MaxResults=100,
-                    SortBy="CreationTime",
-                    SortOrder="Descending",
-                    **extra_args,
-                )
-
-                if resp.get("ProcessingJobSummaries", None):
-                    for job_summary in resp["ProcessingJobSummaries"]:
-                        tags = arn_tags.get(job_summary["ProcessingJobArn"])
-                        if (
-                            tags
-                            and tags.get("SimpleSagemakerProject", None) == project_name
-                            and tags.get("SimpleSagemakerTask", None) == task_name
-                        ):
-                            return (
-                                job_summary["ProcessingJobName"],
-                                constants.TASK_TYPE_PROCESSING,
-                                job_summary["ProcessingJobStatus"],
-                            )
-
-                if "NextToken" in resp:
-                    extra_args["NextToken"] = resp["NextToken"]
-                else:
-                    break
-
-        return None, None, None
+        return name, job_type, status
 
     def bindToLastJob(self, job_name, task_type):
         self.task_type = task_type
@@ -691,6 +704,11 @@ class SageMakerTask:
 
 
 def main():
+    import boto3
+    s = boto3.session.Session()
+    job_name, task_type, status = SageMakerTask.getLastJob(s, "ex-imagenet", "download-all")
+
+
     print("...")
 
 

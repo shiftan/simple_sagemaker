@@ -407,7 +407,7 @@ class SageMakerProject:
             job_name, task_type, status = SageMakerTask.getLastJob(
                 self.boto3_session, self.project_name, task_name
             )
-            assert status == "Completed", f"Task {task_name} isn't completed!"
+            assert status == "Completed", f"Task {task_name} isn't completed but job {job_name} is {status}!"
             smTask.bindToLastJob(job_name, task_type)
             # self.tasks[task_name] = smTask
         return smTask

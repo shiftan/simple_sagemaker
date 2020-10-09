@@ -4,7 +4,7 @@
 set -e # stop and fail if anything stops
 cd `dirname "$0"`
 PARTIAL_DATA=$1
-data_source=$( [ "$PARTIAL_DATA" == true ] &&  echo download || echo download-all3 )
+data_source=$( [ "$PARTIAL_DATA" == true ] &&  echo download || echo download-all )
 echo "*** Using data source: $data_source"
 
 # Download the code from PyTorch's examples repository
@@ -14,9 +14,7 @@ echo "*** Using data source: $data_source"
 ssm process -p ex-imagenet -t download \
     --entrypoint "/bin/bash" --dependencies ./code \
     -o ./output/download \
-    -- -c 'bash /opt/ml/processing/input/code/code/download.sh $SSM_OUTPUT/data'
-
-exit
+    -- -c 'bash /opt/ml/processing/input/code/code/download.sh $SSM_OUTPUT/data' &
 
 # Download the complete data set
 ssm process -p ex-imagenet -t download-all -v 400 \
@@ -28,12 +26,12 @@ wait
 
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
     EPOCHS=${5:-20}  # 20 epochs by default
-    ADDITIONAL_ARGS=${6:-"--no_spot"} # --force_running
+    ADDITIONAL_ARGS=${6:-"--force_running"} # 
 
     echo ===== Training $EPOCHS epochs, $4...
     ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 150 \
-        --iit train $data_source state FullyReplicated data/train \
-        --iit val $data_source state FullyReplicated data/val \
+        --iit train $data_source output FullyReplicated data/train \
+        --iit val $data_source output FullyReplicated data/val \
         --download_model --download_output \
         --it $2 $ADDITIONAL_ARGS \
         --cmd_line  "./extract.sh \$SM_CHANNEL_TRAIN/.. && \ 
