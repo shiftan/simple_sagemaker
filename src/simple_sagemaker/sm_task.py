@@ -516,7 +516,7 @@ class SageMakerTask:
             name2, status2, time2 = SageMakerTask.getLastProcessingJob(
                 boto3_session, client, project_name, task_name
             )
-            if time2 > time:
+            if not name or (name2 and time2 > time):
                 name, status, time = name2, status2, time2
                 job_type = constants.TASK_TYPE_PROCESSING
 
