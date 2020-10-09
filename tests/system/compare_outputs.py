@@ -65,7 +65,7 @@ def compareLog(expectedfile_path, outputfile_path):
     for (block_exp, block_out) in zip(expected_blocks, output_blocks):
         lines_exp = block_exp.splitlines()
         lines_out = block_out.splitlines()
-        if block_exp.startswith("listing files in "):
+        if block_exp.startswith("listing files"):
             if len(lines_exp) != len(lines_out) or lines_exp[0] != lines_out[0]:
                 res.append(
                     f"Output of file listing doen't match, {len(lines_exp)} {len(lines_exp)} *{lines_exp[0]}* *{lines_out[0]}*"
@@ -333,7 +333,7 @@ class LogExtractor(Extractor):
         output = list()
 
         for block in relevant_blocks:
-            if block.startswith("listing files in "):
+            if block.startswith("listing files"):
                 dir_list_output = list()
                 for line in block.splitlines():
                     # 'ls -la' output
