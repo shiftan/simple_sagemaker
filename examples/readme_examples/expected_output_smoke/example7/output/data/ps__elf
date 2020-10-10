@@ -1,6 +1,6 @@
 F S UID          PID    PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY          TIME CMD
-4 S root           1       0  1  80   0 -  4939 wait   05:46 pts/0    00:00:00 bash -m start_with_right_hostname.sh train
-4 S root          14       1 26  80   0 - 56730 pipe_w 05:46 pts/0    00:00:00 /opt/conda/bin/python /opt/conda/bin/train
-4 S root          25      14  0  80   0 -  7629 wait   05:46 pts/0    00:00:00 /opt/conda/bin/python shell_launcher.py --SSM_SHELL_CMD_LINE ps -elf >> $SM_OUTPUT_DATA_DIR/ps__elf
-4 S root          26      25  0  80   0 -  1640 wait   05:46 pts/0    00:00:00 /bin/sh -c ps -elf >> $SM_OUTPUT_DATA_DIR/ps__elf
-4 R root          27      26  0  80   0 -  9040 -      05:46 pts/0    00:00:00 ps -elf
+4 S root           1       0  1  80   0 -  4939 wait   10:03 pts/0    00:00:00 bash -m start_with_right_hostname.sh train
+4 S root          14       1 54  80   0 - 56730 pipe_w 10:03 pts/0    00:00:00 /opt/conda/bin/python /opt/conda/bin/train
+4 S root          25      14  0  80   0 -  7627 wait   10:03 pts/0    00:00:00 /opt/conda/bin/python shell_launcher.py --SSM_SHELL_CMD_LINE ps -elf >> $SM_OUTPUT_DATA_DIR/ps__elf
+4 S root          26      25  0  80   0 -  5456 wait   10:03 pts/0    00:00:00 /bin/bash -c ps -elf >> $SM_OUTPUT_DATA_DIR/ps__elf
+4 R root          27      26  0  80   0 -  9040 -      10:03 pts/0    00:00:00 ps -elf

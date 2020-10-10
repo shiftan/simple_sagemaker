@@ -76,7 +76,9 @@ def _internalTestCli(test_path, caplog, tmp_path):
         run_shell = os.path.join(examples_path, test_path, "run_smoke.sh")
     elif platform.system() == "Windows":
         run_shell = os.path.join(examples_path, test_path, "run_smoke.bat")
-    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
+    subprocess.run(
+        [run_shell, output_path, prefix, postfix, "--cs --force_running"], check=True
+    )
 
     expected_path = os.path.join(examples_path, test_path, "expected_output_smoke")
     assert isAsExpected(output_path, expected_path)

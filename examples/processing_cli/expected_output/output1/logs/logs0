@@ -1,0 +1,131 @@
+Dependency!!!
+INFO:__main__:======= Starting python script ...
+INFO:worker_toolkit.worker_lib:Deleting other instances' state
+INFO:worker_toolkit.worker_lib:Creating state dir
+INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_data='', channel_model='', channels=[], current_host='algo-1', host_rank=0, hosts=['algo-1'], hps=[], input_config_dir='', input_data_config='', input_dir='', instance_state='/opt/ml/processing/state/algo-1', job_name='cli-code-2020-10-06-23-25-36-bE5AcbXg', model_dir='', network_interface_name='', num_cpus=2, num_gpus=-1, num_nodes=1, output_data_dir='', output_dir='', resource_config='', state='/opt/ml/processing/state')
+Environ: environ({'PATH': '/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'HOSTNAME': 'ip-10-0-228-147.ec2.internal', 'SSM_STATE': '/opt/ml/processing/state', 'SSM_OUTPUT': '/opt/ml/processing/output', 'AWS_REGION': 'us-east-1', 'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI': '/v2/credentials/2ucF5alLTY-9jFs9Hp_ZIv8OpNqr93rvz-omNZVcG6E', 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONUNBUFFERED': '1', 'PYTHONIOENCODING': 'UTF-8', 'LANG': 'C.UTF-8', 'LC_ALL': 'C.UTF-8', 'SAGEMAKER_TRAINING_MODULE': 'sagemaker_sklearn_container.training:main', 'SAGEMAKER_SERVING_MODULE': 'sagemaker_sklearn_container.serving:main', 'HOME': '/root', 'SAGEMAKER_JOB_NAME': 'cli-code-2020-10-06-23-25-36-bE5AcbXg', 'SM_HOSTS': '["algo-1"]', 'SM_CURRENT_HOST': 'algo-1', 'SSM_NUM_NODES': '1', 'SSM_HOST_RANK': '0', 'SSM_INSTANCE_STATE': '/opt/ml/processing/state/algo-1', 'SMDEBUG_LOG_LEVEL': 'warning'})
+Args: ['/opt/ml/processing/input/code/ex1.py', 'arg1', '-arg2', '--arg3', 'argument 4']
+INFO:__main__:*** START listing files in /opt/
+INFO:__main__:/opt/:
+total 12
+drwxr-xr-x 1 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 1 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ml
+
+/opt/ml:
+total 20
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 1 root root 4096 Oct  6 23:29 ..
+drw-r--r-- 2 root root 4096 Oct  6 23:27 config
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 output
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 processing
+
+/opt/ml/config:
+total 16
+drw-r--r-- 2 root root 4096 Oct  6 23:27 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+-rw-r--r-- 1 root root 2271 Oct  6 23:27 processingjobconfig.json
+-rw-r--r-- 1 root root   44 Oct  6 23:27 resourceconfig.json
+
+/opt/ml/output:
+total 16
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 data
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 metrics
+
+/opt/ml/output/data:
+total 16
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 output
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 state
+
+/opt/ml/output/data/output:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 ..
+
+/opt/ml/output/data/state:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 algo-1
+
+/opt/ml/output/data/state/algo-1:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
+
+/opt/ml/output/metrics:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 cloudwatch
+
+/opt/ml/output/metrics/cloudwatch:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
+
+/opt/ml/processing:
+total 20
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 input
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 output
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 state
+
+/opt/ml/processing/input:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 code
+
+/opt/ml/processing/input/code:
+total 20
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 dep
+-rw-r--r-- 1 root root 1037 Oct  6 23:29 ex1.py
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 worker_toolkit
+
+/opt/ml/processing/input/code/dep:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root 4096 Oct  6 23:29 ..
+-rw-r--r-- 1 root root   23 Oct  6 23:29 ex1_dep.py
+
+/opt/ml/processing/input/code/worker_toolkit:
+total 24
+drwxr-xr-x 3 root root  4096 Oct  6 23:29 .
+drwxr-xr-x 4 root root  4096 Oct  6 23:29 ..
+-rw-r--r-- 1 root root     0 Oct  6 23:29 __init__.py
+drwxr-xr-x 2 root root  4096 Oct  6 23:29 __pycache__
+-rw-r--r-- 1 root root 10325 Oct  6 23:29 worker_lib.py
+
+/opt/ml/processing/input/code/worker_toolkit/__pycache__:
+total 20
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
+-rw-r--r-- 1 root root  201 Oct  6 23:29 __init__.cpython-37.pyc
+-rw-r--r-- 1 root root 8111 Oct  6 23:29 worker_lib.cpython-37.pyc
+
+/opt/ml/processing/output:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+
+/opt/ml/processing/state:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 5 root root 4096 Oct  6 23:29 ..
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 algo-1
+
+/opt/ml/processing/state/algo-1:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  6 23:29 .
+drwxr-xr-x 3 root root 4096 Oct  6 23:29 ..
+
+INFO:__main__:*** END file listing /opt/
+INFO:__main__:finished!

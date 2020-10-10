@@ -29,5 +29,6 @@
         "sourcedir",
         "tensorflow",
         "xlarge"
-    ]
+    ],
+    "python.linting.enabled": true
 }

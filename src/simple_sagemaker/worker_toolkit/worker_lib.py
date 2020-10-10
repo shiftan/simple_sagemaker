@@ -3,7 +3,9 @@ import json
 import logging
 import multiprocessing
 import os
+import shlex
 import shutil
+import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -19,21 +21,27 @@ def _bind(instance, func, as_name):
 
 
 class WorkerConfig:
-    def __init__(self, init_multi_instance_state=True, set_debug_level=True):
+    def __init__(self, per_instance_state=True, set_debug_level=True, update_argv=True):
         """Initialize the WorkerConfig object.
 
-        :param init_multi_instance_state: whether to call :func:`initMultiWorkersState` on initialization, defaults to True
-        :type init_multi_instance_state: bool, optional
-        :param set_debug_level: whether to call :func:`setDebugLevel` on initialization, defaults to True
+        :param per_instance_state: Whether to call :func:`initMultiWorkersState` on initialization, defaults to True
+        :type per_instance_state: bool, optional
+        :param set_debug_level: Whether to call :func:`setDebugLevel` on initialization, defaults to True
         :type set_debug_level: bool, optional
         """
         if set_debug_level:
             self.setDebugLevel()
-        self._otherInstanceStateDeleted = False
-        self.config = self.parseArgs()
-        if init_multi_instance_state:
-            self.config.instance_state = self.initMultiWorkersState()
+        self.parseArgs()
+        self.per_instance_state = False
+        if per_instance_state:
+            self.initMultiWorkersState()
 
+        if update_argv:
+            self._updateArgv()
+
+        # A workaround as it hides evrything...
+        #   see https://github.com/awslabs/sagemaker-debugger/blob/master/smdebug/core/logger.py
+        os.environ["SMDEBUG_LOG_LEVEL"] = "warning"
         logger.info(f"Worker config: {self.config}")
 
     def __getattr__(self, item):
@@ -48,14 +56,22 @@ class WorkerConfig:
         # Set root logger level
         logging.getLogger().setLevel(int(os.environ.get("SM_LOG_LEVEL", logging.INFO)))
 
-    def parseArgs(self):
-        """Extracting the environment configuration, i.e. input/output/state paths and running parameters
+    def _initProcessingEnvVars(self):
+        """Initializae part of the environmenr variables for processing tasks"""
+        proc_conf = json.load(open("/opt/ml/config/processingjobconfig.json"))
+        res_conf = json.load(open("/opt/ml/config/resourceconfig.json"))
+        os.environ["SAGEMAKER_JOB_NAME"] = proc_conf["ProcessingJobName"]
+        os.environ["SM_HOSTS"] = json.dumps(res_conf["hosts"])
+        os.environ["SM_CURRENT_HOST"] = res_conf["current_host"]
 
-        return: the parsed environment
-        """
+    def parseArgs(self):
+        """Extracting the environment configuration, i.e. input/output/state paths and running parameters"""
 
         # Sagemaker training env vars -
         #   see https://github.com/aws/sagemaker-training-toolkit/blob/master/ENVIRONMENT_VARIABLES.md
+
+        if Path("/opt/ml/config/processingjobconfig.json").is_file():
+            self._initProcessingEnvVars()
 
         parser = argparse.ArgumentParser()
         _bind(
@@ -114,7 +130,7 @@ class WorkerConfig:
             "--hosts",
             type=lambda x: json.loads(x),
             envVarName="SM_HOSTS",
-            default="",
+            default="[]",
         )
         parser.add_argument_default_env_or_other(
             "--num_gpus", type=int, envVarName="SM_NUM_GPUS", default=-1
@@ -139,10 +155,6 @@ class WorkerConfig:
             "--resource-config", type=str, envVarName="SM_RESOURCE_CONFIG", default=""
         )
 
-        parser.add_argument(
-            "--state", type=str, default="/state"
-        )  # TODO: parse dynamically
-
         args, rest = parser.parse_known_args()
 
         for channel_name in args.channels:
@@ -150,45 +162,82 @@ class WorkerConfig:
             if env_name in os.environ:
                 args.__setattr__(f"channel_{channel_name}", os.environ[env_name])
 
-        return args
+        # The arguments are set on top of the environment variables
+        if args.hosts:
+            args.num_nodes = len(args.hosts)
+            args.host_rank = args.hosts.index(args.current_host)
+        else:
+            args.num_nodes = -1
+            args.host_rank = -1
+        # Fill the environment varaible with missing parameters
+        os.environ["SSM_NUM_NODES"] = str(args.num_nodes)
+        os.environ["SSM_HOST_RANK"] = str(args.host_rank)
+
+        if "SSM_STATE" in os.environ:
+            args.state = os.environ["SSM_STATE"]
+        else:
+            args.state = "/state"  # TODO: parse dynamically
+            os.environ["SSM_STATE"] = args.state
+
+        self.config = args
+
+    def _updateArgv(self):
+        if "--external_hps" in sys.argv:
+            idx = sys.argv.index("--external_hps")
+            # parse the arguments, removing the leading and trailing "
+            parsed_external_arguments = shlex.split(sys.argv[idx + 1][1:-1])
+            # make sure external args are given first
+            sys.argv = (
+                sys.argv[:1]
+                + parsed_external_arguments
+                + sys.argv[1:idx]
+                + sys.argv[idx + 2 :]
+            )
+            logger.info(f"sys.argv was updated to: {sys.argv}")
+            return True
+        return False
 
     def _getInstanceStatePath(self):
-        path = Path(self.config.state) / self.config.current_host
+        if self.per_instance_state:
+            path = Path(self.config.state) / self.config.current_host
+        else:
+            path = Path(self.config.state)
+
         if not path.is_dir():
-            logger.info("Creating instance specific state dir")
+            logger.info("Creating state dir")
             path.mkdir(parents=True, exist_ok=True)
         return str(path)
 
     def _deleteOtherInstancesState(self):
-        if self._otherInstanceStateDeleted:
-            return
-
         logger.info("Deleting other instances' state")
         statePaths = [
-            path for path in Path(self.config.state).glob("*") if path.is_dir()
+            path for path in Path(self.config.state).glob("algo-*") if path.is_dir()
         ]
         for path in statePaths:
             if path.parts[-1] != self.config.current_host:
                 shutil.rmtree(str(path), ignore_errors=True)
-        self._otherInstanceStateDeleted = True
+
+    def updateNamespace(self, namespace, fields_mapping):
+        """Update a :class:`Namespace` objects with fields from the configuration
+
+        :param namespace: the name space to be updated
+        :type namespace: Namespace
+        :param fields_mapping: A dictionary mapping  field names in the configuration to fields name in the namespace
+            e.g. {"num_cpus": "num_workers"} will update the `num_workers` fields in namespace with the number of CPU
+            from the configuration.
+        :type fields_mapping: dict
+        """
+        for config_field, ns_field in fields_mapping.items():
+            namespace.__setattr__(ns_field, self.config.__getattribute__(config_field))
 
     def initMultiWorkersState(self):
         """Initialize the multi worker state.
         Creates a per instance state sub-directory and deletes other instances ones, as all instances
         state is merged after running.
-
-        return: the path to the instance specific instance state
         """
+        if self.per_instance_state:
+            return
+        self.per_instance_state = True
         self._deleteOtherInstancesState()
-        return self._getInstanceStatePath()
-
-    def markCompleted(self):
-        """Mark the task as completed.
-        Once a task is marked as completed it won't run again, and the current output will be used instead,
-        unlesss eforced otherwise. In addition, the output of a completed task can be used as input of
-        other **tasks** in the same project.
-
-        """
-        logger.info(f"Marking instance {self.config.current_host} completion")
-        path = Path(self.initMultiWorkersState()) / "__COMPLETED__"
-        path.write_text(self.config.job_name)
+        self.config.instance_state = self._getInstanceStatePath()
+        os.environ["SSM_INSTANCE_STATE"] = self.config.instance_state

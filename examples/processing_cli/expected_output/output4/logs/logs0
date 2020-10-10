@@ -1,0 +1,209 @@
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control in this shell
+2020-10-09 05:55:25,769 sagemaker-training-toolkit INFO     Imported framework sagemaker_pytorch_container.training
+2020-10-09 05:55:25,772 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-09 05:55:25,782 sagemaker_pytorch_container.training INFO     Block until all host DNS lookups succeed.
+2020-10-09 05:55:27,279 sagemaker_pytorch_container.training INFO     Invoking user training script.
+2020-10-09 05:55:27,530 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-09 05:55:27,542 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-09 05:55:27,554 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)
+2020-10-09 05:55:27,563 sagemaker-training-toolkit INFO     Invoking user script
+
+Training Env:
+
+{
+    "additional_framework_parameters": {},
+    "channel_input_dirs": {
+        "cli_code_state": "/opt/ml/input/data/cli_code_state",
+        "cli_code_output": "/opt/ml/input/data/cli_code_output"
+    },
+    "current_host": "algo-1",
+    "framework_module": "sagemaker_pytorch_container.training:main",
+    "hosts": [
+        "algo-1"
+    ],
+    "hyperparameters": {
+        "SSM_SHELL_CMD_LINE": "echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'"
+    },
+    "input_config_dir": "/opt/ml/input/config",
+    "input_data_config": {
+        "cli_code_state": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "FullyReplicated",
+            "RecordWrapperType": "None"
+        },
+        "cli_code_output": {
+            "TrainingInputMode": "File",
+            "S3DistributionType": "FullyReplicated",
+            "RecordWrapperType": "None"
+        }
+    },
+    "input_dir": "/opt/ml/input",
+    "is_master": true,
+    "job_name": "shell-task-2020-10-09-05-51-32-kqhlihtP",
+    "log_level": 20,
+    "master_hostname": "algo-1",
+    "model_dir": "/opt/ml/model",
+    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/ssm-example-processing_2020-10-09-05-41-06_py37/shell-task/shell-task-2020-10-09-05-51-32-kqhlihtP/source/sourcedir.tar.gz",
+    "module_name": "shell_launcher",
+    "network_interface_name": "eth0",
+    "num_cpus": 2,
+    "num_gpus": 0,
+    "output_data_dir": "/opt/ml/output/data",
+    "output_dir": "/opt/ml/output",
+    "output_intermediate_dir": "/opt/ml/output/intermediate",
+    "resource_config": {
+        "current_host": "algo-1",
+        "hosts": [
+            "algo-1"
+        ],
+        "network_interface_name": "eth0"
+    },
+    "user_entry_point": "shell_launcher.py"
+}
+
+Environment variables:
+
+SM_HOSTS=["algo-1"]
+SM_NETWORK_INTERFACE_NAME=eth0
+SM_HPS={"SSM_SHELL_CMD_LINE":"echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'"}
+SM_USER_ENTRY_POINT=shell_launcher.py
+SM_FRAMEWORK_PARAMS={}
+SM_RESOURCE_CONFIG={"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"}
+SM_INPUT_DATA_CONFIG={"cli_code_output":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"cli_code_state":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}}
+SM_OUTPUT_DATA_DIR=/opt/ml/output/data
+SM_CHANNELS=["cli_code_output","cli_code_state"]
+SM_CURRENT_HOST=algo-1
+SM_MODULE_NAME=shell_launcher
+SM_LOG_LEVEL=20
+SM_FRAMEWORK_MODULE=sagemaker_pytorch_container.training:main
+SM_INPUT_DIR=/opt/ml/input
+SM_INPUT_CONFIG_DIR=/opt/ml/input/config
+SM_OUTPUT_DIR=/opt/ml/output
+SM_NUM_CPUS=2
+SM_NUM_GPUS=0
+SM_MODEL_DIR=/opt/ml/model
+SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/ssm-example-processing_2020-10-09-05-41-06_py37/shell-task/shell-task-2020-10-09-05-51-32-kqhlihtP/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"cli_code_output":"/opt/ml/input/data/cli_code_output","cli_code_state":"/opt/ml/input/data/cli_code_state"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1"],"hyperparameters":{"SSM_SHELL_CMD_LINE":"echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'"},"input_config_dir":"/opt/ml/input/config","input_data_config":{"cli_code_output":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"cli_code_state":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"shell-task-2020-10-09-05-51-32-kqhlihtP","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/ssm-example-processing_2020-10-09-05-41-06_py37/shell-task/shell-task-2020-10-09-05-51-32-kqhlihtP/source/sourcedir.tar.gz","module_name":"shell_launcher","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"},"user_entry_point":"shell_launcher.py"}
+SM_USER_ARGS=["--SSM_SHELL_CMD_LINE","echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'"]
+SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
+SM_CHANNEL_CLI_CODE_STATE=/opt/ml/input/data/cli_code_state
+SM_CHANNEL_CLI_CODE_OUTPUT=/opt/ml/input/data/cli_code_output
+SM_HP_SSM_SHELL_CMD_LINE=echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'
+PYTHONPATH=/opt/ml/code:/opt/conda/bin:/opt/conda/lib/python36.zip:/opt/conda/lib/python3.6:/opt/conda/lib/python3.6/lib-dynload:/opt/conda/lib/python3.6/site-packages
+
+Invoking script with the following command:
+
+/opt/conda/bin/python shell_launcher.py --SSM_SHELL_CMD_LINE echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'
+
+
+INFO:worker_toolkit.worker_lib:Deleting other instances' state
+INFO:worker_toolkit.worker_lib:Creating state dir
+INFO:worker_toolkit.worker_lib:Worker config: Namespace(channel_cli_code_output='/opt/ml/input/data/cli_code_output', channel_cli_code_state='/opt/ml/input/data/cli_code_state', channel_data='', channel_model='', channels=['cli_code_output', 'cli_code_state'], current_host='algo-1', host_rank=0, hosts=['algo-1'], hps={'SSM_SHELL_CMD_LINE': "echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'"}, input_config_dir='/opt/ml/input/config', input_data_config='{"cli_code_output":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"cli_code_state":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"}}', input_dir='/opt/ml/input', instance_state='/state/algo-1', job_name='shell-task-2020-10-09-05-51-32-kqhlihtP', model_dir='/opt/ml/model', network_interface_name='eth0', num_cpus=2, num_gpus=0, num_nodes=1, output_data_dir='/opt/ml/output/data', output_dir='/opt/ml/output', resource_config='{"current_host":"algo-1","hosts":["algo-1"],"network_interface_name":"eth0"}', state='/state')
+INFO:__main__:Launching a shell: echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'
+*** START listing files in /opt/ml
+/opt/ml:
+total 28
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 .
+drwxr-xr-x 4 root root 4096 Oct  9 05:55 ..
+drwxr-xr-x 2 root root 4096 Oct  9 05:55 code
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 errors
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 input
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 model
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 output
+
+/opt/ml/code:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:55 .
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 ..
+
+/opt/ml/errors:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 ..
+
+/opt/ml/input:
+total 16
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 ..
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 config
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 data
+
+/opt/ml/input/config:
+total 44
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 ..
+-rw-r--r-- 1 root root   22 Oct  9 05:53 checkpointconfig.json
+-rw-r--r-- 1 root root  513 Oct  9 05:53 hyperparameters.json
+-rw-r--r-- 1 root root 1403 Oct  9 05:53 init-config.json
+-rw-r--r-- 1 root root  226 Oct  9 05:53 inputdataconfig.json
+-rw-r--r-- 1 root root    2 Oct  9 05:53 metric-definition-regex.json
+-rw-r--r-- 1 root root   81 Oct  9 05:53 resourceconfig.json
+-rw-r--r-- 1 root root  222 Oct  9 05:53 tensorboardoutputconfig.json
+-rw-r--r-- 1 root root 3179 Oct  9 05:53 trainingjobconfig.json
+-rw-r--r-- 1 root root    2 Oct  9 05:53 upstreamoutputdataconfig.json
+
+/opt/ml/input/data:
+total 28
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 ..
+-rw-r--r-- 1 root root   71 Oct  9 05:53 checkpoints-manifest
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 cli_code_output
+-rw-r--r-- 1 root root  261 Oct  9 05:53 cli_code_output-manifest
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 cli_code_state
+-rw-r--r-- 1 root root  182 Oct  9 05:53 cli_code_state-manifest
+
+/opt/ml/input/data/cli_code_output:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 .
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 ..
+-rw-r--r-- 1 root root    6 Oct  9 05:54 output
+
+/opt/ml/input/data/cli_code_state:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 4 root root 4096 Oct  9 05:53 ..
+-rw-r--r-- 1 root root    5 Oct  9 05:53 state
+
+/opt/ml/model:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 ..
+
+/opt/ml/output:
+total 24
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 .
+drwxr-xr-x 7 root root 4096 Oct  9 05:55 ..
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 data
+drwxr-xr-x 3 root root 4096 Oct  9 05:54 metrics
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 profiler
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 tensorboard
+
+/opt/ml/output/data:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 ..
+
+/opt/ml/output/metrics:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  9 05:54 .
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 ..
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 sagemaker
+
+/opt/ml/output/metrics/sagemaker:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 .
+drwxr-xr-x 3 root root 4096 Oct  9 05:54 ..
+
+/opt/ml/output/profiler:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:53 .
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 ..
+
+/opt/ml/output/tensorboard:
+total 8
+drwxr-xr-x 2 root root 4096 Oct  9 05:54 .
+drwxr-xr-x 6 root root 4096 Oct  9 05:54 ..
+*** END file listing /opt/ml
+INFO:__main__:finished with 0 return code!
+2020-10-09 05:55:27,640 sagemaker-training-toolkit INFO     Reporting training SUCCESS 

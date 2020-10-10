@@ -73,8 +73,8 @@ if __name__ == "__main__":
     open(
         f"{worker_config.instance_state}/state_{worker_config.current_host}", "wt"
     ).write(f"state_{worker_config.current_host}")
-    worker_config.markCompleted()
 
     # just to show the final directory structue
     logger.info("finished!")
     logAfter(worker_config)
+    # The task is marked as completed

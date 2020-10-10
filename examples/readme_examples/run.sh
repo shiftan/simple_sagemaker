@@ -41,11 +41,11 @@ ssm run -p ${2}simple-sagemaker-example-cli${3} -t cli-task6-2 -s $BASEDIR/examp
 wait # wait for all processes
 
 # Run task6_1 again
-#   --ks (keep state) is used to keep the current state and demonstrate that existing output is used, without running the task again
+#   The rest of arguments ${@:4} (specifying --force_running) aren't passed here, to demonstrate that existing output is used, without running the task again
 ssm run -p ${2}simple-sagemaker-example-cli${3} -t cli-task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
     --download_state --download_model --download_output --max_run_mins 15 \
-    --ic 2 --task_type 1 -o $1/example6_1 ${@:4} > $1/example6_1_2_stdout --ks &
+    --ic 2 --task_type 1 -o $1/example6_1 > $1/example6_1_2_stdout &
 
 wait # wait for all processes

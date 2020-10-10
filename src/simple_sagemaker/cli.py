@@ -8,6 +8,7 @@ from pathlib import Path
 
 import sagemaker
 from sagemaker.inputs import TrainingInput
+from sagemaker.processing import ProcessingInput  # ProcessingOutput
 
 from . import constants
 from .sm_project import SageMakerProject
@@ -27,18 +28,18 @@ def fileOrS3Validation(parser, arg):
     return arg
 
 
-InputTuple = collections.namedtuple("Input", ("path", "distribution"))
+InputTuple = collections.namedtuple("Input", ("path", "distribution", "subdir"))
 Input_S3Tuple = collections.namedtuple(
-    "Input_S3", ("input_name", "s3_uri", "distribution")
+    "Input_S3", ("input_name", "s3_uri", "distribution", "subdir")
 )
 Input_Task_Tuple = collections.namedtuple(
-    "Input_Task", ("input_name", "task_name", "type", "distribution")
+    "Input_Task", ("input_name", "task_name", "type", "distribution", "subdir")
 )
 
 
 def help_for_input_type(tuple, additional_text=""):
-    field_names = " ".join([x.upper() for x in tuple._fields[:-1]])
-    res = f"{tuple.__name__.upper()}: {field_names} [distribution]"
+    field_names = " ".join([x.upper() for x in tuple._fields[:-2]])
+    res = f"{tuple.__name__.upper()}: {field_names} [DISTRIBUTION] [SUBDIR]"
     if additional_text:
         res += "\n" + additional_text
     return res
@@ -53,12 +54,14 @@ class InputActionBase(argparse.Action):
     def __append__(self, args, values):
         dist_options = ["FullyReplicated", "ShardedByS3Key"]
         default_dist = "FullyReplicated"
-        if len(values) == self.__nargs - 1:
+        if len(values) == self.__nargs - 2:
             values.append(default_dist)
+        if len(values) == self.__nargs - 1:
+            values.append("")
         elif len(values) == self.__nargs:
-            if values[-1] not in dist_options:
+            if values[-2] not in dist_options:
                 raise argparse.ArgumentTypeError(
-                    f"distribution has to be one of {dist_options}"
+                    f"distribution has to be one of {dist_options}, got {values[-2]}"
                 )
         else:
             raise argparse.ArgumentTypeError(
@@ -139,16 +142,6 @@ def runArguments(run_parser, shell=False):
     IO_params = run_parser.add_argument_group("I/O")
     download_params = run_parser.add_argument_group("Download")
 
-    # general
-    # parser.add("--config-file", "-c", is_config_file=True, help="Config file path.")
-    run_parser.add_argument("--project_name", "-p", required=True, help="Project name.")
-    run_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
-    IO_params.add_argument(
-        "--bucket_name",
-        "-b",
-        help="S3 bucket name (a default one is used if not given).",
-    )
-
     if shell:
         code_group.add_argument(
             "--cmd_line",
@@ -191,7 +184,7 @@ def runArguments(run_parser, shell=False):
     instance_group.add_argument(
         "--instance_type",
         "--it",
-        default=constants.DEFAULT_INSTANCE_TYPE,
+        default=constants.DEFAULT_INSTANCE_TYPE_TRAINING,
         help="Type of EC2 instance to use.",
     )
     instance_group.add_argument(
@@ -307,6 +300,7 @@ def runArguments(run_parser, shell=False):
     )
     running_params.add_argument(
         "--force_running",
+        "--fr",
         default=False,
         action="store_true",
         help="Force running the task even if it's already completed.",
@@ -359,16 +353,177 @@ def runArguments(run_parser, shell=False):
     addDownloadArgs(download_params)
 
 
+def processingArguments(processing_parser):
+    processing_parser.set_defaults(func=processingHandler)
+
+    code_group = processing_parser.add_argument_group("Code")
+    instance_group = processing_parser.add_argument_group("Instance")
+    image_group = processing_parser.add_argument_group("Image")
+    running_params = processing_parser.add_argument_group("Running")
+    IO_params = processing_parser.add_argument_group("I/O")
+    download_params = processing_parser.add_argument_group("Download")
+
+    # coding params
+    code_group.add_argument(
+        "--code",
+        type=lambda x: fileValidation(processing_parser, x),
+        help="""An S3 URI or a local path to a file with the framework script to run.""",
+    )
+    code_group.add_argument(
+        "--entrypoint",
+        "-e",
+        nargs="+",
+        # type=lambda x: fileValidation(parser, x),
+        help="""The entrypoint for the processing job (default: None).
+                This is in the form of a list of strings that make a command""",
+    )
+    code_group.add_argument(
+        "--dependencies",
+        "-d",
+        nargs="+",
+        type=lambda x: fileValidation(processing_parser, x),
+        help="""A list of paths to directories (absolute or relative) with any additional libraries that will be exported to the container
+        The library folders will be copied to SageMaker in the same folder where the entrypoint is copied.""",
+    )
+
+    code_group.add_argument(
+        "--command",
+        nargs="+",
+        help="""The command to run, along with any command-line flags (defaults to: "python3").""",
+    )
+
+    # instance params
+    instance_group.add_argument(
+        "--instance_type",
+        "--it",
+        default=constants.DEFAULT_INSTANCE_TYPE_PROCESSING,
+        help="Type of EC2 instance to use.",
+    )
+    instance_group.add_argument(
+        "--instance_count",
+        "--ic",
+        type=int,
+        default=constants.DEFAULT_INSTANCE_COUNT,
+        help="Number of EC2 instances to use.",
+    )
+    instance_group.add_argument(
+        "--volume_size",
+        "-v",
+        type=int,
+        default=constants.DEFAULT_VOLUME_SIZE,
+        help="""Size in GB of the EBS volume to use for storing input data.
+        Must be large enough to store input data.""",
+    )
+    instance_group.add_argument(
+        "--max_run_mins",
+        type=int,
+        default=constants.DEFAULT_MAX_RUN,
+        help="""Timeout in minutes for running.
+        After this amount of time Amazon SageMaker terminates the job regardless of its current status.""",
+    )
+    # image params
+    image_group.add_argument("--aws_repo_name", "--ar", help="Name of ECS repository.")
+    image_group.add_argument("--repo_name", "--rn", help="Name of local repository.")
+    image_group.add_argument(
+        "--image_tag", default=constants.DEFAULT_REPO_TAG, help="Image tag."
+    )
+    image_group.add_argument(
+        "--docker_file_path_or_content",
+        "--df",
+        help="""Path to a directory containing the DockerFile. The base image should be set to
+        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
+    )
+    image_group.add_argument(
+        "--framework",
+        "-f",
+        help="The framework to use, see https://github.com/aws/deep-learning-containers/blob/master/available_images.md",
+        default="sklearn",
+    )
+    image_group.add_argument(
+        "--framework_version",
+        "--fv",
+        help="The framework version",
+        default="0.20.0",
+    )
+    # run params
+    IO_params.add_argument(
+        "--input_path",
+        "-i",
+        action=InputAction,
+        help=help_for_input_type(
+            InputTuple,
+            """Local/s3 path for the input data. If a local path is given, it will be sync'ed to the task
+            folder on the selected S3 bucket before launching the task.""",
+        ),
+        tuple=InputTuple,
+    )
+    IO_params.add_argument(
+        "--input_s3",
+        "--iis",
+        action=Input_S3Action,
+        help=help_for_input_type(
+            Input_S3Tuple, "Additional S3 input sources (a few can be given)."
+        ),
+        tuple=Input_S3Tuple,
+    )
+    IO_params.add_argument(
+        "--input_task",
+        "--iit",
+        action=Input_Task_Action,
+        help=help_for_input_type(
+            Input_Task_Tuple,
+            f"""Use an output of a completed task in the same project as an input source (a few can be given).
+            Type should be one of {Input_Task_Types}.""",
+        ),
+        tuple=Input_Task_Tuple,
+    )
+    running_params.add_argument(
+        "--force_running",
+        "--fr",
+        default=False,
+        action="store_true",
+        help="Force running the task even if it's already completed.",
+    )
+    IO_params.add_argument(
+        "--clean_state",
+        "--cs",
+        default=False,
+        action="store_true",
+        help="Clear the task state before running it. The task will be running again even if it was already completed before.",
+    )
+    IO_params.add_argument(
+        "--keep_state",
+        "--ks",
+        action="store_false",
+        dest="clean_state",
+        help="Keep the current task state. If the task is already completed, its current output will \
+             be taken without running it again.",
+    )
+    running_params.add_argument(
+        "--tag",
+        nargs=2,
+        metavar=("key", "value"),
+        action="append",
+        help="Tag to be attached to the jobs executed for this task.",
+    )
+    running_params.add_argument(
+        "--env",
+        nargs=2,
+        metavar=("key", "value"),
+        action="append",
+        help="Environment variables for the running task.",
+    )
+    running_params.add_argument(
+        "--arguments",
+        nargs="+",
+        help="""A list of string arguments to be passed to a processing job. Arguments can also be
+                provided after "--" (followed by a space), which may be needed for parameters with dashes""",
+    )
+
+    addDownloadArgs(download_params)
+
+
 def dataArguments(data_parser):
-    data_parser.add_argument(
-        "--project_name", "-p", required=True, help="Project name."
-    )
-    data_parser.add_argument("--task_name", "-t", required=True, help="Task name.")
-    data_parser.add_argument(
-        "--bucket_name",
-        "-b",
-        help="S3 bucket name (a default one is used if not given).",
-    )
     data_parser.add_argument(
         "--clean_state",
         "--cs",
@@ -391,7 +546,7 @@ def parseArgs():
         help="Run a python / .sh script task",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog="""
-        Anything after "--" will be passed as-is to the executed script command line
+        Anything after "--" (followed by a space) will be passed as-is to the executed script command line
         """,
     )
     shell_parser = subparsers.add_parser(
@@ -404,10 +559,32 @@ def parseArgs():
         help="Manage task data",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    processing_parser = subparsers.add_parser(
+        "process",
+        help="Run a processing task",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog="""
+        Anything after "--" (followed by a space) will be passed as-is to the executed script command line
+        """,
+    )
+
+    for specific_parser in (run_parser, shell_parser, data_parser, processing_parser):
+        specific_parser.add_argument(
+            "--project_name", "-p", required=True, help="Project name."
+        )
+        specific_parser.add_argument(
+            "--task_name", "-t", required=True, help="Task name."
+        )
+        specific_parser.add_argument(
+            "--bucket_name",
+            "-b",
+            help="S3 bucket name (a default one is used if not given).",
+        )
 
     runArguments(run_parser)
     runArguments(shell_parser, True)
     dataArguments(data_parser)
+    processingArguments(processing_parser)
 
     # Parse the configuration, assume anything extra and / or after "--"
     #   is a hyperparameter
@@ -425,7 +602,9 @@ def parseArgs():
     ), f"Hyperparameters has to be of the form --[KEY_NAME] [VALUE] (multiple keys can be given), found: {rest}"
     for i in range(0, len(rest), 2):
         key = rest[i]
-        assert key.startswith("--"), "Hyperparameter key has to start with --"
+        assert key.startswith(
+            "--"
+        ), f"Hyperparameter key has to start with '--' but got {key}"
         hyperparameters[key[2:]] = rest[i + 1]
     return args, hyperparameters
 
@@ -448,21 +627,80 @@ def parseInputsAndAllowAccess(args, sm_project):
     input_data_path = None
     distribution = "FullyReplicated"
     if args.input_path:
-        input_data_path, distribution = args.input_path[0]
+        input_data_path, distribution, subdir = args.input_path[0]
+        if input_data_path.lower().startswith("s3://"):
+            input_data_path = sagemaker.s3.s3_path_join(input_data_path, subdir)
+        else:
+            input_data_path = os.path.join(input_data_path, subdir)
 
     inputs = dict()
     if args.input_task:
-        for (input_name, task_name, ttype, distribution) in args.input_task:
+        for (input_name, task_name, ttype, distribution, subdir) in args.input_task:
             inputs[input_name] = sm_project.getInputConfig(
-                task_name, ttype, distribution=distribution
+                task_name, ttype, distribution=distribution, subdir=subdir
             )
     if args.input_s3:
-        for (input_name, s3_uri, distribution) in args.input_s3:
+        for (input_name, s3_uri, distribution, subdir) in args.input_s3:
+            s3_uri = sagemaker.s3.s3_path_join(s3_uri, subdir)
             bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
             sm_project.allowAccessToS3Bucket(bucket)
             inputs[input_name] = TrainingInput(s3_uri, distribution=distribution)
 
     return input_data_path, distribution, inputs
+
+
+def parseIOAndAllowAccess(args, env, sm_project):
+    input_data_path = None
+    distribution = "FullyReplicated"
+    if args.input_path:
+        input_data_path, distribution, subdir = args.input_path[0]
+        if input_data_path.lower().startswith("s3://"):
+            input_data_path = sagemaker.s3.s3_path_join(input_data_path, subdir)
+        else:
+            input_data_path = os.path.join(input_data_path, subdir)
+
+    inputs = list()
+    if args.input_task:
+        for (input_name, task_name, ttype, distribution, subdir) in args.input_task:
+            s3_uri = sm_project.getInputConfig(
+                task_name,
+                ttype,
+                distribution=distribution,
+                subdir=subdir,
+                return_s3uri=True,
+            )
+            inputs.append(
+                ProcessingInput(
+                    s3_uri,
+                    f"/opt/ml/processing/input/data/{input_name}",
+                    input_name,
+                    s3_data_distribution_type=distribution,
+                )
+            )
+            env[
+                f"SM_CHANNEL_{input_name.upper()}"
+            ] = f"/opt/ml/processing/input/data/{input_name}"
+    if args.input_s3:
+        for (input_name, s3_uri, distribution, subdir) in args.input_s3:
+            s3_uri = sagemaker.s3.s3_path_join(s3_uri, subdir)
+            bucket, _ = sagemaker.s3.parse_s3_url(s3_uri)
+            sm_project.allowAccessToS3Bucket(bucket)
+            inputs.append(
+                ProcessingInput(
+                    s3_uri,
+                    f"/opt/ml/processing/processing/input/data/{input_name}",
+                    input_name,
+                    s3_data_distribution_type=distribution,
+                )
+            )
+            env[
+                f"SM_CHANNEL_{input_name.upper()}"
+            ] = f"/opt/ml/processing/input/data/{input_name}"
+
+    outputs = list()
+    # TBD: support outputs
+
+    return input_data_path, distribution, inputs, outputs
 
 
 def shellHandler(args, hyperparameters):
@@ -485,6 +723,107 @@ def shellHandler(args, hyperparameters):
     shell_launcher = Path(__file__).parent / "shell_launcher.py"
     args.entry_point = str(shell_launcher)
     runHandler(args, hyperparameters)
+
+
+def processingHandler(args, hyperparameters):
+    if hyperparameters["external_hps"]:
+        if not args.arguments:
+            args.arguments = list()
+        args.arguments.extend(hyperparameters["external_hps"])
+        del hyperparameters["external_hps"]
+    # set the default command to be python3
+    if not args.entrypoint and not args.command and args.code:
+        args.command = ["python3"]
+
+    general_params = getAllParams(
+        args,
+        {
+            "project_name": "project_name",
+            "bucket_name": "bucket_name",
+        },
+    )
+    if "local" in args.instance_type:
+        general_params["local_mode"] = True
+    sm_project = SageMakerProject(**general_params)
+
+    code_params = getAllParams(
+        args,
+        {
+            "entrypoint": "entrypoint",
+            "code": "code",
+            "command": "command",
+            "dependencies": "dependencies",
+        },
+    )
+    sm_project.setDefaultInstanceParams(
+        **getAllParams(
+            args,
+            {
+                "instance_count": "instance_count",
+                "instance_type": "instance_type",
+                "volume_size": "volume_size",
+                "max_run_mins": "max_run_mins",
+            },
+        )
+    )
+    sm_project.setDefaultImageParams(
+        **getAllParams(
+            args,
+            {
+                "aws_repo_name": "aws_repo_name",
+                "repo_name": "repo_name",
+                "image_tag": "image_tag",
+                "docker_file_path_or_content": "docker_file_path_or_content",
+                "framework": "framework",
+                "framework_version": "framework_version",
+            },
+        )
+    )
+
+    image_uri = sm_project.buildOrGetImage(
+        instance_type=sm_project.defaultInstanceParams.instance_type
+    )
+
+    running_params = getAllParams(
+        args,
+        {
+            "arguments": "arguments",
+            "force_running": "force_running",
+        },
+    )
+    tags = {} if args.tag is None else {k: v for (k, v) in args.tag}
+    env = {} if args.env is None else {k: v for (k, v) in args.env}
+    running_params["env"] = env
+    running_params["tags"] = tags
+
+    input_data_path, input_distribution, inputs, outputs = parseIOAndAllowAccess(
+        args,
+        running_params["env"],
+        sm_project,
+    )
+
+    sm_project.runTask(
+        args.task_name,
+        image_uri,
+        hyperparameters=None,
+        input_data_path=input_data_path,
+        input_distribution=input_distribution,
+        inputs=inputs,
+        outputs=outputs,
+        clean_state=args.clean_state,
+        task_type=constants.TASK_TYPE_PROCESSING,
+        **{**code_params, **running_params},
+    )
+
+    if args.output_path:
+        sm_project.downloadResults(
+            args.task_name,
+            args.output_path,
+            logs=True,
+            state=args.download_state,
+            model=args.download_model,
+            output=args.download_output,
+        )
 
 
 def runHandler(args, hyperparameters):
@@ -510,7 +849,7 @@ def runHandler(args, hyperparameters):
         shell_launcher = Path(__file__).parent / "shell_launcher.py"
         args.entry_point = str(shell_launcher)
 
-    code_params = getAllParams(
+    general_params = getAllParams(
         args,
         {
             "project_name": "project_name",
@@ -518,8 +857,8 @@ def runHandler(args, hyperparameters):
         },
     )
     if "local" in args.instance_type:
-        code_params["local_mode"] = True
-    sm_project = SageMakerProject(**code_params)
+        general_params["local_mode"] = True
+    sm_project = SageMakerProject(**general_params)
 
     sm_project.setDefaultCodeParams(
         **getAllParams(
@@ -589,9 +928,18 @@ def runHandler(args, hyperparameters):
         import shlex
 
         shell_args = hyperparameters["external_hps"]
-        second_on_cmd = " ".join(shlex.quote(arg) for arg in shell_args[1:])
-        hyperparameters[shell_args[0]] = second_on_cmd
-    del hyperparameters["external_hps"]
+
+        if True:
+            hyperparameters["external_hps"] = (
+                '"' + " ".join(shlex.quote(arg) for arg in shell_args) + '"'
+            )
+        else:
+            second_on_cmd = " ".join(shlex.quote(arg) for arg in shell_args[1:])
+            if not second_on_cmd:
+                second_on_cmd = None
+            hyperparameters[shell_args[0].lstrip("-")] = second_on_cmd
+    else:
+        del hyperparameters["external_hps"]
 
     sm_project.runTask(
         args.task_name,

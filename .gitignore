@@ -13,5 +13,7 @@ __pycache__/
 .cache
 
 examples/*/output
+examples/**/*.extracted*
 htmlcov/*
 .coverage*
+examples/**/cifar-10-*

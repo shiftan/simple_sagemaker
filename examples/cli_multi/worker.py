@@ -51,9 +51,8 @@ def main():
     elif int(worker_config.hps["task_type"]) == 2:
         task2(worker_config)
 
-    # mark the task as completed
-    worker_config.markCompleted()
     logger.info("finished!")
+    # The task is marked as completed
 
 
 if __name__ == "__main__":

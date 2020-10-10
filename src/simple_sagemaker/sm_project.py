@@ -72,6 +72,7 @@ class SageMakerProject:
         self.role_created = False
         self.tasks = {}
         self.local_mode = local_mode
+        self.defaultCodeParams = None
 
         if boto3_session is None:
             boto3_session = boto3.Session()
@@ -158,7 +159,7 @@ class SageMakerProject:
 
     def setDefaultInstanceParams(
         self,
-        instance_type=constants.DEFAULT_INSTANCE_TYPE,
+        instance_type=constants.DEFAULT_INSTANCE_TYPE_TRAINING,
         instance_count=constants.DEFAULT_INSTANCE_COUNT,
         volume_size=constants.DEFAULT_VOLUME_SIZE,
         use_spot_instances=constants.DEFAULT_USE_SPOT,
@@ -167,7 +168,7 @@ class SageMakerProject:
     ):
         f"""Set the default instance params
 
-        :param instance_type: Type of EC2 instance to use, defaults to {constants.DEFAULT_INSTANCE_TYPE}
+        :param instance_type: Type of EC2 instance to use, defaults to {constants.DEFAULT_INSTANCE_TYPE_TRAINING}
         :type instance_type: str, optional
         :param instance_count: Number of EC2 instances to use, defaults to {constants.DEFAULT_INSTANCE_COUNT}
         :type instance_count: int, optional
@@ -263,6 +264,7 @@ class SageMakerProject:
         tags=dict(),
         metric_definitions=dict(),
         enable_sagemaker_metrics=False,
+        task_type=constants.TASK_TYPE_TRAINING,
         **kwargs,
     ):
         """Run a new task for this project.
@@ -311,10 +313,13 @@ class SageMakerProject:
             self.bucket_name,
             smSession=self.smSession,
             local_mode=self.local_mode,
+            task_type=task_type,
         )
         if input_data_path:
             smTask.uploadOrSetInputData(input_data_path)
-        args = self.defaultCodeParams._asdict()
+        args = (
+            dict() if not self.defaultCodeParams else self.defaultCodeParams._asdict()
+        )
         args.update(self.defaultInstanceParams._asdict())
 
         args.update(kwargs)
@@ -327,20 +332,44 @@ class SageMakerProject:
         if clean_state:
             smTask.clean_state()
 
-        job_name = None if force_running else self._getCompletionJobName(task_name)
-        if job_name:
-            logger.info(f"Task {task_name} is already completed by {job_name}")
-            smTask.bindToJob(job_name)
-        else:
-            job_name = smTask.runTrainingJob(
-                self.defaultImageParams.framework,
-                role_name=self.role_name,
-                hyperparameters=hyperparameters,
-                tags=tags,
-                metric_definitions=metric_definitions,
-                enable_sagemaker_metrics=enable_sagemaker_metrics,
-                **args,
+        job_name = None
+        if not force_running:
+            job_name_last, task_type_last, status = SageMakerTask.getLastJob(
+                self.boto3_session,
+                self.project_name,
+                task_name,
+                task_type,
             )
+            if job_name_last and status == "Completed":
+                assert (
+                    task_type == task_type_last
+                ), f"Mismatch task {task_name} type (new {task_type} vs. old {task_type_last}) - {job_name, status}"
+                job_name = job_name_last
+
+        if job_name:
+            logger.info(
+                f"===== Task {task_name} is already completed by {job_name} ====="
+            )
+            smTask.bindToLastJob(job_name, task_type)
+        else:
+            if task_type == constants.TASK_TYPE_TRAINING:
+                job_name = smTask.runTrainingJob(
+                    self.defaultImageParams.framework,
+                    role_name=self.role_name,
+                    hyperparameters=hyperparameters,
+                    tags=tags,
+                    metric_definitions=metric_definitions,
+                    enable_sagemaker_metrics=enable_sagemaker_metrics,
+                    **args,
+                )
+            elif task_type == constants.TASK_TYPE_PROCESSING:
+                args.pop("use_spot_instances", None)
+                args.pop("max_wait_mins", None)
+                job_name = smTask.runProcessing(
+                    role_name=self.role_name,
+                    tags=tags,
+                    **args,
+                )
 
         self.addTask(task_name, smTask)
         return smTask, job_name
@@ -375,9 +404,13 @@ class SageMakerProject:
                 self.bucket_name,
                 smSession=self.smSession,
             )
-            job_name = self._getCompletionJobName(task_name)
-            assert job_name, f"Task {task_name} isn't completed!"
-            smTask.bindToJob(job_name)
+            job_name, task_type, status = SageMakerTask.getLastJob(
+                self.boto3_session, self.project_name, task_name
+            )
+            assert (
+                status == "Completed"
+            ), f"Task {task_name} isn't completed but job {job_name} is {status}!"
+            smTask.bindToLastJob(job_name, task_type)
             # self.tasks[task_name] = smTask
         return smTask
 
@@ -386,6 +419,8 @@ class SageMakerProject:
         task_name,
         output_type,
         distribution="FullyReplicated",
+        subdir="",
+        return_s3uri=False,
     ):
         """Get the class:`sagemaker.inputs.TrainingInput` configuration for an output of a task from this
         project to be used as an input for another task.
@@ -397,8 +432,21 @@ class SageMakerProject:
         :param distribution: Either ShardedByS3Key or FullyReplicated, defaults to FullyReplicated
         :type task_name: str
         """
-        smTask = self._getOrBindTask(task_name)
-        return smTask.getInputConfig(output_type, distribution)
+        # state is global for the task
+        if "state" == output_type:
+            smTask = SageMakerTask(
+                self.boto3_session,
+                task_name,
+                None,
+                self.project_name,
+                self.bucket_name,
+                smSession=self.smSession,
+            )
+        else:
+            smTask = self._getOrBindTask(task_name)
+        return smTask.getInputConfig(
+            output_type, distribution, subdir, return_s3uri=return_s3uri
+        )
 
     def downloadResults(
         self,
@@ -436,37 +484,3 @@ class SageMakerProject:
             output=output,
             source=source,
         )
-
-    def _getS3Subdirs(self, bucket, prefix):
-        client = self.boto3_session.client("s3")
-        result = client.list_objects(Bucket=bucket, Prefix=prefix + "/", Delimiter="/")
-        if "CommonPrefixes" not in result:
-            return list()
-        return [
-            commonPreifx["Prefix"].split("/")[-2]
-            for commonPreifx in result["CommonPrefixes"]
-        ]
-
-    def _getCompletionStatus(self, task_name):
-        taskS3Uri = SageMakerTask.getStateS3Uri(
-            self.bucket_name, self.project_name, task_name
-        )
-        (bucket, key) = sagemaker.s3.parse_s3_url(taskS3Uri)
-        subdirs = self._getS3Subdirs(bucket, key)
-        results = dict.fromkeys(subdirs)
-        for subdir in subdirs:
-            try:
-                completedContent = self.smSession.read_s3_file(
-                    bucket, sagemaker.s3.s3_path_join(key, subdir, "__COMPLETED__")
-                )
-                results[subdir] = completedContent
-            except:  # noqa: E722
-                logger.warning(f"Couldn't get completion status for {subdir}")
-        return results
-
-    def _getCompletionJobName(self, task_name):
-        completionResults = self._getCompletionStatus(task_name)
-        values = list(set(completionResults.values()))
-        if len(values) == 1 and values[0] is not None:
-            return values[0]
-        return False

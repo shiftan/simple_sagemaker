@@ -19,7 +19,7 @@ def listDir(path, ignore_patterns=[]):
         if (not ignore_patterns) or all(
             [pattern not in str(file) for pattern in ignore_patterns]
         ):
-            logger.info(f"[{['Dir ', 'File'][file.is_dir()]}] {file}")
+            logger.info(f"[{['Dir ', 'File'][file.is_file()]}] {file}")
     logger.info(f"*** END file listing {path}")
 
 
@@ -84,11 +84,10 @@ def worker():
     elif int(worker_config.hps["task_type"]) == 2:
         worker2(worker_config)
 
-    # mark the task as completed
-    worker_config.markCompleted()
     show_output(worker_config)
 
     logger.info("finished!")
+    # The task is marked as completed
 
 
 if __name__ == "__main__":

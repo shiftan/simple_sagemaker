@@ -73,7 +73,9 @@ def _internalTestCli(test_path, caplog, tmp_path):
     prefix = "tests/"
 
     run_shell = os.path.join(examples_path, test_path, "run.sh")
-    subprocess.run([run_shell, output_path, prefix, postfix, "--cs"], check=True)
+    subprocess.run(
+        [run_shell, output_path, prefix, postfix, "--cs --force_running"], check=True
+    )
 
     expected_path = os.path.join(examples_path, test_path, "expected_output")
     assert isAsExpected(output_path, expected_path)
@@ -85,3 +87,7 @@ def skip_test_cli_multi(caplog, tmp_path):
 
 def test_readme_examples(caplog, tmp_path):
     _internalTestCli("readme_examples", caplog, tmp_path)
+
+
+def test_processing_cli_examples(caplog, tmp_path):
+    _internalTestCli("processing_cli", caplog, tmp_path)

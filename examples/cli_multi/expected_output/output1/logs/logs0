@@ -98,6 +98,5 @@ INFO:worker_toolkit.worker_lib:Creating instance specific state dir
 INFO:__main__:Hyperparams: {'task_type': '1'}
 INFO:__main__:Input data files: [PosixPath('/opt/ml/input/data/data/sample_data1.txt'), PosixPath('/opt/ml/input/data/data/sample_data2.txt')]
 INFO:__main__:State files: [PosixPath('/state/algo-1')]
-INFO:worker_toolkit.worker_lib:Marking instance algo-1 completion
 INFO:__main__:finished!
 2020-09-13 13:20:26,601 sagemaker-training-toolkit INFO     Reporting training SUCCESS
