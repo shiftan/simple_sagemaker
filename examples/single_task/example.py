@@ -79,7 +79,7 @@ def runner(
 
     # task name
     task_name = (
-        "Task1"
+        "task1"
         + postfix  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     )
     # input data params
