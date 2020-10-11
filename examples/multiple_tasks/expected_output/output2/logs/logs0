@@ -166,7 +166,7 @@ drwxr-xr-x 2 root root 4096 Oct  8 08:02 config
 drwxr-xr-x 7 root root 4096 Oct  8 08:02 data
 
 /opt/ml/input/config:
-total 48
+total 44
 drwxr-xr-x 2 root root 4096 Oct  8 08:02 .
 drwxr-xr-x 4 root root 4096 Oct  8 08:02 ..
 -rw-r--r-- 1 root root   22 Oct  8 08:02 checkpointconfig.json
@@ -373,7 +373,7 @@ drwxr-xr-x 2 root root 4096 Oct  8 08:02 config
 drwxr-xr-x 7 root root 4096 Oct  8 08:02 data
 
 /opt/ml/input/config:
-total 48
+total 44
 drwxr-xr-x 2 root root 4096 Oct  8 08:02 .
 drwxr-xr-x 4 root root 4096 Oct  8 08:02 ..
 -rw-r--r-- 1 root root   22 Oct  8 08:02 checkpointconfig.json

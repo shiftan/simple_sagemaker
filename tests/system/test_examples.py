@@ -12,24 +12,6 @@ examples_path = os.path.abspath(os.path.join(file_path, "..", "..", "examples"))
 sys.path.append(examples_path)
 
 
-def test_single_task(caplog, tmp_path):
-    from single_task.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
-
-
-def test_multiple_tasks(caplog, tmp_path):
-    from multiple_tasks.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
-
-
-def test_single_file_tasks(caplog, tmp_path):
-    from single_file.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
-
-
 def _internalTestExample(caplog, tmp_path, runner):
     caplog.set_level(logging.INFO)
     # print(os.environ)
@@ -91,3 +73,21 @@ def test_readme_examples(caplog, tmp_path):
 
 def test_processing_cli_examples(caplog, tmp_path):
     _internalTestCli("processing_cli", caplog, tmp_path)
+
+
+def test_multiple_tasks(caplog, tmp_path):
+    from multiple_tasks.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
+
+
+def test_single_file_tasks(caplog, tmp_path):
+    from single_file.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
+
+
+def test_single_task(caplog, tmp_path):
+    from single_task.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
