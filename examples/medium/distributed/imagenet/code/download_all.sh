@@ -15,18 +15,7 @@ download () {
     aria2c --summary-interval=30 --conditional-get=true -x 16 -s 16 $1
 }
 
-### Adapted from https://github.com/pytorch/examples/blob/master/run_python_examples.sh
-mkdir -p val/n
-mkdir -p train/n
-wget "https://upload.wikimedia.org/wikipedia/commons/5/5a/Socks-clinton.jpg" || { error "couldn't download sample image for imagenet"; return; }
-mv Socks-clinton.jpg train/n
-cp train/n/* val/n/
-
-### Imagenet 16
-#wget http://www.image-net.org/image/downsample/Imagenet16_train.zip
-#wget http://www.image-net.org/image/downsample/Imagenet16_val.zip
-
-### From https://cloud.google.com/tpu/docs/imagenet-setup :
+### From https://cloud.google.com/tpu/docs/imagenet-setup, please make sure you have the permission to download the files from [Imagenet](http://image-net.org)
 echo Downloading to `pwd` 
 for FILENAME in ILSVRC2012_img_train.tar ILSVRC2012_img_val.tar ILSVRC2012_img_train_t3.tar
 do
@@ -37,7 +26,7 @@ echo "Download finished!"
 
 echo "Extracting first level..."
 tar -xf ILSVRC2012_img_train.tar --xform="s|^|train/|S" &
-tar -xf ILSVRC2012_img_train_t3.tar --xform="s|^|train/|S" &
-tar -xf ILSVRC2012_img_val.tar --xform="s|^|val/|S" &
+#tar -xf ILSVRC2012_img_train_t3.tar --xform="s|^|train/|S" &
 wait
+mv ILSVRC2012_img_val.tar val/
 echo "Done!"

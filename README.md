@@ -3,7 +3,6 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 
 **Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
-
 ## Requirements
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
@@ -146,6 +145,7 @@ The complete list of configuration parameters:
 | **Output**:|
 | The path where output data should be stored | SM_OUTPUT_DATA_DIR | output_data_dir | '/opt/ml/output/data'
 | Path where model output should be stored | SM_MODEL_DIR | model_dir | '/opt/ml/model'
+| TensorBoard output | SSM_TENSORBOARD_DIR | tensorboard_dir | '/opt/ml/output/tensorboard'
 | **System**:|
 | The number of available CPUs on this instance | SM_NUM_CPUS | num_cpus | 2
 | The number of available GPUs  instance| SM_NUM_GPUS | num_gpus | 1
@@ -831,7 +831,7 @@ file_path = Path(__file__).parent
 def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_path=None):
     from simple_sagemaker.sm_project import SageMakerProject
 
-    sm_project = SageMakerProject(prefix + project_name + postfix)
+    sm_project = SageMakerProject(project_name, prefix=prefix)
     # define the code parameters
     sm_project.setDefaultCodeParams(
         source_dir=None, entry_point=__file__, dependencies=[]
@@ -850,7 +850,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     )
 
     # *** Task 1 - process input data
-    task1_name = "task1"
+    task1_name = "task1"+postfix
     # set the input data
     input_data_path = file_path / "data"
     # run the task
@@ -871,7 +871,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
 An additional **task** that depends on the previous one can now be scheduled as well:
 ```python
     # *** Task 2 - process the results of Task 1
-    task2_name = "task2"
+    task2_name = "task2"+postfix
     # set the input
     additional_inputs = {
         "task2_data": sm_project.getInputConfig(task1_name, "model"),

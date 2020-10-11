@@ -22,11 +22,13 @@ class SageMakerProject:
     :param role_name: The Amazon SageMaker training jobs and APIs that create Amazon SageMaker endpoints
         use this role to access training data and model artifacts. After the endpoint is created,
         the inference code might use the IAM role, if it needs to access an AWS resource.,
-        defaults to {constants.DEFAULT_IAM_ROLE}
+        defaults to {constants.DEFAULT_IAM_ROLE}_[project_name]
     :type role_name: str, optional
     :param bucket_name: A bucket name to be used. The default sagemaker bucket is used if not specified
     :type bucket_name: str, optional
-    :param smSession:An existing sage maker session to be used. A new one is created if not given
+    :param smSession: An existing sage maker session to be used. A new one is created if not given
+    :type smSession: str, optional
+    :param prefix: A prefix to be used on the S3 bucket
     :type smSession: str, optional
     """
     ImageParams = collections.namedtuple(
@@ -61,17 +63,21 @@ class SageMakerProject:
         self,
         project_name,
         boto3_session=None,
-        role_name=constants.DEFAULT_IAM_ROLE,
+        role_name=None,
         bucket_name=None,
         smSession=None,
         local_mode=False,
+        prefix=None,
     ):
         """Constructor"""
         self.project_name = project_name
+        if not role_name:
+            role_name = f"{constants.DEFAULT_IAM_ROLE}_{project_name}"
         self.role_name = role_name
         self.role_created = False
         self.tasks = {}
         self.local_mode = local_mode
+        self.prefix = prefix or ""
         self.defaultCodeParams = None
 
         if boto3_session is None:
@@ -214,17 +220,19 @@ class SageMakerProject:
         iam_utils.createSageMakerIAMRole(self.boto3_session, self.role_name)
         self.role_created = True
 
-    def allowAccessToS3Bucket(
-        self, bucket_name, policy_name=constants.DEFAULT_IAM_BUCKET_POLICY
-    ):
+    def allowAccessToS3Bucket(self, bucket_name, policy_name=None):
         f"""Make sure the used IAM rule is allowed to access the given bucket. Needed e.g. for using public buckets.
 
         :param bucket_name: The name of the bucket
         :type bucket_name: str
         :param policy_name: The policy name to be allowed access to `bucket_name`,
-        defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
+        defaults to [role_name]_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}
         :type policy_name: str
         """
+        if not policy_name:
+            policy_name = (
+                f"{self.role_name}_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}"
+            )
         iam_utils.allowAccessToS3Bucket(
             self.boto3_session, self.role_name, policy_name, bucket_name
         )
@@ -309,7 +317,7 @@ class SageMakerProject:
             self.boto3_session,
             task_name,
             image_uri,
-            self.project_name,
+            self.prefix + self.project_name,
             self.bucket_name,
             smSession=self.smSession,
             local_mode=self.local_mode,
@@ -377,7 +385,9 @@ class SageMakerProject:
     def cleanFolder(self):
         """Clean the project folder on the S3 bucket"""
         s3c = self.boto3_session.client("s3")
-        for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
+        for file in self.smSession.list_s3_files(
+            self.bucket_name, self.prefix + self.project_name
+        ):
             s3c.delete_object(Bucket=self.bucket_name, Key=file)
 
     def cleanState(self, task_name):
@@ -386,7 +396,7 @@ class SageMakerProject:
             self.boto3_session,
             task_name,
             None,
-            self.project_name,
+            self.prefix + self.project_name,
             self.bucket_name,
             smSession=self.smSession,
         )
@@ -400,7 +410,7 @@ class SageMakerProject:
                 self.boto3_session,
                 task_name,
                 None,
-                self.project_name,
+                self.prefix + self.project_name,
                 self.bucket_name,
                 smSession=self.smSession,
             )
@@ -438,7 +448,7 @@ class SageMakerProject:
                 self.boto3_session,
                 task_name,
                 None,
-                self.project_name,
+                self.prefix + self.project_name,
                 self.bucket_name,
                 smSession=self.smSession,
             )

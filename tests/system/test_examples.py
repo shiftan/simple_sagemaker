@@ -3,31 +3,13 @@ import os
 import shutil
 import subprocess
 import sys
-from time import gmtime, strftime
+from time import time
 
 from .compare_outputs import isAsExpected
 
 file_path = os.path.split(__file__)[0]
 examples_path = os.path.abspath(os.path.join(file_path, "..", "..", "examples"))
 sys.path.append(examples_path)
-
-
-def test_single_task(caplog, tmp_path):
-    from single_task.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
-
-
-def test_multiple_tasks(caplog, tmp_path):
-    from multiple_tasks.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
-
-
-def test_single_file_tasks(caplog, tmp_path):
-    from single_file.example import runner
-
-    _internalTestExample(caplog, tmp_path, runner)
 
 
 def _internalTestExample(caplog, tmp_path, runner):
@@ -42,8 +24,8 @@ def _internalTestExample(caplog, tmp_path, runner):
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
-    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{time_string}_{py_version_string}"
+    time_string = int(time())
+    postfix = f"-{time_string}-{py_version_string}"
     prefix = "tests/"
 
     sm_project = runner(postfix=postfix, prefix=prefix, output_path=output_path)
@@ -68,8 +50,8 @@ def _internalTestCli(test_path, caplog, tmp_path):
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
-    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{time_string}_{py_version_string}"
+    time_string = int(time())
+    postfix = f"-{time_string}-{py_version_string}"
     prefix = "tests/"
 
     run_shell = os.path.join(examples_path, test_path, "run.sh")
@@ -91,3 +73,21 @@ def test_readme_examples(caplog, tmp_path):
 
 def test_processing_cli_examples(caplog, tmp_path):
     _internalTestCli("processing_cli", caplog, tmp_path)
+
+
+def test_multiple_tasks(caplog, tmp_path):
+    from multiple_tasks.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
+
+
+def test_single_file_tasks(caplog, tmp_path):
+    from single_file.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
+
+
+def test_single_task(caplog, tmp_path):
+    from single_task.example import runner
+
+    _internalTestExample(caplog, tmp_path, runner)
