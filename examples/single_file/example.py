@@ -35,7 +35,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     )
 
     # *** Task 1 - process input data
-    task1_name = "single-file-task1"+postfix
+    task1_name = "single-file-task1" + postfix
     # set the input data
     input_data_path = file_path / "data"
     # run the task
@@ -54,7 +54,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 
     # *** Task 2 - process the results of Task 1
-    task2_name = "single-file-task2"+postfix
+    task2_name = "single-file-task2" + postfix
     # set the input
     additional_inputs = {
         "task2_data": sm_project.getInputConfig(task1_name, "model"),

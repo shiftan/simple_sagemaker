@@ -26,7 +26,9 @@ class SageMakerProject:
     :type role_name: str, optional
     :param bucket_name: A bucket name to be used. The default sagemaker bucket is used if not specified
     :type bucket_name: str, optional
-    :param smSession:An existing sage maker session to be used. A new one is created if not given
+    :param smSession: An existing sage maker session to be used. A new one is created if not given
+    :type smSession: str, optional
+    :param prefix: A prefix to be used on the S3 bucket
     :type smSession: str, optional
     """
     ImageParams = collections.namedtuple(
@@ -65,6 +67,7 @@ class SageMakerProject:
         bucket_name=None,
         smSession=None,
         local_mode=False,
+        prefix=None,
     ):
         """Constructor"""
         self.project_name = project_name
@@ -74,6 +77,7 @@ class SageMakerProject:
         self.role_created = False
         self.tasks = {}
         self.local_mode = local_mode
+        self.prefix = prefix or ""
         self.defaultCodeParams = None
 
         if boto3_session is None:
@@ -313,7 +317,7 @@ class SageMakerProject:
             self.boto3_session,
             task_name,
             image_uri,
-            self.project_name,
+            self.prefix + self.project_name,
             self.bucket_name,
             smSession=self.smSession,
             local_mode=self.local_mode,
@@ -381,7 +385,9 @@ class SageMakerProject:
     def cleanFolder(self):
         """Clean the project folder on the S3 bucket"""
         s3c = self.boto3_session.client("s3")
-        for file in self.smSession.list_s3_files(self.bucket_name, self.project_name):
+        for file in self.smSession.list_s3_files(
+            self.bucket_name, self.prefix + self.project_name
+        ):
             s3c.delete_object(Bucket=self.bucket_name, Key=file)
 
     def cleanState(self, task_name):
@@ -390,7 +396,7 @@ class SageMakerProject:
             self.boto3_session,
             task_name,
             None,
-            self.project_name,
+            self.prefix + self.project_name,
             self.bucket_name,
             smSession=self.smSession,
         )
@@ -404,7 +410,7 @@ class SageMakerProject:
                 self.boto3_session,
                 task_name,
                 None,
-                self.project_name,
+                self.prefix + self.project_name,
                 self.bucket_name,
                 smSession=self.smSession,
             )
@@ -442,7 +448,7 @@ class SageMakerProject:
                 self.boto3_session,
                 task_name,
                 None,
-                self.project_name,
+                self.prefix + self.project_name,
                 self.bucket_name,
                 smSession=self.smSession,
             )
