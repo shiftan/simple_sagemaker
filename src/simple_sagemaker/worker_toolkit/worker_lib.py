@@ -169,9 +169,12 @@ class WorkerConfig:
         else:
             args.num_nodes = -1
             args.host_rank = -1
+        args.tensorboard_dir = "/opt/ml/output/tensorboard"
+
         # Fill the environment varaible with missing parameters
         os.environ["SSM_NUM_NODES"] = str(args.num_nodes)
         os.environ["SSM_HOST_RANK"] = str(args.host_rank)
+        os.environ["SSM_TENSORBOARD_DIR"] = args.tensorboard_dir
 
         if "SSM_STATE" in os.environ:
             args.state = os.environ["SSM_STATE"]
