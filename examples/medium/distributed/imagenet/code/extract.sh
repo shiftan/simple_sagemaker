@@ -24,3 +24,4 @@ cd val
 tar -xf ILSVRC2012_img_val.tar
 wget -qO- https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh | bash
 echo "Done!"
+echo "Extracted `find train | grep .JPEG | wc -l` train files and `find val | grep .JPEG | wc -l` validation files"

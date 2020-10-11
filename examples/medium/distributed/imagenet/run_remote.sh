@@ -25,7 +25,7 @@ ssm process -p ex-imagenet -t download-all -v 400 \
 wait
 
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
-    EPOCHS=${5:-20}  # 20 epochs by default
+    EPOCHS=${5:-10}  # 20 epochs by default
     ADDITIONAL_ARGS=${6:-"--no_spot --force_running"} # 
 
     echo ===== Training $EPOCHS epochs, $4...
@@ -39,7 +39,7 @@ run_training () { # args: task_name, instance_type, additional_command_params, [
         --it $2 $ADDITIONAL_ARGS \
         --cmd_line  "./extract.sh \$SM_CHANNEL_TRAIN/.. && \ 
                     CODE_DIR=\`pwd\` && cd \$SSM_INSTANCE_STATE && START=\$SECONDS && \
-                    python \$CODE_DIR/main.py --epochs $EPOCHS --workers 8 \$SM_CHANNEL_TRAIN/.. $3 2>&1 && \
+                    python \$CODE_DIR/main.py --epochs $EPOCHS --resume checkpoint.pth.tar --workers 8 \$SM_CHANNEL_TRAIN/.. $3 2>&1 && \
                     echo Total time: \$(( SECONDS - START )) seconds"
 
     exit $?

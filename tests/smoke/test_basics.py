@@ -4,7 +4,7 @@ import platform
 import shutil
 import subprocess
 import sys
-from time import gmtime, strftime
+from time import time
 
 import boto3
 
@@ -68,8 +68,8 @@ def _internalTestCli(test_path, caplog, tmp_path):
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
-    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{os.name}_{py_version_string}_{time_string}"
+    time_string = int(time())
+    postfix = f"-{os.name}-{time_string}-{py_version_string}"
     prefix = "tests_smoke/"
 
     if platform.system() == "Linux":

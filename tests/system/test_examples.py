@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
-from time import gmtime, strftime
+from time import time
 
 from .compare_outputs import isAsExpected
 
@@ -42,8 +42,8 @@ def _internalTestExample(caplog, tmp_path, runner):
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
-    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{time_string}_{py_version_string}"
+    time_string = int(time())
+    postfix = f"-{time_string}-{py_version_string}"
     prefix = "tests/"
 
     sm_project = runner(postfix=postfix, prefix=prefix, output_path=output_path)
@@ -68,7 +68,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     shutil.rmtree(output_path, ignore_errors=True)
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
-    time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+    time_string = int(time())
     postfix = f"-{time_string}-{py_version_string}"
     prefix = "tests/"
 

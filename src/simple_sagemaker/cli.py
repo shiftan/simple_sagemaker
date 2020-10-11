@@ -572,7 +572,7 @@ def parseArgs():
         specific_parser.add_argument(
             "--project_name", "-p", required=True, help="Project name."
         )
-        specific_parser.add_argument("--prefix", required=True, help="Project name.")
+        specific_parser.add_argument("--prefix", help="Project name.")
         specific_parser.add_argument(
             "--task_name", "-t", required=True, help="Task name."
         )
