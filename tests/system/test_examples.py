@@ -69,7 +69,7 @@ def _internalTestCli(test_path, caplog, tmp_path):
     # prefix/suffix for project name
     py_version_string = f"py{sys.version_info.major}{sys.version_info.minor}"
     time_string = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    postfix = f"_{time_string}_{py_version_string}"
+    postfix = f"-{time_string}-{py_version_string}"
     prefix = "tests/"
 
     run_shell = os.path.join(examples_path, test_path, "run.sh")

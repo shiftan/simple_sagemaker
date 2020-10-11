@@ -22,7 +22,7 @@ class SageMakerProject:
     :param role_name: The Amazon SageMaker training jobs and APIs that create Amazon SageMaker endpoints
         use this role to access training data and model artifacts. After the endpoint is created,
         the inference code might use the IAM role, if it needs to access an AWS resource.,
-        defaults to {constants.DEFAULT_IAM_ROLE}
+        defaults to {constants.DEFAULT_IAM_ROLE}_[project_name]
     :type role_name: str, optional
     :param bucket_name: A bucket name to be used. The default sagemaker bucket is used if not specified
     :type bucket_name: str, optional
@@ -61,13 +61,15 @@ class SageMakerProject:
         self,
         project_name,
         boto3_session=None,
-        role_name=constants.DEFAULT_IAM_ROLE,
+        role_name=None,
         bucket_name=None,
         smSession=None,
         local_mode=False,
     ):
         """Constructor"""
         self.project_name = project_name
+        if not role_name:
+            role_name = f"{constants.DEFAULT_IAM_ROLE}_{project_name}"
         self.role_name = role_name
         self.role_created = False
         self.tasks = {}
@@ -214,17 +216,19 @@ class SageMakerProject:
         iam_utils.createSageMakerIAMRole(self.boto3_session, self.role_name)
         self.role_created = True
 
-    def allowAccessToS3Bucket(
-        self, bucket_name, policy_name=constants.DEFAULT_IAM_BUCKET_POLICY
-    ):
+    def allowAccessToS3Bucket(self, bucket_name, policy_name=None):
         f"""Make sure the used IAM rule is allowed to access the given bucket. Needed e.g. for using public buckets.
 
         :param bucket_name: The name of the bucket
         :type bucket_name: str
         :param policy_name: The policy name to be allowed access to `bucket_name`,
-        defaults to {constants.DEFAULT_IAM_BUCKET_POLICY}
+        defaults to [role_name]_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}
         :type policy_name: str
         """
+        if not policy_name:
+            policy_name = (
+                f"{self.role_name}_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}"
+            )
         iam_utils.allowAccessToS3Bucket(
             self.boto3_session, self.role_name, policy_name, bucket_name
         )
