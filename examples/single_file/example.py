@@ -16,7 +16,7 @@ file_path = Path(__file__).parent
 def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_path=None):
     from simple_sagemaker.sm_project import SageMakerProject
 
-    sm_project = SageMakerProject(prefix + project_name + postfix)
+    sm_project = SageMakerProject(project_name, prefix=prefix)
     # define the code parameters
     sm_project.setDefaultCodeParams(
         source_dir=None, entry_point=__file__, dependencies=[]
@@ -35,7 +35,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     )
 
     # *** Task 1 - process input data
-    task1_name = "single-file-task1"
+    task1_name = "single-file-task1"+postfix
     # set the input data
     input_data_path = file_path / "data"
     # run the task
@@ -54,7 +54,7 @@ def runner(project_name="simple-sagemaker-sf", prefix="", postfix="", output_pat
     sm_project.downloadResults(task1_name, Path(output_path) / "output1")
 
     # *** Task 2 - process the results of Task 1
-    task2_name = "single-file-task2"
+    task2_name = "single-file-task2"+postfix
     # set the input
     additional_inputs = {
         "task2_data": sm_project.getInputConfig(task1_name, "model"),

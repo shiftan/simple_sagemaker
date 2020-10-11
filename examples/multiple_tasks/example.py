@@ -74,14 +74,14 @@ def runner(
 ):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-    sm_project = SageMakerProject(prefix + project_name + postfix)
+    sm_project = SageMakerProject(project_name, prefix=prefix)
     setDefaultParams(sm_project)
     image_uri = buildImage(
         sm_project, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
     )
 
     # task name
-    task_name = "multi-task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
+    task_name = "multi-task1"+postfix  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     # input data params
     input_data_path = os.path.join(
         file_path, "..", "single_task", "input_data"

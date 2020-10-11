@@ -70,7 +70,7 @@ def runner(
 ):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-    sm_project = SageMakerProject(prefix + project_name + postfix)
+    sm_project = SageMakerProject(project_name, prefix=prefix)
 
     setDefaultParams(sm_project)
     image_uri = buildImage(
@@ -79,7 +79,7 @@ def runner(
 
     # task name
     task_name = (
-        "Task1"  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
+        "Task1"+postfix  # must satisfy regular expression pattern: ^[a-zA-Z0-9](-*[a-zA-Z0-9])*
     )
     # input data params
     input_data_path = os.path.join(

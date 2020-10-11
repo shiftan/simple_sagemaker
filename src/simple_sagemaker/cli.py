@@ -573,6 +573,9 @@ def parseArgs():
             "--project_name", "-p", required=True, help="Project name."
         )
         specific_parser.add_argument(
+            "--prefix", required=True, help="Project name."
+        )
+        specific_parser.add_argument(
             "--task_name", "-t", required=True, help="Task name."
         )
         specific_parser.add_argument(
@@ -740,6 +743,7 @@ def processingHandler(args, hyperparameters):
         {
             "project_name": "project_name",
             "bucket_name": "bucket_name",
+            "prefix": "prefix",
         },
     )
     if "local" in args.instance_type:
@@ -854,6 +858,7 @@ def runHandler(args, hyperparameters):
         {
             "project_name": "project_name",
             "bucket_name": "bucket_name",
+            "prefix": "prefix",
         },
     )
     if "local" in args.instance_type:
@@ -971,6 +976,7 @@ def dataHandler(args, hyperparameters):
             {
                 "project_name": "project_name",
                 "bucket_name": "bucket_name",
+                "prefix": "prefix",
             },
         )
     )
