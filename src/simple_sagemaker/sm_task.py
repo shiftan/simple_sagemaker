@@ -315,7 +315,7 @@ class SageMakerTask:
         # Configure TensorBoard
         tensorboard_output_config = TensorBoardOutputConfig(
             s3_output_path=self.baseTaskS3Uri,
-            container_local_output_path="/opt/ml/output/tensorboard/",
+            container_local_output_path="/opt/ml/output/tensorboard",
         )
 
         estimator = estimator_class(
