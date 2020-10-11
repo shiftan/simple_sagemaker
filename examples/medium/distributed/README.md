@@ -6,6 +6,7 @@ A very good [blog post](https://yangkky.github.io/2019/07/08/distributed-pytorch
 - [SageMaker's MNIST](https://github.com/aws/sagemaker-pytorch-training-toolkit/blob/master/test/resources/mnist/mnist.py)
 
 # Imagenet 
+Using the [LSVRC2012 dataset](http://image-net.org/challenges/LSVRC/2012/ilsvrc2012.pdf)
 from https://cloud.google.com/tpu/docs/imagenet-setup:
 1. Register to [http://image-net.org/](http://image-net.org/) and request access permission
 2. nohup wget http://image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_train.tar
@@ -53,3 +54,4 @@ from https://cloud.google.com/tpu/docs/imagenet-setup:
 Notes:
 1. Make sure to save checkpoints to the state folder
 2. TensorBoard is active, save logs to /opt/ml/output/tensorboard/, e.g. writer = SummaryWriter('/opt/ml/output/tensorboard/') and writer.add_scalar('Loss/test', np.random.random(), n_iter)
+3. Syncing many files from S3 is slow, it's better to split the DB into e.g. 1000 tars.

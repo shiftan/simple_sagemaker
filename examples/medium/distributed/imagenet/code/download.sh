@@ -1,7 +1,7 @@
 #! /bin/bash
 # Expected to be launched with DATA_DIR as first argument
 
-set -e # stop and fail if anything stops
+set -ex # stop and fail if anything stops
 
 mkdir -p $1
 cd $1
@@ -14,13 +14,6 @@ apt-get -y --allow-unauthenticated install aria2
 download () {
     aria2c --summary-interval=30 --conditional-get=true -x 16 -s 16 $1
 }
-
-### Adapted from https://github.com/pytorch/examples/blob/master/run_python_examples.sh
-#mkdir -p val/n
-#mkdir -p train/n
-#wget "https://upload.wikimedia.org/wikipedia/commons/5/5a/Socks-clinton.jpg" || { error "couldn't download sample image for imagenet"; return; }
-#mv Socks-clinton.jpg train/n
-#cp train/n/* val/n/
 
 ### From https://cloud.google.com/tpu/docs/imagenet-setup, please make sure you have the permission to download the files from [Imagenet](http://image-net.org)
 echo Downloading to `pwd` 

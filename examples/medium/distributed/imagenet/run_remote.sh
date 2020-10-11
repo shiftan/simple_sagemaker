@@ -26,10 +26,10 @@ wait
 
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
     EPOCHS=${5:-10}  # 20 epochs by default
-    ADDITIONAL_ARGS=${6:-"--no_spot --force_running"} # 
+    ADDITIONAL_ARGS=${6:-"--no_spot --force_running --cs"} # 
 
     echo ===== Training $EPOCHS epochs, $4...
-    ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 250 \
+    ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 280 \
         --iit train $data_source output FullyReplicated data/train \
         --iit val $data_source output FullyReplicated data/val \
         -m --md "loss" "Epoch:.*Loss\s+([e\-+0-9\\.]*) \(" --md "acc1" "Epoch:.*Acc@1\s+([e\-+0-9\\.]*) \(" --md "acc5" "Epoch:.*Acc@5\s+([e\-+0-9\\.]*) \(" \
@@ -53,7 +53,7 @@ DESC="distributed training, 8 GPUs"
 run_training train-dist-8gpus ml.p2.8xlarge "--multiprocessing-distributed --dist-url env:// --world-size 1 --rank 0 --seed 123" "$DESC" &
 DESC="distributed training, 3 instances, total 3 GPUs"
 run_training train-dist-3nodes-3gpus ml.p3.2xlarge '--multiprocessing-distributed --dist-url env:// --world-size $SSM_NUM_NODES --rank $SSM_HOST_RANK --seed 123' "$DESC" \
-        "" "--no_spot --ic 3" &
+        "" "--no_spot --ic 3 --force_running --cs" &
 
 wait
 echo "FINISHED!"
