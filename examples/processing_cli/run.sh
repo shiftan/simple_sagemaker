@@ -28,13 +28,13 @@ echo state>\$SSM_STATE/state" &
 wait $pid1
 ssm process --prefix ${2} -p ssm-example-processing -t cli-bash${3} -o $1/output3 \
     --download_state --command bash --download_output --max_run_mins 15 \
-    -i ./data --iit cli_code_output cli-code output --iit cli_code_state cli-code state \
+    -i ./data --iit cli_code_output cli-code${3} output --iit cli_code_state cli-code${3} state \
     --code ex3.sh --dependencies ./dep ${@:4} \
     -- arg1 -arg2 --arg3 "argument 4" &
 
 # Example 3 - a shell training ecript that gets the output and state of cli-code as input
 ssm shell --prefix ${2} -p ssm-example-processing -t shell-task${3} -o $1/output4 \
-    --iit cli_code_output cli-code output --iit cli_code_state cli-code state \
+    --iit cli_code_output cli-code${3} output --iit cli_code_state cli-code${3} state \
     --cmd_line "echo '*** START listing files in /opt/ml' && ls -laR /opt/ml && echo '*** END file listing /opt/ml'" \
     --max_run_mins 15 ${@:4} &
 
