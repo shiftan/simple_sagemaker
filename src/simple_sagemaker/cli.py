@@ -335,14 +335,6 @@ def runArguments(run_parser, shell=False):
         help="Name and regexp for a metric definition, a few can be given. \
             See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
     )
-    IO_params.add_argument(
-        "--enable_sagemaker_metrics",
-        "-m",
-        default=False,
-        action="store_true",
-        help="Enables SageMaker Metrics Time Series. \
-            See https://docs.aws.amazon.com/sagemaker/latest/dg/training-metrics.html.",
-    )
     running_params.add_argument(
         "--tag",
         nargs=2,
@@ -909,7 +901,6 @@ def runHandler(args, hyperparameters):
         args,
         {
             "clean_state": "clean_state",
-            "enable_sagemaker_metrics": "enable_sagemaker_metrics",
             "force_running": "force_running",
             "distribution": "distribution",
             "model_uri": "model_uri",
@@ -925,6 +916,9 @@ def runHandler(args, hyperparameters):
         if args.metric_definitions is None
         else {k: v for (k, v) in args.metric_definitions}
     )
+    if len (metric_definitions):
+        running_params["enable_sagemaker_metrics"] = True
+
 
     # encode external args to be parse correctly by SM
     if hyperparameters["external_hps"]:

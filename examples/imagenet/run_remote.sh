@@ -24,10 +24,10 @@ run_training () { # args: task_name, instance_type, additional_command_params, [
     ssm shell -p ex-imagenet -t $1 --dir_files ./code -o ./output/$1 -v 280 \
         --iit train $data_source output FullyReplicated data/train \
         --iit val $data_source output FullyReplicated data/val \
-        -m --md "loss" "Epoch:.*Loss\s+([e\-+0-9\\.]*) \(" --md "acc1" "Epoch:.*Acc@1\s+([e\-+0-9\\.]*) \(" --md "acc5" "Epoch:.*Acc@5\s+([e\-+0-9\\.]*) \(" \
+        --md "loss" "Epoch:.*Loss\s+([e\-+0-9\\.]*) \(" --md "acc1" "Epoch:.*Acc@1\s+([e\-+0-9\\.]*) \(" --md "acc5" "Epoch:.*Acc@5\s+([e\-+0-9\\.]*) \(" \
         --md "time" "Epoch:.*Time\s+([e\-+0-9\\.]*) \(" --md "data_time" "Epoch:.*Data\s+([e\-+0-9\\.]*) \(" \
         --md "test_loss" "Test:.*Loss\s+([e\-+0-9\\.]*) \(" --md "test_acc1" "Test:.*Acc@1\s+([e\-+0-9\\.]*) \(" --md "test_acc5" "Test:.*Acc@5\s+([e\-+0-9\\.]*) \(" \
-        --download_model --download_output \
+        --download_model --download_output -- download_state \
         --it $2 $ADDITIONAL_ARGS \
         --cmd_line  "./extract.sh \$SM_CHANNEL_TRAIN/.. && \ 
                     CODE_DIR=\`pwd\` && cd \$SSM_INSTANCE_STATE && START=\$SECONDS && \
