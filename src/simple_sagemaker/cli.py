@@ -916,9 +916,8 @@ def runHandler(args, hyperparameters):
         if args.metric_definitions is None
         else {k: v for (k, v) in args.metric_definitions}
     )
-    if len (metric_definitions):
+    if len(metric_definitions):
         running_params["enable_sagemaker_metrics"] = True
-
 
     # encode external args to be parse correctly by SM
     if hyperparameters["external_hps"]:
