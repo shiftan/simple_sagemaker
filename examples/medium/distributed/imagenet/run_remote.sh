@@ -1,5 +1,5 @@
 #! /bin/bash
-# Arguments [PARTIAL_DATA]
+# Arguments [PARTIAL_DATA flag]
 
 set -e # stop and fail if anything stops
 cd `dirname "$0"`
@@ -10,19 +10,11 @@ echo "*** Using data source: $data_source"
 # Download the code from PyTorch's examples repository
 [ -f code/main.py ] || wget -O code/main.py https://raw.githubusercontent.com/pytorch/examples/master/imagenet/main.py
 
-# Download the subset data
-ssm process -p ex-imagenet -t download \
+# Download the data
+ssm process -p ex-imagenet -t $data_source -v 400 \
     --entrypoint "/bin/bash" --dependencies ./code \
-    -o ./output/download \
-    -- -c 'bash /opt/ml/processing/input/code/code/download.sh $SSM_OUTPUT/data' &
-
-# Download the complete data set
-ssm process -p ex-imagenet -t download-all -v 400 \
-    --entrypoint "/bin/bash" --dependencies ./code \
-    -o ./output/download-all \
-    -- -c 'bash /opt/ml/processing/input/code/code/download_all.sh $SSM_OUTPUT/data' &
-
-wait
+    -o ./output/$data_source \
+    -- -c "bash /opt/ml/processing/input/code/code/$data_source.sh \$SSM_OUTPUT/data"
 
 run_training () { # args: task_name, instance_type, additional_command_params, [description] [epochs] [additional_args]
     EPOCHS=${5:-10}  # 20 epochs by default
