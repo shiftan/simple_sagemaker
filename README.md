@@ -373,10 +373,6 @@ I/O:
                         Name and regexp for a metric definition, a few can be
                         given. See https://docs.aws.amazon.com/sagemaker/lates
                         t/dg/training-metrics.html. (default: None)
-  --enable_sagemaker_metrics, -m
-                        Enables SageMaker Metrics Time Series. See https://doc
-                        s.aws.amazon.com/sagemaker/latest/dg/training-
-                        metrics.html. (default: False)
 
 Download:
   --output_path OUTPUT_PATH, -o OUTPUT_PATH
@@ -607,7 +603,7 @@ ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e 
 ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model \
     --iit task_6_1_state task6-1 state ShardedByS3Key \
-    -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
+    -f tensorflow --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
     --ic 2 --task_type 2 -o $1/example6_2 &
 
 # Running task6_1 again

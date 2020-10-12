@@ -34,7 +34,7 @@ ssm shell --prefix ${2} -p simple-sagemaker-example-cli -t shell-task${3} --cmd_
 #   - Defines sagemaker metrics (-m, --md)
 ssm run --prefix ${2} -p simple-sagemaker-example-cli -t cli-task6-2${3} -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model cli-task6-1${3} model --iit task_6_1_state cli-task6-1${3} state ShardedByS3Key \
-    -f tensorflow -m --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
+    -f tensorflow --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
     --download_state --download_model --download_output --max_run_mins 15 \
     --ic 2 --task_type 2 -o $1/example6_2 ${@:4} &
 
