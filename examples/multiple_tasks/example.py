@@ -47,25 +47,6 @@ def setDefaultParams(sm_project):
     )
 
 
-def buildImage(sm_project, fallback_uri=None):
-    try:
-        # build a local image
-        image_uri = sm_project.buildOrGetImage(
-            instance_type=sm_project.defaultInstanceParams.instance_type
-        )
-        # use an AWS pre-built image
-        # image_uri = "763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3"
-    except:  # noqa: E722
-        logger.exception("Couldn't build image")
-        if not fallback_uri:
-            raise
-        logger.info(f"falling back to {fallback_uri}")
-        # for debugging whe're
-        image_uri = fallback_uri
-
-    return image_uri
-
-
 def runner(
     project_name="simple-sagemaker-example-multi",
     prefix="",
@@ -76,8 +57,8 @@ def runner(
 
     sm_project = SageMakerProject(project_name, prefix=prefix)
     setDefaultParams(sm_project)
-    image_uri = buildImage(
-        sm_project, "667232328135.dkr.ecr.us-east-1.amazonaws.com/task_repo:latest"
+    image_uri = sm_project.buildOrGetImage(
+        instance_type=sm_project.defaultInstanceParams.instance_type
     )
 
     # task name
@@ -88,7 +69,7 @@ def runner(
     input_data_path = os.path.join(
         file_path, "..", "single_task", "input_data"
     )  # Can also provide a URI to an S3 bucket, e.g. next commented line
-    # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-667232328135", "task3", "input")
+    # input_data_path = sagemaker.s3.s3_path_join("s3://", "sagemaker-us-east-1-XXXXXXXXXXXX", "task3", "input")
     distribution = "ShardedByS3Key"  # or "FullyReplicated" which is the default
     model_uri = (
         None  # Can be used to supply model data as an additional input, local/s3
