@@ -7,7 +7,7 @@ A very good [blog post](https://yangkky.github.io/2019/07/08/distributed-pytorch
 
 # Imagenet 
 Using the [LSVRC2012 dataset](http://image-net.org/challenges/LSVRC/2012/ilsvrc2012.pdf)
-from https://cloud.google.com/tpu/docs/imagenet-setup:
+from https://cloud.google.com/tpu/docs/imagenet-setup :
 1. Register to [http://image-net.org/](http://image-net.org/) and request access permission
 2. nohup wget http://image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_train.tar
 3. wget http://www.image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/ILSVRC2012_img_train_t3.tar

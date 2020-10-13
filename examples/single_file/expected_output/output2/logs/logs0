@@ -47,7 +47,7 @@ Training Env:
     "log_level": 20,
     "master_hostname": "algo-1",
     "model_dir": "/opt/ml/model",
-    "module_dir": "s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz",
+    "module_dir": "s3://sagemaker-us-east-1-XXXXXXXXXXXX/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz",
     "module_name": "example",
     "network_interface_name": "eth0",
     "num_cpus": 2,
@@ -87,8 +87,8 @@ SM_OUTPUT_DIR=/opt/ml/output
 SM_NUM_CPUS=2
 SM_NUM_GPUS=0
 SM_MODEL_DIR=/opt/ml/model
-SM_MODULE_DIR=s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz
-SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"task2_data":"/opt/ml/input/data/task2_data","task2_data_dist":"/opt/ml/input/data/task2_data_dist"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"arg":"hello world!","task":2,"worker":1},"input_config_dir":"/opt/ml/input/config","input_data_config":{"task2_data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task2_data_dist":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"single-file-task2-2020-10-04-09-22-02-VI5kfOxl","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz","module_name":"example","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"example.py"}
+SM_MODULE_DIR=s3://sagemaker-us-east-1-XXXXXXXXXXXX/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz
+SM_TRAINING_ENV={"additional_framework_parameters":{},"channel_input_dirs":{"task2_data":"/opt/ml/input/data/task2_data","task2_data_dist":"/opt/ml/input/data/task2_data_dist"},"current_host":"algo-1","framework_module":"sagemaker_pytorch_container.training:main","hosts":["algo-1","algo-2"],"hyperparameters":{"arg":"hello world!","task":2,"worker":1},"input_config_dir":"/opt/ml/input/config","input_data_config":{"task2_data":{"RecordWrapperType":"None","S3DistributionType":"FullyReplicated","TrainingInputMode":"File"},"task2_data_dist":{"RecordWrapperType":"None","S3DistributionType":"ShardedByS3Key","TrainingInputMode":"File"}},"input_dir":"/opt/ml/input","is_master":true,"job_name":"single-file-task2-2020-10-04-09-22-02-VI5kfOxl","log_level":20,"master_hostname":"algo-1","model_dir":"/opt/ml/model","module_dir":"s3://sagemaker-us-east-1-XXXXXXXXXXXX/tests/simple-sagemaker-sf_2020-10-04-09-16-49_py37/single-file-task2/single-file-task2-2020-10-04-09-22-02-VI5kfOxl/source/sourcedir.tar.gz","module_name":"example","network_interface_name":"eth0","num_cpus":2,"num_gpus":0,"output_data_dir":"/opt/ml/output/data","output_dir":"/opt/ml/output","output_intermediate_dir":"/opt/ml/output/intermediate","resource_config":{"current_host":"algo-1","hosts":["algo-1","algo-2"],"network_interface_name":"eth0"},"user_entry_point":"example.py"}
 SM_USER_ARGS=["--arg","hello world!","--task","2","--worker","1"]
 SM_OUTPUT_INTERMEDIATE_DIR=/opt/ml/output/intermediate
 SM_CHANNEL_TASK2_DATA_DIST=/opt/ml/input/data/task2_data_dist

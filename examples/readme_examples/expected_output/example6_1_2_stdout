@@ -6,7 +6,7 @@ FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.6.0-cpu-py3
 RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3
  to task6_repo:latest and pushing to task6_repo...
 I [2020-10-04 09:28:11][root] Tagging and pushing the image...
-I [2020-10-04 09:28:11][root] {'status': 'The push refers to repository [667232328135.dkr.ecr.us-east-1.amazonaws.com/task6_repo]'}
+I [2020-10-04 09:28:11][root] {'status': 'The push refers to repository [XXXXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/task6_repo]'}
 I [2020-10-04 09:28:11][root] {'status': 'Preparing', 'progressDetail': {}, 'id': 'c82abfd0d10b'}
 I [2020-10-04 09:28:11][root] {'status': 'Preparing', 'progressDetail': {}, 'id': '6e02cdf87ae5'}
 I [2020-10-04 09:28:11][root] {'status': 'Preparing', 'progressDetail': {}, 'id': 'a0b401464be6'}
@@ -92,11 +92,11 @@ I [2020-10-04 09:28:17][root] {'status': 'Pushing', 'progressDetail': {'current'
 I [2020-10-04 09:28:18][root] {'status': 'Pushed', 'progressDetail': {}, 'id': 'c82abfd0d10b'}
 I [2020-10-04 09:28:18][root] {'status': 'latest: digest: sha256:0ce4b33ac109cfedaf95e5675797b31a5af01a77f9e2aec3e0c4b5d1b2c23110 size: 3043'}
 I [2020-10-04 09:28:18][root] {'progressDetail': {}, 'aux': {'Tag': 'latest', 'Digest': 'sha256:0ce4b33ac109cfedaf95e5675797b31a5af01a77f9e2aec3e0c4b5d1b2c23110', 'Size': 3043}}
-I [2020-10-04 09:28:18][root] Image uri: 667232328135.dkr.ecr.us-east-1.amazonaws.com/task6_repo:latest
+I [2020-10-04 09:28:18][root] Image uri: XXXXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/task6_repo:latest
 I [2020-10-04 09:28:18][simple_sagemaker.iam_utils] Allowing access for SageMakerIAMRole to awsglue-datasets using the SageMakerIAMRole policy...
 statement already exist
 I [2020-10-04 09:28:19][simple_sagemaker.iam_utils] Creating SageMaker IAM Role: SageMakerIAMRole with an attached AmazonSageMakerFullAccess policy...
-I [2020-10-04 09:28:19][simple_sagemaker.sm_task] Syncing data from /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/ to s3://sagemaker-us-east-1-667232328135/tests/simple-sagemaker-example-cli_2020-10-04-09-16-49_py37/cli-task6-1/input...
+I [2020-10-04 09:28:19][simple_sagemaker.sm_task] Syncing data from /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/ to s3://sagemaker-us-east-1-XXXXXXXXXXXX/tests/simple-sagemaker-example-cli_2020-10-04-09-16-49_py37/cli-task6-1/input...
 I [2020-10-04 09:28:19][simple_sagemaker.s3_sync] Skipping /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/sample_data2.txt
 I [2020-10-04 09:28:19][simple_sagemaker.s3_sync] Skipping /home/runner/work/simple_sagemaker/simple_sagemaker/examples/readme_examples/example6/data/sample_data1.txt
 I [2020-10-04 09:28:20][simple_sagemaker.sm_project] Task cli-task6-1 is already completed by cli-task6-1-2020-10-04-09-17-37-eb2wbRmm
