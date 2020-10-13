@@ -3,6 +3,10 @@ A **simpler** and **cheaper** way to distribute work (python/shell/training) wor
 
 **Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
 
+Blog posts:
+- [A quick introduction](https://towardsdatascience.com/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9)
+- [A detailed distributed pytorch model training example](https://towardsdatascience.com/single-line-distributed-pytorch-training-on-aws-sagemaker-813df77530d8)
+
 ## Requirements
 1. Python 3.6+
 2. An AWS account + region and credentials configured for boto3, as explained on the [Boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html)
@@ -80,7 +84,7 @@ Well, I couldn't find a simple and cheap way to run my existing code on cloud. A
 Please refer to [this blog post](https://medium.com/@shiftan/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9?postPublishedType=repub).
 
 # Background
-*Simple Sagemaker* is a thin wrapper around SageMaker's training **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
+*Simple Sagemaker* is a thin wrapper around SageMaker's training and processing **jobs**, that makes distribution of work (python/shell) on [any supported instance type](https://aws.amazon.com/sagemaker/pricing/) **very simple**. 
 
 The distribution solution is composed of two parts, one on each side: a **runner** on the client machine that manages the distribution process, and a **worker** which is the code being distributed on the cloud.
 * The **runner** is the main part of this package, can mostly be controlled by using the `ssm` command line interface (CLI), or be fully customized by using the python API.
@@ -206,9 +210,10 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 - PyTorch - [Distributed PyTorch Training](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html#distributed-pytorch-training)
 - TensorFlow - [Distributed TensorFlow Training](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/using_tf.html#distributed-training). 
 
+A full distributed ImageNet training pipeline can be found [here](https://github.com/shiftan/simple_sagemaker/tree/master/examples/imagenet), along with a detailed explanation on the [blog post](https://towardsdatascience.com/single-line-distributed-pytorch-training-on-aws-sagemaker-813df77530d8), 
+
 # Processing tasks
-TBD
-For now, take a look [on the processing cli examples](https://github.com/shiftan/simple_sagemaker/tree/master/examples/processing_cli/run.sh), and the `ssm process -h` output.
+Documentation TBD. For now, take a look [on the processing cli examples](https://github.com/shiftan/simple_sagemaker/tree/master/examples/processing_cli/run.sh), and the `ssm process -h` output.
 
 # CLI
 The `ssm` CLI supports 4 commands:
@@ -1034,3 +1039,4 @@ tox -e report
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)
     - [Debugger](https://docs.aws.amazon.com/sagemaker/latest/dg/train-debugger.html)
     - [Automatic Tuning](https://docs.aws.amazon.com/sagemaker/latest/dg/automatic-model-tuning.html)
+8. Join an in progress task
