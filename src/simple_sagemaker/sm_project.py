@@ -229,6 +229,7 @@ class SageMakerProject:
         defaults to [role_name]_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}
         :type policy_name: str
         """
+        self.createIAMRole()
         if not policy_name:
             policy_name = (
                 f"{self.role_name}_{constants.DEFAULT_IAM_BUCKET_POLICY_SUFFIX}"
