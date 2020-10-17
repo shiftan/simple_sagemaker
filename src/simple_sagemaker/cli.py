@@ -150,9 +150,7 @@ def runArguments(run_parser, shell=False):
         )
         code_group.add_argument(
             "--dir_files",
-            help="""Path to a directory with files that are expected to be in root folder where cmd_line is executed.
-            Note: this is intended to be used for shell scripts / small files. Input data should be given with relevant
-            other parameters).""",
+            help="""Path to a directory with files that are expected to be in root folder where cmd_line is executed.""",
         )
     else:
         # coding params

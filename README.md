@@ -1,8 +1,6 @@
 # Simple Sagemaker 
 A **simpler** and **cheaper** way to distribute work (python/shell/training) work on machines of your choice in the (AWS) cloud.
 
-**Note: this (initial) work is still in progress. Only SageMaker's [PyTorch](https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/index.html) and [TensorFlow](https://sagemaker.readthedocs.io/en/stable/frameworks/tensorflow/index.html) frameworks are currently supported. But, these frameworks are enough to distribute any type of work, including shell commands, just without the specific customization.**
-
 Blog posts:
 - [A quick introduction](https://towardsdatascience.com/a-very-simple-and-cheap-way-to-run-your-processing-job-on-the-cloud-c76af579f9e9)
 - [A detailed distributed pytorch model training example](https://towardsdatascience.com/single-line-distributed-pytorch-training-on-aws-sagemaker-813df77530d8)
@@ -20,7 +18,7 @@ pip install simple-sagemaker
 ```
 Then, to get the shell command `cat /proc/cpuinfo && nvidia-smi` run on a single ml.p3.2xlarge instance, run the following `ssm` command (documentation of the `ssm` CLI is given [below](#cli)):
 ```bash
-ssm shell -p simple-sagemaker-example-cli-shell -t shell-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
+ssm shell -p ssm-ex -t shell-task -o ./output --cmd_line "cat /proc/cpuinfo && nvidia-smi"
 ```
 
 Output including the logs with script stdout is downloaded to `./output`.
@@ -56,7 +54,7 @@ for i in range(torch.cuda.device_count()):
 ```
 Just run the below `ssm` command:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task1 -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
+ssm run -p ssm-ex -t python-task -e worker1.py -o ./output/example1 --it ml.p3.2xlarge --ic 2
 ```
 The output is saved to `./output/example1`, logs to `./output/example1/logs/logs0` and `./output/example1/logs/logs1`:
 ```bash
@@ -213,7 +211,7 @@ Sagemaker's PyTorch and TensorFlow pre-built images has extra customization for 
 A full distributed ImageNet training pipeline can be found [here](https://github.com/shiftan/simple_sagemaker/tree/master/examples/imagenet), along with a detailed explanation on the [blog post](https://towardsdatascience.com/single-line-distributed-pytorch-training-on-aws-sagemaker-813df77530d8), 
 
 # Processing tasks
-Documentation TBD. For now, take a look [on the processing cli examples](https://github.com/shiftan/simple_sagemaker/tree/master/examples/processing_cli/run.sh), and the `ssm process -h` output.
+Documentation TBD. For now, take a look [on the processing cli examples](https://github.com/shiftan/simple_sagemaker/tree/master/examples/processing_cli/run.sh), and the [`ssm process -h` output](#ssm-process).
 
 # CLI
 The `ssm` CLI supports 4 commands:
@@ -235,6 +233,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
 ```
+## ssm run
 ```bash  
 $ ssm run -h
 usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
@@ -392,6 +391,7 @@ Download:
 Anything after "--" (followed by a space) will be passed as-is to the executed
 script command line
 ```
+## ssm process
 ```bash  
 $ ssm process -h
 usage: ssm process [-h] --project_name PROJECT_NAME --task_name TASK_NAME
@@ -526,6 +526,7 @@ Download:
 Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by
 `dir_files` and `cmd_line`, respectively. Run `ssm shell -h` for more details.
 
+## ssm data
 To manage the data of an existing command:
 ```bash
 $ ssm data -h 
@@ -593,7 +594,7 @@ The code is then launched a few time by [run.sh](https://github.com/shiftan/simp
 #   - Hyperparameter task_type
 #   - 2 instance (--ic)
 #   - Use an on-demand instance (--no_spot)
-ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+ssm run -p ssm-ex -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" --no_spot \
@@ -604,8 +605,8 @@ ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e 
 #   - Uses additional local code dependencies (-d)
 #   - Uses the tensorflow framework as pre-built image (-f)
 #   - Tags the jobs (--tag)
-#   - Defines sagemaker metrics (-m, --md)
-ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
+#   - Defines sagemaker metrics (--md)
+ssm run -p ssm-ex -t task6-2 -s $BASEDIR/example6/code -e worker6.py \
     -d $BASEDIR/example6/external_dependency --iit task_6_1_model task6-1 model \
     --iit task_6_1_state task6-1 state ShardedByS3Key \
     -f tensorflow --md "Score" "Score=(.*?);" --tag "MyTag" "MyValue" \
@@ -614,7 +615,7 @@ ssm run -p simple-sagemaker-example-cli -t task6-2 -s $BASEDIR/example6/code -e 
 # Running task6_1 again
 #   - A completed task isn't executed again, but the current output is used instead. 
 #       --ks (keep state, the default) is used to keep the current state
-ssm run -p simple-sagemaker-example-cli -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
+ssm run -p ssm-ex -t task6-1 -s $BASEDIR/example6/code -e worker6.py \
     -i $BASEDIR/example6/data ShardedByS3Key \
     --iis persons s3://awsglue-datasets/examples/us-legislators/all/persons.json \
     --df $BASEDIR/example6 --repo_name "task6_repo" --aws_repo_name "task6_repo" \
@@ -662,7 +663,7 @@ print("-***-", worker_config.hps["msg"])
 ```
 Runner CLI:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task2 -e worker2.py --msg "Hello, world!" -o ./output/example2
+ssm run -p ssm-ex -t task2 -e worker2.py --msg "Hello, world!" -o ./output/example2
 ```
 Output from the log file
 ```
@@ -694,7 +695,7 @@ open(os.path.join(worker_config.state, "state_dir"), "wt").write("state_dir file
 ```
 Runner CLI:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task3 -e worker3.py -o ./output/example3
+ssm run -p ssm-ex -t task3 -e worker3.py -o ./output/example3
 ```
 Output from the log file
 ```
@@ -740,7 +741,7 @@ if __name__ == "__main__":
 ```
 Running command:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task4 -e worker4.py -i ./data \
+ssm run -p ssm-ex -t task4 -e worker4.py -i ./data \
     --iis bucket s3://awsglue-datasets/examples/us-legislators/all/persons.json -o ./output/example4
 ```
 Output from the log file
@@ -773,7 +774,7 @@ The output of a completed **task** on the same **project** can be used as an inp
 
 Using the model output of *task3* and the same `worker4.py` code, we can now run:
 ```bash
-ssm run -p simple-sagemaker-example-cli -t task5 -e worker4.py --iit bucket task3 model -o ./output/example5
+ssm run -p ssm-ex -t task5 -e worker4.py --iit bucket task3 model -o ./output/example5
 ```
 
 And get the following output from in the log file:
@@ -1039,4 +1040,4 @@ tox -e report
     - [Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html)
     - [Debugger](https://docs.aws.amazon.com/sagemaker/latest/dg/train-debugger.html)
     - [Automatic Tuning](https://docs.aws.amazon.com/sagemaker/latest/dg/automatic-model-tuning.html)
-8. Join an in progress task
+8. Join an in progress task if there's a need to run it / depend on its output
