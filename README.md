@@ -236,8 +236,8 @@ optional arguments:
 ## ssm run
 ```bash  
 $ ssm run -h
-usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
-               [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
+usage: ssm run [-h] --project_name PROJECT_NAME [--prefix PREFIX] --task_name
+               TASK_NAME [--bucket_name BUCKET_NAME] [--source_dir SOURCE_DIR]
                --entry_point ENTRY_POINT
                [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
                [--instance_type INSTANCE_TYPE]
@@ -254,14 +254,15 @@ usage: ssm run [-h] --project_name PROJECT_NAME --task_name TASK_NAME
                [--model_uri MODEL_URI] [--input_s3 INPUT_S3 [INPUT_S3 ...]]
                [--input_task INPUT_TASK [INPUT_TASK ...]] [--force_running]
                [--distribution DISTRIBUTION] [--clean_state] [--keep_state]
-               [--metric_definitions name regexp] [--enable_sagemaker_metrics]
-               [--tag key value] [--output_path OUTPUT_PATH]
-               [--download_state] [--download_model] [--download_output]
+               [--metric_definitions name regexp] [--tag key value]
+               [--output_path OUTPUT_PATH] [--download_state]
+               [--download_model] [--download_output]
 
 optional arguments:
   -h, --help            show this help message and exit
   --project_name PROJECT_NAME, -p PROJECT_NAME
                         Project name. (default: None)
+  --prefix PREFIX       S3 prefix. (default: None)
   --task_name TASK_NAME, -t TASK_NAME
                         Task name. (default: None)
   --bucket_name BUCKET_NAME, -b BUCKET_NAME
@@ -320,10 +321,14 @@ Image:
   --image_tag IMAGE_TAG
                         Image tag. (default: latest)
   --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
-                        Path to a directory containing the DockerFile. The
-                        base image should be set to `__BASE_IMAGE__` within
-                        the Dockerfile, and is automatically replaced with the
-                        correct base image. (default: None)
+                        Either a path to a directory containing the DockerFile
+                        or its content. In the first case, the base image
+                        should be set to `__BASE_IMAGE__` within the
+                        Dockerfile, and is automatically replaced with the
+                        correct base image. For the latter case, it should be
+                        the content of the docker file e.g. '--df "RUN pip3
+                        install pandas==0.25.3 scikit-learn==0.21.3"'
+                        (default: None)
   --framework {pytorch,tensorflow}, -f {pytorch,tensorflow}
                         The framework to use, see https://github.com/aws/deep-
                         learning-containers/blob/master/available_images.md
@@ -334,7 +339,8 @@ Image:
                         The python version (default: None)
 
 Running:
-  --force_running       Force running the task even if its already completed.
+  --force_running, --fr
+                        Force running the task even if its already completed.
                         (default: False)
   --distribution DISTRIBUTION
                         Tensorflows distribution policy, see https://sagemake
@@ -394,9 +400,9 @@ script command line
 ## ssm process
 ```bash  
 $ ssm process -h
-usage: ssm process [-h] --project_name PROJECT_NAME --task_name TASK_NAME
-                   [--bucket_name BUCKET_NAME] [--code CODE]
-                   [--entrypoint ENTRYPOINT [ENTRYPOINT ...]]
+usage: ssm process [-h] --project_name PROJECT_NAME [--prefix PREFIX]
+                   --task_name TASK_NAME [--bucket_name BUCKET_NAME]
+                   [--code CODE] [--entrypoint ENTRYPOINT [ENTRYPOINT ...]]
                    [--dependencies DEPENDENCIES [DEPENDENCIES ...]]
                    [--command COMMAND [COMMAND ...]]
                    [--instance_type INSTANCE_TYPE]
@@ -420,6 +426,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --project_name PROJECT_NAME, -p PROJECT_NAME
                         Project name. (default: None)
+  --prefix PREFIX       S3 prefix. (default: None)
   --task_name TASK_NAME, -t TASK_NAME
                         Task name. (default: None)
   --bucket_name BUCKET_NAME, -b BUCKET_NAME
@@ -445,7 +452,7 @@ Code:
 
 Instance:
   --instance_type INSTANCE_TYPE, --it INSTANCE_TYPE
-                        Type of EC2 instance to use. (default: ml.m5.large)
+                        Type of EC2 instance to use. (default: ml.t3.medium)
   --instance_count INSTANCE_COUNT, --ic INSTANCE_COUNT
                         Number of EC2 instances to use. (default: 1)
   --volume_size VOLUME_SIZE, -v VOLUME_SIZE
@@ -465,10 +472,14 @@ Image:
   --image_tag IMAGE_TAG
                         Image tag. (default: latest)
   --docker_file_path_or_content DOCKER_FILE_PATH_OR_CONTENT, --df DOCKER_FILE_PATH_OR_CONTENT
-                        Path to a directory containing the DockerFile. The
-                        base image should be set to `__BASE_IMAGE__` within
-                        the Dockerfile, and is automatically replaced with the
-                        correct base image. (default: None)
+                        Either a path to a directory containing the DockerFile
+                        or its content. In the first case, the base image
+                        should be set to `__BASE_IMAGE__` within the
+                        Dockerfile, and is automatically replaced with the
+                        correct base image. For the latter case, it should be
+                        the content of the docker file e.g. '--df "RUN pip3
+                        install pandas==0.25.3 scikit-learn==0.21.3"'
+                        (default: None)
   --framework FRAMEWORK, -f FRAMEWORK
                         The framework to use, see https://github.com/aws/deep-
                         learning-containers/blob/master/available_images.md
@@ -477,7 +488,8 @@ Image:
                         The framework version (default: 0.20.0)
 
 Running:
-  --force_running       Force running the task even if its already completed.
+  --force_running, --fr
+                        Force running the task even if its already completed.
                         (default: False)
   --tag key value       Tag to be attached to the jobs executed for this task.
                         (default: None)
@@ -521,6 +533,9 @@ Download:
                         False)
   --download_output     Download the output once task is finished (default:
                         False)
+
+Anything after "--" (followed by a space) will be passed as-is to the executed
+script command line
 ```
 
 Running a shell based task is very similar, except for `source_dir` and `entry_point` which are replaced by

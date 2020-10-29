@@ -237,8 +237,10 @@ def runArguments(run_parser, shell=False):
     image_group.add_argument(
         "--docker_file_path_or_content",
         "--df",
-        help="""Path to a directory containing the DockerFile. The base image should be set to
-        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
+        help="""Either a path to a directory containing the DockerFile or its content. In the first case, the base image should 
+            be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image. For
+            the latter case, it should be the content of the docker file e.g. 
+            '--df "RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3"' """,
     )
     image_group.add_argument(
         "--framework",
@@ -420,8 +422,10 @@ def processingArguments(processing_parser):
     image_group.add_argument(
         "--docker_file_path_or_content",
         "--df",
-        help="""Path to a directory containing the DockerFile. The base image should be set to
-        `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image.""",
+        help="""Either a path to a directory containing the DockerFile or its content. In the first case, the base image should 
+            be set to `__BASE_IMAGE__` within the Dockerfile, and is automatically replaced with the correct base image. For
+            the latter case, it should be the content of the docker file e.g. 
+            '--df "RUN pip3 install pandas==0.25.3 scikit-learn==0.21.3"' """,
     )
     image_group.add_argument(
         "--framework",
@@ -562,7 +566,7 @@ def parseArgs():
         specific_parser.add_argument(
             "--project_name", "-p", required=True, help="Project name."
         )
-        specific_parser.add_argument("--prefix", help="Project name.")
+        specific_parser.add_argument("--prefix", help="S3 prefix.")
         specific_parser.add_argument(
             "--task_name", "-t", required=True, help="Task name."
         )
