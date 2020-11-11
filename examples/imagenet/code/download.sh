@@ -17,7 +17,7 @@ download () {
 
 ### From https://cloud.google.com/tpu/docs/imagenet-setup, please make sure you have the permission to download the files from [Imagenet](http://image-net.org)
 echo Downloading to `pwd` 
-for FILENAME in ILSVRC2012_img_val.tar ILSVRC2012_img_train_t3.tar
+for FILENAME in ILSVRC2012_img_val.tar ILSVRC2012_img_train.tar
 do
     download http://image-net.org/challenges/LSVRC/2012/dd31405981ef5f776aa17412e1f0c112/${FILENAME} 2>&1 && echo finished downloading $FILENAME  &
 done
